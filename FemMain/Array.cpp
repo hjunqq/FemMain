@@ -333,6 +333,9 @@ CSRMatrix::CSRMatrix()
 	nRow = 0;
 	nCol = 0;
 	NonZero = 0;
+	Values = NULL;
+	RowIdx = NULL;
+	ColIdx = NULL;
 }
 
 
@@ -341,14 +344,47 @@ CSRMatrix::~CSRMatrix()
 }
 
 
-void CSRMatrix::Init(int NonZero, int nRow, int nCol)
+void CSRMatrix::Init(int NonZero, int nRow, int nCol, int* RowIdx, int*ColIdx)
 {
-
+	this->nRow = nRow;
+	this->nCol = nCol;
+	this->NonZero = NonZero;
+	Values = new double[NonZero]();
+	this->RowIdx = RowIdx;
+	this->ColIdx = ColIdx;
 }
 
 
 // 返回i行j列的值
 double & CSRMatrix::at(int i, int j)
 {
-	//TODO: insert return statement here
+	int iRow,iCol;
+	iRow = RowIdx[i];
+	iCol = iRow + j;
+	return Values[iCol];
+}
+
+
+// 矩阵转置
+CSRMatrix CSRMatrix::Trans(CSRMatrix * B)
+{
+	return CSRMatrix();
+}
+
+
+int CSRMatrix::GetRows()
+{
+	return nRow;
+}
+
+
+int CSRMatrix::GetCols()
+{
+	return nCol;
+}
+
+
+int CSRMatrix::GetNonZero()
+{
+	return NonZero;
 }

@@ -114,7 +114,12 @@ private:
 	int *RowIdx;
 	int *ColIdx;
 public:
-	void Init(int NonZero,int nRow,int nCol);
+	void Init(int NonZero, int nRow, int nCol, int* RowIdx,int*ColIdx);
 	// 返回i行j列的值
 	double & at(int i, int j);
+	// 矩阵转置
+	CSRMatrix Trans(CSRMatrix * B);
+	int GetRows();
+	int GetCols();
+	int GetNonZero();
 };
