@@ -122,4 +122,6 @@ public:
 	int GetRows();
 	int GetCols();
 	int GetNonZero();
+	// ´òÓ¡Êý×é
+	void Print();
 };

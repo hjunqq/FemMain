@@ -1,26 +1,26 @@
 #include "Array.h"
 int main()
 {
-	FloatArray A(10);
-	for (int i = 0; i < 10; i++)
+	double Values;
+	int RowIdx[7] = { 0, 3, 5, 8, 12, 14, 15 };
+	int ColIdx[15] = { 0, 3, 5, 0, 1, 1, 2, 5, 0, 3, 4, 5, 1, 4, 5 };
+	int nRow, nCol, NonZero;
+	nRow = 6;
+	nCol = 6;
+	NonZero = 15;
+	CSRMatrix A;
+	A.Init(NonZero, nRow, nCol, RowIdx, ColIdx);
+	Values = 0;
+	for (int iRow = 0; iRow < nRow; iRow++)
 	{
-		A.at(i) = 1;
-	}
-	A.Print();
-	FloatMatrix B(10, 10);
-	for (int i = 0; i < 10; i++)
-	{
-		for (int j = 0; j < 10; j++)
+		int i = iRow;
+		for (int iCol = RowIdx[iRow]; iCol < RowIdx[iRow + 1]; iCol++)
 		{
-			B.at(i, j) = i + j;
+			int j = ColIdx[iCol];
+			Values++;
+			A.at(i, j) = Values;
 		}
 	}
-	B.Print();
-	B = B.Trans();
-	B.Print();
-	A = B.Mult(&A);
 	A.Print();
-	B = B.Mult(&B);
-	B.Print();
 	return 0;
 }

@@ -358,10 +358,17 @@ void CSRMatrix::Init(int NonZero, int nRow, int nCol, int* RowIdx, int*ColIdx)
 // 返回i行j列的值
 double & CSRMatrix::at(int i, int j)
 {
-	int iRow,iCol;
-	iRow = RowIdx[i];
-	iCol = iRow + j;
-	return Values[iCol];
+	int idx;
+	for (int iCol = RowIdx[i]; iCol < RowIdx[i + 1]; iCol++)
+	{
+		idx = ColIdx[iCol];
+		if (idx == j)
+		{
+			return Values[iCol];
+		}
+	}
+	double temp = 0;;
+	return temp;
 }
 
 
@@ -387,4 +394,20 @@ int CSRMatrix::GetCols()
 int CSRMatrix::GetNonZero()
 {
 	return NonZero;
+}
+
+
+// 打印数组
+void CSRMatrix::Print()
+{
+	cout << "Compress Sparse Row Matrix:" << setw(10) << nRow << "X" << nCol << endl;
+	for (int iRow = 0; iRow < nRow; iRow++)
+	{
+		for (int iCol = 0; iCol < nCol; iCol++)
+		{
+			cout << setw(7) << this->at(iRow, iCol);
+		}
+		cout << endl;
+	}
+	return void();
 }
