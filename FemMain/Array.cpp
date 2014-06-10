@@ -60,7 +60,18 @@ IntArray IntArray::Add(IntArray & TArray)
 	return Temp;
 }
 
-
+// 数组复制
+IntArray IntArray::Copy(IntArray *TArray)
+{
+	IntArray Temp;
+	Temp.Values = new int[TArray->GetSize()]();
+	Temp.size = TArray->GetSize();
+	for (int i = 0; i < size; i++)
+	{
+		Temp.Values[i] = TArray->at(i);
+	}
+	return Temp;
+}
 // 获取数组大小
 int IntArray::GetSize()
 {
@@ -119,7 +130,7 @@ void FloatArray::Print()
 	cout << "FloatArray" << endl;
 	for (int i = 0; i < size; i++)
 	{
-		cout << setw(15) << Values[i] << endl;
+		cout << setw(15) << Values[i] ;
 	}
 	cout << endl;
 }
@@ -352,6 +363,7 @@ void CSRMatrix::Init(int NonZero, int nRow, int nCol, int* RowIdx, int*ColIdx)
 	Values = new double[NonZero]();
 	this->RowIdx = RowIdx;
 	this->ColIdx = ColIdx;
+	Zero = 0;
 }
 
 
@@ -367,8 +379,7 @@ double & CSRMatrix::at(int i, int j)
 			return Values[iCol];
 		}
 	}
-	double temp = 0;;
-	return temp;
+	return Zero;
 }
 
 

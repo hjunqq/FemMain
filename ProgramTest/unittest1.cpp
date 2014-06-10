@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../FemMain/Array.h"
+#include "../FemMain/Model.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -10,7 +11,7 @@ namespace ProgramTest
 	{
 	public:
 		
-		TEST_METHOD(TestMethod1)
+		TEST_METHOD(TestArray)
 		{
 			// TODO:  在此输入测试代码
 			IntArray A(10);
@@ -25,7 +26,7 @@ namespace ProgramTest
 			*B = A.Append(*B);
 			Assert::AreEqual(30, B->GetSize());
 		}
-		TEST_METHOD(TestMethod2)
+		TEST_METHOD(TestFloat)
 		{
 			FloatArray A(10);
 			for (int i = 0; i < 10; i++)
@@ -43,7 +44,7 @@ namespace ProgramTest
 			B = B.Trans();
 			A = B.Mult(&A);
 		}
-		TEST_METHOD(TestMethod3)
+		TEST_METHOD(TestCSR)
 		{
 			
 			double Values;
@@ -67,6 +68,37 @@ namespace ProgramTest
 				}				
 			}
 			Assert::AreEqual(13.0, A.at(4, 1));
+		}
+		TEST_METHOD(TestNode)
+		{
+			Node A;
+			FloatArray *Coor;
+			Coor = new FloatArray(3);
+			for (int icoor = 0; icoor < 3; icoor++)
+			{
+				Coor->at(icoor) = icoor;
+			}
+			A.Init(0, Coor);
+			A.Print();
+		}
+		TEST_METHOD(TestGroup)
+		{
+			Group A;
+			IntArray *Elems;
+			Elems = new IntArray(10);
+			for (int i = 0; i < 10; i++)
+			{
+				Elems->at(i) = i + 1;
+			}
+			A.Init(0, 10, 1);
+			A.FillElement(Elems);
+			Assert::AreEqual(3, A.GetElement(2));
+
+			Quadr C;
+			IntArray B(4);
+			C.Print();
+			C.Init(4, 9, 1, 1, *Elems);
+			Assert::AreEqual(3, C.GetNode(2));
 		}
 	};
 }

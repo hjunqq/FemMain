@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+
+
 using namespace std;
 
 class IntArray
@@ -22,6 +24,8 @@ public:
 	IntArray Append( IntArray & TArray);
 	// 数组相加
 	IntArray Add(IntArray & TArrray);
+	// 数组复制
+	IntArray Copy(IntArray *TArray);
 	// 获取数组大小
 	int GetSize();
 	// 打印变量内容
@@ -113,6 +117,7 @@ private:
 	double *Values;
 	int *RowIdx;
 	int *ColIdx;
+	double Zero;
 public:
 	void Init(int NonZero, int nRow, int nCol, int* RowIdx,int*ColIdx);
 	// 返回i行j列的值
