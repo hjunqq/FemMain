@@ -90,7 +90,7 @@ namespace ProgramTest
 			{
 				Elems->at(i) = i + 1;
 			}
-			A.Init(0, 10, 1);
+			A.Init(0, 10, 1,1,2);
 			A.FillElement(Elems);
 			Assert::AreEqual(3, A.GetElement(2));
 

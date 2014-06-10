@@ -7,7 +7,7 @@
 class FemMain
 {
 private:
-	string prob, text;
+	string prob, text,workdir;
 	string GidResFile;
 	int nNode;
 	int nElem;
@@ -18,10 +18,16 @@ private:
 	int TotalDOF;
 	
 	ofstream chk, res;
+	ifstream glb, cor, ele, grp, loa, mat, pre;
 	time_t tNow;
 	struct tm tmLocal;
 	int Id, nPorcs;
 	
+	Group *Groups;
+	Quadr *Quadrs;
+	Material *Mats;
+	Node *Nodes;
+
 	FloatMatrix *A;
 	FloatArray *Result;
 	IntArray DegreeOfFreedom;
@@ -32,15 +38,6 @@ private:
 	FloatArray *TotalLoad;
 public:
 	void ShowTime();
+	string & WordDir();
+	void ReadFiles();
 };
-void FemMain::ShowTime()
-{
-	time(&tNow);
-	localtime_s(&tmLocal, &tNow);
-	cout << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon + 1 << "-" <<
-		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-	chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
-		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-}

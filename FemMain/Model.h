@@ -99,9 +99,10 @@ private:
 	int type;
 	IntArray *Elements;
 	int nElements;
+	int nDof;
 public:
 	// 初始化
-	void Init(int Index, int nElements, int type);
+	void Init(int Index, int nElements, int type,int Mat,int Dof);
 	// 填充单元
 	void FillElement(IntArray * ElementList);
 	// 获取第i个单元号

@@ -202,11 +202,13 @@ Group::~Group()
 
 
 // ³õÊ¼»¯
-void Group::Init(int Index, int nElements, int type)
+void Group::Init(int Index, int nElements, int type , int Mat, int Dof)
 {
 	this->Index = Index;
 	this->nElements = nElements;
 	this->type = type;
+	this->Material = Mat;
+	this->nDof = Dof;
 	Elements = new IntArray(nElements);
 }
 
