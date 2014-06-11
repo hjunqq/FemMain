@@ -42,7 +42,7 @@ namespace ProgramTest
 				}
 			}
 			B = B.Trans();
-			A = B.Mult(&A);
+			A = B.Mult(A);
 		}
 		TEST_METHOD(TestCSR)
 		{
@@ -97,8 +97,23 @@ namespace ProgramTest
 			Quadr C;
 			IntArray B(4);
 			C.Print();
-			C.Init(4, 9, 1, 1, *Elems);
+			C.Init(4, 9, 1, 1, Elems);
 			Assert::AreEqual(3, C.GetNode(2));
+		}
+		TEST_METHOD(TestElement)
+		{
+			Line *A;
+			A = new Line();
+			IntArray *Nodes;
+			Nodes = new IntArray(2);
+			for (int i = 0; i < 10; i++)
+			{
+				Nodes->at(i) = i;
+			}
+			A->Init(1, 1, 1, 1, Nodes);
+			Line B;
+			B = *A;
+			Assert::AreEqual(1, B.GetNode(2));
 		}
 	};
 }

@@ -85,6 +85,7 @@
     <ClInclude Include="Array.h" />
     <ClInclude Include="Boundary.h" />
     <ClInclude Include="FemMain.h" />
+    <ClInclude Include="gidpost.h" />
     <ClInclude Include="Load.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Model.h" />

@@ -21,11 +21,12 @@ public:
 	// 返回第i个函数值	
 	int & at(int i);
 	// 两个向量直接叠加
-	IntArray Append( IntArray & TArray);
+	IntArray Append(const IntArray & I);
 	// 数组相加
-	IntArray Add(IntArray & TArrray);
+	IntArray Add(const IntArray & I);
 	// 数组复制
-	IntArray Copy(IntArray *TArray);
+	IntArray Copy(const IntArray & I);
+	IntArray(const IntArray & I);
 	// 获取数组大小
 	int GetSize();
 	// 打印变量内容
@@ -56,9 +57,12 @@ public:
 	// 清空
 	int Clear();
 	// 数组相加
-	FloatArray Plus(FloatArray * );
+	FloatArray Plus(const FloatArray & F);
 	// 数组相减
-	FloatArray Minus(FloatArray * );
+	FloatArray Minus(const FloatArray & F );
+	// 数组复制
+	FloatArray Copy(const FloatArray & F);
+	FloatArray(const FloatArray & F);
 };
 
 class FloatMatrix
@@ -73,18 +77,20 @@ private:
 public:
 	// 构造m行n列的矩阵
 	FloatMatrix(int i, int j);
+	FloatMatrix(const FloatMatrix & F);
 	// 返回第m行n列的值
 	double & at(int i, int j);
 	// 转置
 	FloatMatrix Trans();
 	// 乘以数组
-	FloatArray Mult(FloatArray * );
+	FloatArray Mult(FloatArray & F );
 	// 乘以矩阵
-	FloatMatrix Mult(FloatMatrix * );
+	FloatMatrix Mult( FloatMatrix & F );
 	// 矩阵相加
-	FloatMatrix Plus(FloatMatrix *);
+	FloatMatrix Plus(FloatMatrix & F);
 	// 矩阵相减
-	FloatMatrix Minus(FloatMatrix * );
+	FloatMatrix Minus(FloatMatrix & F );
+	FloatMatrix Copy(FloatMatrix & F);
 	void Print();
 };
 
@@ -100,6 +106,7 @@ private:
 public:
 	// 构造矩阵
 	IntMatrix(int i, int j);
+	IntMatrix(const IntMatrix &I);
 	// 返回第m行n列元素
 	int & at(int i, int j);
 };
@@ -109,6 +116,7 @@ class CSRMatrix
 {
 public:
 	CSRMatrix();
+	CSRMatrix(CSRMatrix &C);
 	~CSRMatrix();
 private:
 	int nRow;
@@ -123,7 +131,8 @@ public:
 	// 返回i行j列的值
 	double & at(int i, int j);
 	// 矩阵转置
-	CSRMatrix Trans(CSRMatrix * B);
+	CSRMatrix Trans(CSRMatrix & C);
+	CSRMatrix Copy(CSRMatrix & C);
 	int GetRows();
 	int GetCols();
 	int GetNonZero();

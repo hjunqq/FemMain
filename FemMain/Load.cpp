@@ -28,8 +28,27 @@ Face::~Face()
 }
 
 
-void Face::Init(int Index, double StartC, double StartV, double EndC, double EndV, int Dir)
+void Face::Init(int Index, int nEle, int nNode, double StartC, double StartV, double EndC, double EndV, int Dir)
 {
+	this->Index = Index;
+	this->nElem = nEle;
+	this->nNode = nNode;
+	this->StartC = StartC;
+	this->StratV = StartV;
+	this->EndC = EndC;
+	this->EndV = EndV;
+	this->Dir = Dir;
+	if (nNode == 2)
+	{
+		Lines = new Line[nElem]();
+	}
+}
+void Face::Set(Line *TLines)
+{
+	for (int i = 0; i < nElem; i++)
+	{
+		Lines[i] =TLines[i];
+	}
 }
 
 
@@ -47,8 +66,13 @@ Volumn::~Volumn()
 }
 
 
-void Volumn::Init(int Index, int group, double Value, int Dir)
+void Volumn::Init(int Index, int nGroup,IntArray *group, double Value, int Dir)
 {
+	this->Index = Index;
+	this->Value = Value;
+	this->Dir = Dir;
+	this->nGroup = nGroup;
+	this->group = new IntArray(*group);
 }
 
 
@@ -64,6 +88,11 @@ Concentrate::~Concentrate()
 }
 
 
-void Concentrate::Init(int Index, IntArray * Nodes, FloatArray * Values, int Dir)
+void Concentrate::Init(int Index,int nNode, IntArray * Nodes, FloatArray * Values, int Dir)
 {
+	this->Index = Index;
+	this->nNode = nNode;
+	this->Dir = Dir;
+	this->Nodes = new IntArray(*Nodes);
+	this->Values = new FloatArray(*Values);
 }

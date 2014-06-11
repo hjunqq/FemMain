@@ -28,11 +28,11 @@ int & IntArray::at(int i)
 
 
 // 两个向量直接叠加
-IntArray IntArray::Append(IntArray & TArray)
+IntArray IntArray::Append(const IntArray & I)
 {
 	IntArray Temp;
 	int nNew;
-	nNew = size + TArray.GetSize();
+	nNew = size + I.size;
 	Temp.Values = new int[nNew]();
 	Temp.size = nNew;
 	for (int i = 0; i < size; i++)
@@ -41,34 +41,43 @@ IntArray IntArray::Append(IntArray & TArray)
 	}
 	for (int i = size; i < nNew; i++)
 	{
-		Temp.Values[i] = TArray.at(i - size);
+		Temp.Values[i] = I.Values[i - size];
 	}
 	return Temp;
 }
 
 
 // 数组相加
-IntArray IntArray::Add(IntArray & TArray)
+IntArray IntArray::Add(const IntArray & I)
 {
 	IntArray Temp;
 	Temp.Values = new int[size]();
 	Temp.size =size;
 	for (int i = 0; i < size; i++)
 	{
-		Temp.Values[i]=Values[i] + TArray.at(i);
+		Temp.Values[i] = Values[i] + I.Values[i];
 	}
 	return Temp;
 }
 
 // 数组复制
-IntArray IntArray::Copy(IntArray *TArray)
+IntArray::IntArray(const IntArray & I)
 {
-	IntArray Temp;
-	Temp.Values = new int[TArray->GetSize()]();
-	Temp.size = TArray->GetSize();
+	size = I.size;
+	Values = new int[size];
 	for (int i = 0; i < size; i++)
 	{
-		Temp.Values[i] = TArray->at(i);
+		Values[i] = I.Values[i];
+	}
+}
+IntArray IntArray::Copy(const IntArray & I)
+{
+	IntArray Temp;
+	Temp.size = I.size;
+	Temp.Values = new int[size];
+	for (int i = 0; i < size; i++)
+	{
+		Temp.Values[i] = I.Values[i];
 	}
 	return Temp;
 }
@@ -127,7 +136,6 @@ int FloatArray::GetSize()
 // 打印数组
 void FloatArray::Print()
 {
-	cout << "FloatArray" << endl;
 	for (int i = 0; i < size; i++)
 	{
 		cout << setw(15) << Values[i] ;
@@ -141,6 +149,7 @@ FloatArray FloatArray::Times(double Scalar)
 {
 	FloatArray TArray;
 	TArray.size = size;
+	TArray.Values = new double[TArray.size];
 	for (int i = 0; i < size; i++)
 	{
 		TArray.at(i) = Values[i] * Scalar;
@@ -171,37 +180,71 @@ int FloatArray::Clear()
 
 
 // 数组相加
-FloatArray FloatArray::Plus(FloatArray * B)
+FloatArray FloatArray::Plus(const FloatArray & F)
 {
 	FloatArray Temp;
 	Temp.size = size;
+	Temp.Values = new double[Temp.size];
 	for (int i = 0; i < size; i++)
 	{
-		Temp.Values[i] = Values[i] + B->at(i);
+		Temp.Values[i] = Values[i] + F.Values[i];
 	}
 	return Temp;
 }
 
 
 // 数组相减
-FloatArray FloatArray::Minus(FloatArray * B)
+FloatArray FloatArray::Minus(const FloatArray & F)
 {
 	FloatArray Temp;
 	Temp.size = size;
+	Temp.Values = new double[Temp.size];
 	for (int i = 0; i < size; i++)
 	{
-		Temp.Values[i] = Values[i] - B->at(i);
+		Temp.Values[i] = Values[i] - F.Values[i];
 	}
 	return Temp;
 }
 
+ // 数组复制
+FloatArray FloatArray::Copy(const FloatArray & F)
+{
+	FloatArray Temp;
+	Temp.size = F.size;
+	Temp.Values = new double[Temp.size]();
+	for (int i = 0; i < Temp.size; i++)
+	{
+		Temp.Values[i] = F.Values[i];
+	}
+	return Temp;
+}
+FloatArray::FloatArray(const FloatArray & F)
+{
+	size = F.size;
+	Values = new double[size]();
+	for (int i = 0; i < size; i++)
+	{
+		Values[i] = F.Values[i];
+	}
+}
 
 FloatMatrix::FloatMatrix()
 {
 	m = 0;
 	n = 0;
+	Values = new double[m*n]();
 }
 
+FloatMatrix::FloatMatrix(const FloatMatrix &F)
+{
+	m = F.m;
+	n = F.n;
+	Values = new double[m*n]();
+	for (int i = 0; i < m*n; i++)
+	{
+		Values[i] = F.Values[i];
+	}
+}
 
 FloatMatrix::~FloatMatrix()
 {
@@ -212,8 +255,19 @@ IntMatrix::IntMatrix()
 {
 	m = 0;
 	n = 0;
+	Values = new int[m*n]();
 }
 
+IntMatrix::IntMatrix(const IntMatrix & I)
+{
+	m = I.m;
+	n = I.n;
+	Values = new int[m*n]();
+	for (int i = 0; i < m*n; i++)
+	{
+		Values[i] = I.Values[i];
+	}
+}
 
 IntMatrix::~IntMatrix()
 {
@@ -266,30 +320,30 @@ FloatMatrix FloatMatrix::Trans()
 
 
 // 乘以数组
-FloatArray FloatMatrix::Mult(FloatArray * B)
+FloatArray FloatMatrix::Mult(FloatArray & F)
 {
 	FloatArray Temp(m);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i) += B->at(j)*this->at(i,j);
+			Temp.at(i) += F.at(i) * this->at(i, j);
 		}
 	}
 	return Temp;
 }
 
  // 乘以矩阵
-FloatMatrix FloatMatrix::Mult(FloatMatrix * B)
+FloatMatrix FloatMatrix::Mult( FloatMatrix & F)
 {
 	FloatMatrix Temp(m, n);
 	for (int i = 0; i < m; i++)
 	{
-		for (int j = 0; j < B->n; j++)
+		for (int j = 0; j < F.n; j++)
 		{
 			for (int k = 0; k < n; k++)
 			{
-				Temp.at(i, j) = this->at(i, k)*B->at(k,j);
+				Temp.at(i, j) = this->at(i, k)*F.at(k,j);
 			}			
 		}
 	}
@@ -297,28 +351,28 @@ FloatMatrix FloatMatrix::Mult(FloatMatrix * B)
 }
 
  // 矩阵相加
-FloatMatrix FloatMatrix::Plus(FloatMatrix * B)
+FloatMatrix FloatMatrix::Plus(FloatMatrix & F)
 {
 	FloatMatrix Temp(m, n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i, j) = this->at(i, j) + B->at(i, j);
+			Temp.at(i, j) = this->at(i, j) + F.at(i, j);
 		}
 	}
 	return Temp;
 }
 
  // 矩阵相减
-FloatMatrix FloatMatrix::Minus(FloatMatrix * B)
+FloatMatrix FloatMatrix::Minus(FloatMatrix & F)
 {
 	FloatMatrix Temp(m, n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i, j) = this->at(i, j) - B->at(i, j);
+			Temp.at(i, j) = this->at(i, j) - F.at(i, j);
 		}
 	}
 	return Temp;
@@ -349,6 +403,24 @@ CSRMatrix::CSRMatrix()
 	ColIdx = NULL;
 }
 
+CSRMatrix::CSRMatrix(CSRMatrix &C)
+{
+	nRow = C.nRow;
+	nCol = C.nCol;
+	NonZero = C.NonZero;
+	Values = new double[NonZero]();
+	RowIdx = new int [nRow + 1]();
+	ColIdx = new int[NonZero]();
+	for (int i = 0; i < NonZero; i++)
+	{
+		ColIdx[i] = C.ColIdx[i];
+		Values[i] = C.Values[i];
+	}
+	for (int i = 0; i < nRow+1; i++)
+	{
+		RowIdx[i] = C.RowIdx[i];
+	}
+}
 
 CSRMatrix::~CSRMatrix()
 {
@@ -384,7 +456,7 @@ double & CSRMatrix::at(int i, int j)
 
 
 // 矩阵转置
-CSRMatrix CSRMatrix::Trans(CSRMatrix * B)
+CSRMatrix CSRMatrix::Trans(CSRMatrix &C)
 {
 	return CSRMatrix();
 }

@@ -1,0 +1,44 @@
+nloa,nface£¬nbody£¬ncent
+3 1 1 1
+face
+nele,nnode,dir,startcoor,endcoor,startval,endval  curve
+2     2    1    4.0 0.0        1000     1000    1
+node1,node2,elem
+9 8 4
+8 7 3
+body
+Dir,Acceleration,nGroup
+ 2       -9.81     2
+group
+1 2
+cent
+Nnode,Dir,Value
+1      2  -1000000
+Value
+-1000000
+Node 
+8
+
+
+
+nloa,nface£¬nbody£¬ncent
+3 0 1 0
+ntype
+face
+nele,nnode,dir,startcoor,endcoor,startval,endval  curve
+2     2    1    4.0       0        1000     1000    1
+node1,node2,elem
+9 8 4
+8 7 3
+ntype
+body
+Dir,Acceleration,nGroup
+ 2       -9.81     2
+group
+1 2
+ntype
+cent
+Nnode,Dir,Value
+1      2  -1000
+Node 
+8

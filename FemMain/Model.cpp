@@ -16,13 +16,14 @@ Element::~Element()
 
 
  // 单元初始化
-void Element::Init(int nNodes, int Material, int Index, int Group, IntArray Node)
+void Element::Init(int nNodes, int Material, int Index, int Group, IntArray *Node)
 {
 	this->nNodes = nNodes;
 	this->Material = Material;
 	this->Index = Index;
 	this->group = Group;
-	this->Nodes = Node;
+	this->Nodes = new IntArray(this->nNodes);
+	*Nodes = Nodes->Copy(*Node);
 	this->DegreeOfFreedom = NULL;
 	this->Stiff = NULL;
 }
@@ -70,7 +71,7 @@ int Element::GetnNode()
 
 
 // 获得单元节点
-IntArray Element::GetNodeArray()
+IntArray * Element::GetNodeArray()
 {
 	return Nodes;
 }
@@ -78,7 +79,7 @@ IntArray Element::GetNodeArray()
 // 获得单元节点
 int Element::GetNode(int i)
 {
-	return Nodes.at(i);
+	return Nodes->at(i);
 }
 
 
@@ -118,14 +119,17 @@ Node::~Node()
 void Node::Init(int Index, FloatArray * Coordinate)
 {
 	this->Index = Index;
-	this->Coordinates = Coordinate;
+	int size;
+	size = Coordinate->GetSize();
+	Coordinates = new FloatArray(size);
+	*Coordinates=Coordinates->Copy(*Coordinate);
 }
 
 
 // 打印节点信息
 void Node::Print()
 {
-	cout << "Node " << Index << endl;
+	cout << "Node " << Index ;
 	Coordinates->Print();
 }
 
@@ -216,7 +220,7 @@ void Group::Init(int Index, int nElements, int type , int Mat, int Dof)
 // 填充单元
 void Group::FillElement(IntArray * ElementList)
 {
-	*Elements = Elements->Copy(ElementList);
+	*Elements =Elements->Copy(* ElementList);
 }
 
 
@@ -235,7 +239,10 @@ int Group::GetnElements()
 	return nElements;
 }
 
-
+int Group::GetType()
+{
+	return type;
+}
 // 获取材料号
 int Group::GetMaterial()
 {
@@ -254,6 +261,8 @@ bool & Group::IsAppear()
 Quadr::Quadr()
 {
 	this->type = Quadrilateral;
+	this->nNodes = 4;
+	this->Nodes = new IntArray(4);
 }
 
 
@@ -269,19 +278,41 @@ void Element::Print()
 
 void Quadr::Print()
 {
-	cout << "I am a Quadr Element" << endl;
+	cout << "Quadr Element "<<setw(5)<<this->Index;
+	for (int i = 0; i < 4; i++)
+	{
+		cout <<setw(5)<< this->Nodes->at(i);
+	}
+	cout << endl;
 }
 
 Line::Line()
 {
 	this->type = Linear;
+	this->nNodes = 2;
+	this->Nodes = new IntArray(2);
 }
 Line::~Line()
 {
+}
+Line::Line(const Line & L)
+{
+	nNodes = L.nNodes;
+	Material = L.Material;
+	Index = L.Index;
+	group = L.group;
+	type = L.type;
+	Nodes = new IntArray(nNodes);
+	Nodes = L.Nodes;
 }
 
 
 void Line::Print()
 {
 	cout << "I am a Line Element" << endl;
+}
+
+int & Line::AtAdjElem()
+{
+	return AdjElem;
 }

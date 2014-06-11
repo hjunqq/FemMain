@@ -1,6 +1,6 @@
 #pragma once
 
-#define Elatisic 0
+#define Elastic 0
 
 class Material
 {

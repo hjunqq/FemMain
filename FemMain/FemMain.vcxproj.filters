@@ -36,6 +36,9 @@
     <ClInclude Include="Solver.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="gidpost.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Array.cpp">

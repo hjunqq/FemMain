@@ -54,14 +54,14 @@ protected:
 	int Index;
 	int group;
 	int type;
-	IntArray  Nodes;
+	IntArray  *Nodes;
 	FloatMatrix *Stiff;
 	IntArray DegreeOfFreedom;
 	FloatMatrix *ConstitutiveMatrix;
 	int nGaussPoint;
 	GaussPoint **GaussPointArray;
 public:
-	void Init(int nNodes, int Material, int Index, int Group, IntArray Node);
+	void Init(int nNodes, int Material, int Index, int Group, IntArray *Node);
 	// 计算刚度矩阵
 	virtual FloatMatrix * BuildStiff();
 	// 组装本构矩阵
@@ -75,7 +75,7 @@ public:
 	// 获得单元节点数
 	int GetnNode();
 	// 获得单元节点
-	IntArray GetNodeArray();
+	IntArray * GetNodeArray();
 	// 获得单元节点
 	int GetNode(int i);
 	// 获得单元高斯点数
@@ -85,6 +85,27 @@ public:
 	// 获得单元材料
 	int GetMaterial();
 	virtual void Print();
+};
+
+class Quadr :
+	public Element
+{
+public:
+	Quadr();
+	virtual ~Quadr();
+	void Print();
+};
+class Line :
+	public Element
+{
+private:
+	int AdjElem;
+public:
+	Line();
+	Line(const Line & L);
+	virtual ~Line();
+	void Print();
+	int & AtAdjElem();
 };
 
 class Group
@@ -100,6 +121,7 @@ private:
 	IntArray *Elements;
 	int nElements;
 	int nDof;
+	Quadr * Quadrs; 
 public:
 	// 初始化
 	void Init(int Index, int nElements, int type,int Mat,int Dof);
@@ -111,24 +133,10 @@ public:
 	int GetnElements();
 	// 获取材料号
 	int GetMaterial();
+	int GetType();
 	// 设置是否出现
 	bool & IsAppear();
 };
 
-class Quadr :
-	public Element
-{
-public:
-	Quadr();
-	virtual ~Quadr();
-	void Print();
-};
-class Line :
-	public Element
-{
-public:
-	Line();
-	virtual ~Line();
-	void Print();
-};
+
 
