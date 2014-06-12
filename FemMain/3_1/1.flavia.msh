@@ -1,4 +1,4 @@
-MESH "Static" dimension 2 ElemType Quadrilateral Nnode 4
+MESH "Quadrilateral" dimension 2 ElemType Quadrilateral Nnode 4
 Coordinates
 1 0 0
 2 3 0
@@ -13,6 +13,9 @@ End Coordinates
 Elements
 1 1 2 5 4
 2 2 3 6 5
+End Elements
+MESH "Quadrilateral" dimension 2 ElemType Quadrilateral Nnode 4
+Elements
 3 4 5 8 7
 4 5 6 9 8
 End Elements

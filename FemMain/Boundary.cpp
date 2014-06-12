@@ -70,3 +70,70 @@ Interact::~Interact()
 {
 }
 
+
+
+// 获得第i个元素
+int Fixed::at(int i)
+{
+	return Node->at(i);
+}
+
+
+int Fixed::GetDir()
+{
+	return Dir;
+}
+
+
+int Fixed::GetnNode()
+{
+	return nNode;
+}
+
+
+int Displace::GetnNode()
+{
+	return nNode;
+}
+
+
+int Displace::at(int i)
+{
+	return Node->at(i);
+}
+
+
+double Displace::atValue(int i)
+{
+	return Values->at(i);
+}
+
+
+int Displace::GetDir()
+{
+	return Dir;
+}
+
+
+int Interact::GetnNode()
+{
+	return nNode;
+}
+
+
+int Interact::GetAdj()
+{
+	return AdjDomain;
+}
+
+
+IntArray * Interact::GetLocal()
+{
+	return Local;
+}
+
+
+IntArray * Interact::GetRemote()
+{
+	return Remote;
+}

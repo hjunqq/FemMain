@@ -10,6 +10,14 @@ Material::Material()
 	Density = 0.0;
 }
 
+Material::Material(const Material *Mat)
+{
+	Index = Mat->Index;
+	type = Mat->type;
+	Density = Mat->Density;
+	Possion = Mat->Possion;
+	Young = Mat->Young;
+}
 
 Material::~Material()
 {

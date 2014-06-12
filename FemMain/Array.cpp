@@ -25,7 +25,13 @@ int & IntArray::at(int i)
 	return Values[i];
 }
 
-
+void IntArray::Set(int Value)
+{
+	for (int i = 0; i < size; i++)
+	{
+		Values[i] = Value;
+	}
+}
 
 // 两个向量直接叠加
 IntArray IntArray::Append(const IntArray & I)
@@ -99,6 +105,39 @@ void IntArray::Print()
 	cout << endl;
 }
 
+IntArray &  IntArray::operator + (const IntArray & I)
+{
+	IntArray T;
+	T.size = I.size;
+	T.Values = new int[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] =Values[i]+ I.Values[i];
+	}
+	return T;
+}
+IntArray & IntArray::operator = (const IntArray & I)
+{
+	IntArray T;
+	T.size =  I.size;
+	T.Values = new int[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] = I.Values[i];
+	}
+	return T;
+}
+IntArray & IntArray::operator - (const IntArray & I)
+{
+	IntArray T;
+	T.size = I.size;
+	T.Values = new int[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] =Values[i]- I.Values[i];
+	}
+	return T;
+}
 
 FloatArray::FloatArray()
 {
@@ -228,6 +267,28 @@ FloatArray::FloatArray(const FloatArray & F)
 	}
 }
 
+FloatArray & FloatArray::operator + (const FloatArray & I)
+{
+	FloatArray T;
+	return T;
+}
+FloatArray & FloatArray::operator = (const FloatArray & I)
+{
+	FloatArray T;
+	T.size = I.size;
+	T.Values = new double[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] = I.Values[i];
+	}
+	return T;
+}
+FloatArray & FloatArray::operator - (const FloatArray & I)
+{
+	FloatArray T;
+	return T;
+}
+
 FloatMatrix::FloatMatrix()
 {
 	m = 0;
@@ -287,7 +348,51 @@ int & IntMatrix::at(int i, int j)
 {
 	return Values[i*n + j];
 }
-
+IntMatrix & IntMatrix::operator + (const IntMatrix & I)
+{
+	IntMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new int[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) = this->at(i, j) + I.Values[i*n+j];
+		}
+	}
+	return T;
+}
+IntMatrix & IntMatrix::operator=(const IntMatrix & I)
+{
+	IntMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new int[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) = I.Values[i*n + j];
+		}
+	}
+	return T;
+}
+IntMatrix & IntMatrix::operator-(const IntMatrix & I)
+{
+	IntMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new int[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) = this->at(i, j) - I.Values[i*n + j];
+		}
+	}
+	return T;
+}
 
 // 构造m行n列的矩阵
 FloatMatrix::FloatMatrix(int i, int j)
@@ -392,6 +497,51 @@ void FloatMatrix::Print()
 	}
 }
 
+FloatMatrix & FloatMatrix::operator + (const FloatMatrix & I)
+{
+	FloatMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new double[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) = this->at(i, j) + I.Values[i*n + j];
+		}
+	}
+	return T;
+}
+FloatMatrix & FloatMatrix::operator = (const FloatMatrix & I)
+{
+	FloatMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new double[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) =I.Values[i*n + j];
+		}
+	}
+	return T;
+}
+FloatMatrix &  FloatMatrix::operator - (const FloatMatrix & I)
+{
+	FloatMatrix T;
+	T.m = m;
+	T.n = n;
+	T.Values = new double[m + n];
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			T.at(i, j) = this->at(i, j) - I.Values[i*n + j];
+		}
+	}
+	return T;
+}
 
 CSRMatrix::CSRMatrix()
 {

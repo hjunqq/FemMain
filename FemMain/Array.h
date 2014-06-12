@@ -31,6 +31,11 @@ public:
 	int GetSize();
 	// 打印变量内容
 	void Print();
+	void Set(int Value);
+
+	IntArray & operator+(const IntArray & I);
+	IntArray & operator=(const IntArray & I);
+	IntArray & operator-(const IntArray & I);
 };
 
 class FloatArray
@@ -63,6 +68,10 @@ public:
 	// 数组复制
 	FloatArray Copy(const FloatArray & F);
 	FloatArray(const FloatArray & F);
+
+	FloatArray & operator+(const FloatArray & I);
+	FloatArray & operator=(const FloatArray & I);
+	FloatArray & operator-(const FloatArray & I);
 };
 
 class FloatMatrix
@@ -92,6 +101,10 @@ public:
 	FloatMatrix Minus(FloatMatrix & F );
 	FloatMatrix Copy(FloatMatrix & F);
 	void Print();
+
+	FloatMatrix & operator+(const FloatMatrix & I);
+	FloatMatrix & operator=(const FloatMatrix & I);
+	FloatMatrix & operator-(const FloatMatrix & I);
 };
 
 class IntMatrix
@@ -109,6 +122,11 @@ public:
 	IntMatrix(const IntMatrix &I);
 	// 返回第m行n列元素
 	int & at(int i, int j);
+
+	IntMatrix & operator+(const IntMatrix & I);
+	IntMatrix & operator=(const IntMatrix & I);
+	IntMatrix & operator-(const IntMatrix & I);
+
 };
  // Compressed Sparse Row Storage Format
  // 行压缩矩阵 

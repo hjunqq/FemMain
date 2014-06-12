@@ -1,5 +1,6 @@
 #pragma once
 #include "Array.h"
+#include "Material.h"
 
 #define Linear			2
 #define Quadrilateral	4
@@ -33,6 +34,7 @@ public:
 	FloatMatrix & GetStress();
 	// 获得应变
 	FloatMatrix & GetStrain();
+	Node & operator =(const Node & N);
 };
 
 class GaussPoint :
@@ -50,22 +52,27 @@ public:
 	virtual ~Element();
 protected:
 	int nNodes;
-	int Material;
+	int mat;
 	int Index;
 	int group;
+	int Dof;
 	int type;
+	Material *Mat;
 	IntArray  *Nodes;
+	FloatArray **Coors;
 	FloatMatrix *Stiff;
-	IntArray DegreeOfFreedom;
+	IntArray *DegreeOfFreedom;
 	FloatMatrix *ConstitutiveMatrix;
 	int nGaussPoint;
 	GaussPoint **GaussPointArray;
 public:
-	void Init(int nNodes, int Material, int Index, int Group, IntArray *Node);
+	void Init(int nNodes, int mat, int Index, int Group, int Dof, IntArray *Node);
+	// 计算J
+	virtual FloatMatrix * ComputeJacobi(GaussPoint * B);
 	// 计算刚度矩阵
-	virtual FloatMatrix * BuildStiff();
+	virtual FloatMatrix * ComputeStiff();
 	// 组装本构矩阵
-	virtual FloatMatrix * BuildConstitutiveMatrix();
+	virtual FloatMatrix * ComputeConstitutiveMatrix();
 	// 计算高斯点应变
 	virtual FloatArray * ComputeStrain(GaussPoint * B);
 	// 计算B矩阵
@@ -84,6 +91,13 @@ public:
 	int GetGroup();
 	// 获得单元材料
 	int GetMaterial();
+	void SetMaterial(Material *Mat);
+
+	void SetCoor(FloatArray **Coor);
+
+	int GetIndex();
+	void FillDof(IntArray * DegreeOfFreedom);
+	IntArray * GetDof();
 	virtual void Print();
 };
 
@@ -94,6 +108,9 @@ public:
 	Quadr();
 	virtual ~Quadr();
 	void Print();
+	Quadr & operator=(const Quadr &Q);
+	FloatMatrix * BuildStiff();
+	FloatMatrix * ComputeJacobi(GaussPoint * B);
 };
 class Line :
 	public Element
@@ -106,6 +123,7 @@ public:
 	virtual ~Line();
 	void Print();
 	int & AtAdjElem();
+	Line & operator=(const Line &L);
 };
 
 class Group
@@ -121,19 +139,21 @@ private:
 	IntArray *Elements;
 	int nElements;
 	int nDof;
-	Quadr * Quadrs; 
+	Quadr ** Quadrs; 
 public:
 	// 初始化
 	void Init(int Index, int nElements, int type,int Mat,int Dof);
 	// 填充单元
 	void FillElement(IntArray * ElementList);
+	void FillElement(Quadr * Quadrs);
 	// 获取第i个单元号
-	int GetElement(int i);
+	Quadr * GetElement(Quadr &);
 	// 获取单元个数
 	int GetnElements();
 	// 获取材料号
 	int GetMaterial();
 	int GetType();
+	int GetDof();
 	// 设置是否出现
 	bool & IsAppear();
 };

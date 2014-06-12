@@ -25,6 +25,8 @@ namespace ProgramTest
 			*B = B->Add(A);
 			*B = A.Append(*B);
 			Assert::AreEqual(30, B->GetSize());
+			B = &A;
+			Assert::AreEqual(9, B->at(9));
 		}
 		TEST_METHOD(TestFloat)
 		{
@@ -92,7 +94,6 @@ namespace ProgramTest
 			}
 			A.Init(0, 10, 1,1,2);
 			A.FillElement(Elems);
-			Assert::AreEqual(3, A.GetElement(2));
 
 			Quadr C;
 			IntArray B(4);

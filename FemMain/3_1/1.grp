@@ -1,4 +1,4 @@
-group,type,gne,gmat
+group,type,gne,gmat dof
    1   4   2   1    2
-group,type,gne,gmat
+group,type,gne,gmat dof
    2   4   2   1    2

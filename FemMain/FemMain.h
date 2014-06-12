@@ -2,6 +2,7 @@
 #pragma comment(lib,"zlib.lib")
 #pragma comment(lib,"hdf5.lib")
 #pragma comment(lib,"gidpost.lib")
+#pragma comment(linker,"/NODEFAULTLIB:libcmt.lib")
 #include "Array.h"
 #include "Model.h"
 #include "Load.h"
@@ -10,10 +11,13 @@
 #include "gidpost.h"
 
 #define MAXCHAR 200
+
+const string GroupName[4] = { " ", "Linear", " ", "Quadrilateral" };
+
 class FemMain
 {
 private:
-	string GroupName[4] = {"", "Linear","", "Quadrilateral" };
+	
 
 	string prob, text,workdir;
 	string GidResFile;
@@ -24,6 +28,7 @@ private:
 	int nGroup;
 	int nMat;
 	int nStep;
+	int nDof;
 	int TotalDOF;
 	int nTotalLoad;
 	int nFace;
@@ -50,17 +55,20 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix *A;
-	FloatArray *Result;
-	IntArray DegreeOfFreedom;
-	FloatArray *LoadMatrix;
-	FloatArray *InitialLoad;
+	FloatMatrix *Stiff;
+	FloatArray *ResultZero;
+	IntArray *DegreeOfFreedom;
+	FloatArray *ExternalForce;
+	FloatArray *InitialStain;
 	FloatArray *InteractLoad;
-	FloatArray *DispLoad;
+	FloatArray *InitialDispLoad;
 	FloatArray *TotalLoad;
 public:
 	void ShowTime();
-	string & WordDir();
+	string & WorkDir();
 	void ReadFiles();
     void GIDOutMesh();
+	void ComputeDOF();
+	void InitSolve();
+	void ComputeElementStiff();
 };

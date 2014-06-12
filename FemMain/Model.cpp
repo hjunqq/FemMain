@@ -1,10 +1,11 @@
 #include "Model.h"
-
+#include "FemMain.h"
+extern FemMain Fem1;
 
 Element::Element()
 {
 	nNodes = 0;
-	Material = 0;
+	mat = 0;
 	Index = 0;
 	nGaussPoint = 0;
 }
@@ -16,32 +17,32 @@ Element::~Element()
 
 
  // 单元初始化
-void Element::Init(int nNodes, int Material, int Index, int Group, IntArray *Node)
+void Element::Init(int nNodes, int Material, int Index, int Group,int Dof, IntArray *Node)
 {
 	this->nNodes = nNodes;
-	this->Material = Material;
+	this->mat = Material;
 	this->Index = Index;
 	this->group = Group;
-	this->Nodes = new IntArray(this->nNodes);
-	*Nodes = Nodes->Copy(*Node);
+	this->Dof = Dof;
+	this->Nodes = new IntArray(*Node);
 	this->DegreeOfFreedom = NULL;
 	this->Stiff = NULL;
 }
 
-
-// 计算刚度矩阵
-FloatMatrix * Element::BuildStiff()
+FloatMatrix *Element::ComputeJacobi(GaussPoint *B)
 {
 	return NULL;
 }
 
-
-// 组装本构矩阵
-FloatMatrix * Element::BuildConstitutiveMatrix()
+FloatMatrix *Element::ComputeStiff()
 {
 	return NULL;
 }
 
+FloatMatrix *Element::ComputeConstitutiveMatrix()
+{
+	return NULL;
+}
 
 // 计算高斯点应变
 FloatArray * Element::ComputeStrain(GaussPoint * B)
@@ -55,6 +56,7 @@ FloatMatrix Element::ComputeBMarix(GaussPoint * B)
 {
 	return FloatMatrix();
 }
+
 
 
 // 打印单元结果
@@ -100,9 +102,50 @@ int Element::GetGroup()
 // 获得单元材料
 int Element::GetMaterial()
 {
-	return Material;
+	return mat;
 }
 
+void Element::SetMaterial(Material *Mat)
+{
+	this->Mat =new Material( *Mat);
+}
+
+void Element::SetCoor(FloatArray **Coor)
+{
+	this->Coors = new FloatArray*[nNodes];
+	for (int i = 0; i < nNodes; i++)
+	{
+		this->Coors[i] = new FloatArray(*Coor[i]);
+	}
+}
+
+void Element::Print()
+{
+}
+
+int Element::GetIndex()
+{
+	return Index;
+}
+
+void Element::FillDof(IntArray * DegreeOfFreedom)
+{
+	int Node;
+	this->DegreeOfFreedom = new IntArray(nNodes*Dof);
+	for (int inode = 0; inode < nNodes; inode++)
+	{
+		Node = Nodes->at(inode);
+		for (int idof = 0; idof < Dof; idof++)
+		{
+			this->DegreeOfFreedom->at(inode*Dof + idof) = DegreeOfFreedom->at(Node*Dof + idof);
+		}
+	}
+}
+
+IntArray *Element::GetDof()
+{
+	return DegreeOfFreedom;
+}
 
 Node::Node()
 {
@@ -121,8 +164,7 @@ void Node::Init(int Index, FloatArray * Coordinate)
 	this->Index = Index;
 	int size;
 	size = Coordinate->GetSize();
-	Coordinates = new FloatArray(size);
-	*Coordinates=Coordinates->Copy(*Coordinate);
+	Coordinates = new FloatArray(*Coordinate);
 }
 
 
@@ -140,6 +182,17 @@ double Node::GetCoordinate(int i)
 	return Coordinates->at(i);
 }
 
+Node & Node::operator=(const Node & N)
+{
+	Node T;
+	T.Index = N.Index;
+	T.Coordinates = N.Coordinates;
+	T.Displacement = N.Displacement;
+	T.Stress = N.Stress;
+	T.Strain = N.Strain;
+	T.PrincipleStrain = N.PrincipleStrain;
+	return T;
+}
 
 // 获得节点坐标
 FloatArray Node::GetCoordinate()
@@ -214,6 +267,7 @@ void Group::Init(int Index, int nElements, int type , int Mat, int Dof)
 	this->Material = Mat;
 	this->nDof = Dof;
 	Elements = new IntArray(nElements);
+	Quadrs = new Quadr *[nElements];
 }
 
 
@@ -223,11 +277,18 @@ void Group::FillElement(IntArray * ElementList)
 	*Elements =Elements->Copy(* ElementList);
 }
 
-
-// 获取第i个单元号
-int Group::GetElement(int i)
+void Group::FillElement(Quadr *Q)
 {
-	return Elements->at(i);
+	for (int ielem = 0; ielem < nElements;ielem++)
+	{
+		Quadrs[ielem] = &Q[ielem];
+	}
+}
+
+// 获取第i个单元
+Quadr * Group::GetElement(Quadr & )
+{
+	return *Quadrs;
 }
 
 
@@ -243,6 +304,12 @@ int Group::GetType()
 {
 	return type;
 }
+
+int Group::GetDof()
+{
+	return nDof;
+}
+
 // 获取材料号
 int Group::GetMaterial()
 {
@@ -265,14 +332,39 @@ Quadr::Quadr()
 	this->Nodes = new IntArray(4);
 }
 
+FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
+{
+	FloatArray **Coor;
+	double Young, Possion;
+	FloatMatrix *DN,*DX;
+	return NULL;
+}
+FloatMatrix * Quadr::BuildStiff()
+{
+	return NULL;
+}
 
 Quadr::~Quadr()
 {
 }
 
 
-void Element::Print()
+Quadr & Quadr::operator=(const Quadr &Q)
 {
+	Quadr T;
+	T.Index = Q.Index;
+	T.ConstitutiveMatrix = Q.ConstitutiveMatrix;
+	T.DegreeOfFreedom = Q.DegreeOfFreedom;
+	T.GaussPointArray = Q.GaussPointArray;
+	T.DegreeOfFreedom = Q.DegreeOfFreedom;
+	T.group = Q.group;
+	T.mat = Q.mat;
+	T.nGaussPoint = Q.nGaussPoint;
+	T.nNodes = Q.nNodes;
+	T.Nodes = Q.Nodes;
+	T.Stiff = Q.Stiff;
+	T.type = Q.type;
+	return T;
 }
 
 
@@ -298,7 +390,7 @@ Line::~Line()
 Line::Line(const Line & L)
 {
 	nNodes = L.nNodes;
-	Material = L.Material;
+	mat = L.mat;
 	Index = L.Index;
 	group = L.group;
 	type = L.type;
@@ -315,4 +407,23 @@ void Line::Print()
 int & Line::AtAdjElem()
 {
 	return AdjElem;
+}
+
+Line & Line::operator=(const Line &L)
+{
+	Line T;
+	T.Index = L.Index;
+	T.ConstitutiveMatrix = L.ConstitutiveMatrix;
+	T.DegreeOfFreedom = L.DegreeOfFreedom;
+	T.GaussPointArray = L.GaussPointArray;
+	T.DegreeOfFreedom = L.DegreeOfFreedom;
+	T.group = L.group;
+	T.mat = L.mat;
+	T.nGaussPoint = L.nGaussPoint;
+	T.nNodes = L.nNodes;
+	T.Nodes = L.Nodes;
+	T.Stiff = L.Stiff;
+	T.type = L.type;
+	T.AdjElem = L.AdjElem;
+	return T;
 }
