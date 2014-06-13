@@ -71,4 +71,6 @@ public:
 	void ComputeDOF();
 	void InitSolve();
 	void ComputeElementStiff();
+	void AssembleStiff();
+	void ApplyLoad();
 };

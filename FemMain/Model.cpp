@@ -52,9 +52,9 @@ FloatArray * Element::ComputeStrain(GaussPoint * B)
 
 
 // 计算B矩阵
-FloatMatrix Element::ComputeBMarix(GaussPoint * B)
+FloatMatrix ** Element::ComputeBMarix(GaussPoint * B)
 {
-	return FloatMatrix();
+	return NULL;
 }
 
 
@@ -110,13 +110,9 @@ void Element::SetMaterial(Material *Mat)
 	this->Mat =new Material( *Mat);
 }
 
-void Element::SetCoor(FloatArray **Coor)
+void Element::SetCoor(FloatMatrix *Coor)
 {
-	this->Coors = new FloatArray*[nNodes];
-	for (int i = 0; i < nNodes; i++)
-	{
-		this->Coors[i] = new FloatArray(*Coor[i]);
-	}
+	this->Coors = new FloatMatrix(*Coor);
 }
 
 void Element::Print()
@@ -145,6 +141,11 @@ void Element::FillDof(IntArray * DegreeOfFreedom)
 IntArray *Element::GetDof()
 {
 	return DegreeOfFreedom;
+}
+
+FloatMatrix *Element::GetStiff()
+{
+	return Stiff;
 }
 
 Node::Node()
@@ -195,7 +196,7 @@ Node & Node::operator=(const Node & N)
 }
 
 // 获得节点坐标
-FloatArray Node::GetCoordinate()
+FloatArray & Node::GetCoordinate()
 {
 	return *Coordinates;
 }
@@ -220,7 +221,7 @@ FloatArray & Node::GetPriStess()
 // 获得应力
 FloatMatrix & Node::GetStress()
 {
-	return Stress;
+	return *Stress;
 	//TODO: insert return statement here
 }
 
@@ -334,14 +335,113 @@ Quadr::Quadr()
 
 FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 {
-	FloatArray **Coor;
-	double Young, Possion;
-	FloatMatrix *DN,*DX;
+	if (this->Coors == NULL)
+	{
+		cout << "No Coordiantes" << endl;
+	}
+	Shape = new FloatArray(4);
+	double ksi, eta;
+	ksi = B->GetCoordinate(0);
+	eta = B->GetCoordinate(1);
+	Shape->at(0) = 0.25*(1 + ksi)*(1 + eta);
+	Shape->at(1) = 0.25*(1 - ksi)*(1 + eta);
+	Shape->at(2) = 0.25*(1 - ksi)*(1 - eta);
+	Shape->at(3) = 0.25*(1 + ksi)*(1 - eta);
+	DShape = new FloatMatrix(2, 4);
+	DShape->at(0, 0) = 0.25*(1 + eta);
+	DShape->at(1, 0) = 0.25*(1 + ksi);
+	DShape->at(0, 1) = -0.25*(1 + eta);
+	DShape->at(1, 1) = 0.25*(1 - ksi);
+	DShape->at(0, 2) = -0.25*(1 - eta);
+	DShape->at(1, 2) = -0.25*(1 - ksi);
+	DShape->at(0, 3) = 0.25*(1 - eta);
+	DShape->at(1, 3) = -0.25*(1 + ksi);
+	Jacobi = new FloatMatrix(2, 2);
+	//DShape->Print();
+	//Coors->Print();
+	Jacobi =& DShape->Mult(*Coors);
+	//Jacobi->Print();
+	Det = Jacobi->Determinant();
+	InvJacobi = new FloatMatrix(2, 2);
+	InvJacobi = &Jacobi->Inverse();
+	//InvJacobi->Print();
+	DShapeX = new FloatMatrix(2, 4);
+	DShapeX = &InvJacobi->Mult(*DShape);
 	return NULL;
 }
-FloatMatrix * Quadr::BuildStiff()
+FloatMatrix ** Quadr::ComputeBMarix()
 {
-	return NULL;
+	BMatrix = new FloatMatrix*[4];
+	for (int inode = 0; inode < 4; inode++)
+	{
+		BMatrix[inode] = new FloatMatrix(3, 2);
+		BMatrix[inode]->at(0, 0) = DShape->at(0, inode);
+		BMatrix[inode]->at(1, 1) = DShape->at(1, inode);
+		BMatrix[inode]->at(2, 0) = DShape->at(1, inode);
+		BMatrix[inode]->at(2, 1) = DShape->at(0, inode);
+	}
+	return BMatrix;
+}
+FloatMatrix * Quadr::ComputeConstitutiveMatrix()
+{
+	FloatMatrix *T;
+	T = new FloatMatrix(3, 3);
+	double Young, Possion;
+	Young = Mat->GetYoung();
+	Possion = Mat->GetPossion();
+	double D1, D2, D3;
+	D1 = (1 - Possion)*Young / ((1 + Possion)*(1 - 2 * Possion));
+	D2 = Possion*Young / ((1 + Possion)*(1 - 2 * Possion));
+	D3 = Young / (2 * (1 - Possion));
+	T->at(0, 0) = D1;
+	T->at(1, 0) = D2;
+	T->at(0, 1) = D2;
+	T->at(1, 1) = D1;
+	T->at(2, 2) = D3;
+	return T;
+}
+FloatMatrix * Quadr::ComputeStiff()
+{
+	FloatArray *GaussCoor;
+	GaussCoor = new FloatArray(2);
+	GaussPoint *B = new GaussPoint;
+	DMatrix = new FloatMatrix(3, 3);
+	FloatMatrix *G = new FloatMatrix(2, 2);
+	FloatMatrix *BT=new FloatMatrix(3, 2);
+	FloatMatrix *DT = new FloatMatrix(3, 3);
+	Stiff = new FloatMatrix(8, 8);
+	double W1,W2;
+	for (int i = 0; i < 3; i++)
+	{
+		GaussCoor->at(0) = Gauss3[i];
+		W1 = Weight3[i];
+		for (int j = 0; j < 3; j++)
+		{
+			GaussCoor->at(1) = Gauss3[j];
+			B->Init(0, GaussCoor);
+			ComputeJacobi(B);
+			BMatrix = ComputeBMarix();
+			DMatrix = ComputeConstitutiveMatrix();
+			for (int inode = 0; inode < 4; inode++)
+			{
+				for (int jnode = 0; jnode < 4; jnode++)
+				{
+					BT = &BMatrix[inode]->Trans();
+					DT = &BT->Mult(*DMatrix);
+					G = &DT->Mult(*BMatrix[jnode]);
+					W2 = Weight3[j];
+					W2 = W1*W2;
+					G = &G->Mult(W2);
+					Stiff->at(2*inode, 2*jnode) += G->at(0, 0);
+					Stiff->at(2*inode+1, 2*jnode) += G->at(1, 0);
+					Stiff->at(2*inode, 2*jnode+1) += G->at(0, 1);
+					Stiff->at(2*inode+1, 2*jnode+1) += G->at(1, 1);
+				}
+			}
+		}
+	}
+	//Stiff->Print();
+	return Stiff;
 }
 
 Quadr::~Quadr()
@@ -426,4 +526,14 @@ Line & Line::operator=(const Line &L)
 	T.type = L.type;
 	T.AdjElem = L.AdjElem;
 	return T;
+}
+
+FloatArray *Line::ComputeShape(GaussPoint *B)
+{
+	Shape = new FloatArray(2);
+	double ksi;
+	ksi = B->GetCoordinate(0);
+	Shape->at(0) = 0.5*(1 - ksi);
+	Shape->at(1) = 0.5*(1 + ksi);
+	return Shape;
 }

@@ -270,6 +270,12 @@ FloatArray::FloatArray(const FloatArray & F)
 FloatArray & FloatArray::operator + (const FloatArray & I)
 {
 	FloatArray T;
+	T.size = I.size;
+	T.Values = new double[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] =this->Values[i]+ I.Values[i];
+	}
 	return T;
 }
 FloatArray & FloatArray::operator = (const FloatArray & I)
@@ -423,7 +429,18 @@ FloatMatrix FloatMatrix::Trans()
 	return Temp;
 }
 
-
+FloatMatrix FloatMatrix::Mult(double &D)
+{
+	FloatMatrix Temp(m,n);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			Temp.at(i,j) = this->at(i, j)*D;
+		}
+	}
+	return Temp;
+}
 // 乘以数组
 FloatArray FloatMatrix::Mult(FloatArray & F)
 {
@@ -441,14 +458,14 @@ FloatArray FloatMatrix::Mult(FloatArray & F)
  // 乘以矩阵
 FloatMatrix FloatMatrix::Mult( FloatMatrix & F)
 {
-	FloatMatrix Temp(m, n);
+	FloatMatrix Temp(m, F.n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < F.n; j++)
 		{
 			for (int k = 0; k < n; k++)
 			{
-				Temp.at(i, j) = this->at(i, k)*F.at(k,j);
+				Temp.at(i, j) += this->at(i, k)*F.at(k,j);
 			}			
 		}
 	}
@@ -491,11 +508,91 @@ void FloatMatrix::Print()
 	{
 		for (int j = 0; j < n; j++)
 		{
-			cout << setw(7) << this->at(i, j);
+			cout << setw(15) << this->at(i, j);
 		}
 		cout << endl;
 	}
 }
+
+double FloatMatrix::Determinant()
+{
+	double Det=0;
+	if (this->m == 1)
+	{
+		return this->at(0, 0);
+	}
+	else
+	{
+		FloatMatrix *T;
+		T = new FloatMatrix(this->m - 1, this->n - 1);
+		for (int i = 0; i < m; i++)
+		{
+			for (int j = 0; j < m; j++)
+			{
+				for (int k = 0; k < m; k++)
+				{
+					if (j < i && k < i)
+					{
+						T->at(j, k) = this->at(j, k);
+					}
+					if (j>i && k < i)
+					{
+						T->at(j - 1, k) = this->at(j, k);
+					}
+					if (j<i && k>i)
+					{
+						T->at(j, k - 1) = this->at(j, k);
+					}
+					if (j>i && k > i)
+					{
+						T->at(j - 1, k - 1) = this->at(j, k);
+					}
+				}
+			}
+
+			Det += this->at(i, 0)* pow(-1, m)*T->Determinant();
+		}
+		return Det;
+	}
+}
+
+FloatMatrix FloatMatrix::Inverse()
+{
+	FloatMatrix T1(m,n),T2(m-1,n-1);
+	double det;
+	det = this->Determinant();
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			for (int k = 0; k < m; k++)
+			{
+				for (int l = 0; l < m; l++)
+				{
+					if (k < i && l < j)
+					{
+						T2.at(k, l) = this->at(k, l);
+					}
+					if (k>i && l < j)
+					{
+						T2.at(k - 1, l) = this->at(k, l);
+					}
+					if (k<i && l>j)
+					{
+						T2.at(k, l - 1) = this->at(k, l);
+					}
+					if (k>i && l > j)
+					{
+						T2.at(k - 1, l - 1) = this->at(k, l);
+					}
+				}
+			}
+			T1.at(i, j) = T2.Determinant()/det;
+		}
+	}
+	return T1;
+}
+
 
 FloatMatrix & FloatMatrix::operator + (const FloatMatrix & I)
 {

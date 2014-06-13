@@ -4,6 +4,10 @@
 
 #define Linear			2
 #define Quadrilateral	4
+const double Gauss3[] = { -0.774596669241483, 0.0, 0.774596669241483 };
+const double Weight3[] = { 0.555555555555556, 0.888888888888889, 0.555555555555556 };
+const double Gauss2[] = { -0.5773502692, 0.5773502692 };
+const double Weight2[] = { 1.0, 1.0};
 
 class Node
 {
@@ -15,7 +19,7 @@ private:
 	FloatArray *Coordinates;
 	FloatArray *Displacement;
 	FloatArray *PrincipleStrain;
-	FloatMatrix Stress;
+	FloatMatrix * Stress;
 	FloatMatrix *Strain;
 public:
 	// 节点初始化
@@ -25,7 +29,7 @@ public:
 	// 获得节点坐标
 	double GetCoordinate(int i);
 	// 获得节点坐标
-	FloatArray GetCoordinate();
+	FloatArray & GetCoordinate();
 	// 获得位移
 	FloatArray & GetDisplacement();
 	// 获得主应力
@@ -57,10 +61,18 @@ protected:
 	int group;
 	int Dof;
 	int type;
+	double Det;
 	Material *Mat;
 	IntArray  *Nodes;
-	FloatArray **Coors;
+	FloatMatrix *Coors;
+	FloatArray *Shape;
+	FloatMatrix *DShape;
+	FloatMatrix *DShapeX;
+	FloatMatrix *Jacobi;
+	FloatMatrix *InvJacobi;
 	FloatMatrix *Stiff;
+	FloatMatrix **BMatrix;
+	FloatMatrix *DMatrix;
 	IntArray *DegreeOfFreedom;
 	FloatMatrix *ConstitutiveMatrix;
 	int nGaussPoint;
@@ -76,7 +88,7 @@ public:
 	// 计算高斯点应变
 	virtual FloatArray * ComputeStrain(GaussPoint * B);
 	// 计算B矩阵
-	virtual FloatMatrix ComputeBMarix(GaussPoint * B);
+	virtual FloatMatrix ** ComputeBMarix(GaussPoint * B);
 	// 打印单元结果
 	void PrintRes();
 	// 获得单元节点数
@@ -93,11 +105,12 @@ public:
 	int GetMaterial();
 	void SetMaterial(Material *Mat);
 
-	void SetCoor(FloatArray **Coor);
+	void SetCoor(FloatMatrix *Coor);
 
 	int GetIndex();
 	void FillDof(IntArray * DegreeOfFreedom);
 	IntArray * GetDof();
+	FloatMatrix *GetStiff();
 	virtual void Print();
 };
 
@@ -109,8 +122,10 @@ public:
 	virtual ~Quadr();
 	void Print();
 	Quadr & operator=(const Quadr &Q);
-	FloatMatrix * BuildStiff();
+	FloatMatrix * ComputeStiff();
 	FloatMatrix * ComputeJacobi(GaussPoint * B);
+	FloatMatrix ** ComputeBMarix();
+	FloatMatrix * ComputeConstitutiveMatrix();
 };
 class Line :
 	public Element
@@ -123,6 +138,7 @@ public:
 	virtual ~Line();
 	void Print();
 	int & AtAdjElem();
+	FloatArray *ComputeShape(GaussPoint *B);
 	Line & operator=(const Line &L);
 };
 

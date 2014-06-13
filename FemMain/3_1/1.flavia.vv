@@ -1,6 +1,6 @@
-BeginZE C:/Users/huijun/Documents/Visual Studio 2013/Projects/FemOOP/x64/Debug/3_1/1.flavia.vv
-   x -0.74165749549865723 6.7416572570800781
-   y 6.0807075500488281 -2.0807075500488281
+BeginZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_1\1.flavia.vv
+   x -1.0596609115600586 6.9101052284240723
+   y 6.3459725379943848 -2.3459722995758057
    z -11.224972724914551 11.224972724914551
    e 3.7416574954986572
    v 0 0 0
@@ -29,7 +29,7 @@ BeginZE C:/Users/huijun/Documents/Visual Studio 2013/Projects/FemOOP/x64/Debug/3
    OGLStereo(EyeDistance) 0.075
    OGLStereo(LeftEyeDistance) 1 0 0 1
    OGLStereo(RightEyeDistance) 0 1 1 1
-EndZE C:/Users/huijun/Documents/Visual Studio 2013/Projects/FemOOP/x64/Debug/3_1/1.flavia.vv
+EndZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_1\1.flavia.vv
 
 BeginMirror
    Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror
@@ -39,11 +39,11 @@ EndMirror
 BeginPostState
 BeginSingleMesh
   Num meshes: 0
-  Num sets: 1
+  Num sets: 2
   Num cuts: 0
   Set: 0
   State: On
-    Name: "Static"
+    Name: "Quadrilateral"
     IdSet: 1
     Color Type: 0
     Color Ambient: 0.2 0.2 0.2 0.5
@@ -57,8 +57,24 @@ BeginSingleMesh
     Property Vector Filter Factor: 0
     Property Stream Arrow: 0
   EndSet: 0
+  Set: 1
+  State: On
+    Name: "Quadrilateral 2"
+    IdSet: 2
+    Color Type: 0
+    Color Ambient: 0 0 0.3 0.5
+    Color Diffuse: 0 0 1 0.5
+    Color Specular: 1 1 1 0.5
+    Color Shininess: 0.5
+    Property Massive: 0
+    Property Transparent: 0
+    Property Style: 14
+    Property Edge Width: 1
+    Property Vector Filter Factor: 0
+    Property Stream Arrow: 0
+  EndSet: 1
 EndSingleMesh
   Post_Prefs_Vector_Size: 0 32 32 32
-  ResultView: {Id 6} {Contour Fill} Static 0.0 Displacement |Displacement| 0.0 4 0
+  ResultView: {Id 27} {Contour Fill} Static 0.0 Displacement |Displacement| 0.0 4 0
 EndPostState
 

@@ -93,6 +93,7 @@ public:
 	FloatMatrix Trans();
 	// 乘以数组
 	FloatArray Mult(FloatArray & F );
+	FloatMatrix Mult(double &D);
 	// 乘以矩阵
 	FloatMatrix Mult( FloatMatrix & F );
 	// 矩阵相加
@@ -100,6 +101,11 @@ public:
 	// 矩阵相减
 	FloatMatrix Minus(FloatMatrix & F );
 	FloatMatrix Copy(FloatMatrix & F);
+	
+	double Determinant();
+
+	FloatMatrix Inverse();
+
 	void Print();
 
 	FloatMatrix & operator+(const FloatMatrix & I);

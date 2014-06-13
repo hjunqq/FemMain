@@ -15,7 +15,7 @@ Load::~Load()
 Face::Face()
 {
 	nElem = 0;
-	StratV = 0.0;
+	StartV = 0.0;
 	EndV = 0.0;
 	Dir = 0;
 	StartC = 0.0;
@@ -34,23 +34,62 @@ void Face::Init(int Index, int nEle, int nNode, double StartC, double StartV, do
 	this->nElem = nEle;
 	this->nNode = nNode;
 	this->StartC = StartC;
-	this->StratV = StartV;
+	this->StartV = StartV;
 	this->EndC = EndC;
 	this->EndV = EndV;
 	this->Dir = Dir;
 	if (nNode == 2)
 	{
-		Lines = new Line[nElem]();
+		Lines = new Line*[nElem];
 	}
 }
 void Face::Set(Line *TLines)
 {
 	for (int i = 0; i < nElem; i++)
 	{
-		Lines[i] =TLines[i];
+		Lines[i] =&TLines[i];
 	}
 }
 
+int Face::GetDir()
+{
+	return Dir;
+}
+
+int Face::GetnNode()
+{
+	return nNode;
+}
+
+int Face::GetnElem()
+{
+	return nElem;
+}
+
+double Face::GetStartV()
+{
+	return StartV;
+}
+
+double Face::GetStartC()
+{
+	return StartC;
+}
+
+double Face::GetEndC()
+{
+	return EndC;
+}
+
+double Face::GetEndV()
+{
+	return EndV;
+}
+
+Line *Face::GetLines()
+{
+	return *Lines;
+}
 
 Volumn::Volumn()
 {
@@ -75,6 +114,25 @@ void Volumn::Init(int Index, int nGroup,IntArray *group, double Value, int Dir)
 	this->group = new IntArray(*group);
 }
 
+int Volumn::GetnGroup()
+{
+	return nGroup;
+}
+
+int Volumn::GetDir()
+{
+	return Dir;
+}
+
+double Volumn::GetValue()
+{
+	return Value;
+}
+
+IntArray * Volumn::GetGroup()
+{
+	return group;
+}
 
 Concentrate::Concentrate()
 {
@@ -95,4 +153,24 @@ void Concentrate::Init(int Index,int nNode, IntArray * Nodes, FloatArray * Value
 	this->Dir = Dir;
 	this->Nodes = new IntArray(*Nodes);
 	this->Values = new FloatArray(*Values);
+}
+
+int Concentrate::GetnNode()
+{
+	return nNode;
+}
+
+int Concentrate::GetDir()
+{
+	return Dir;
+}
+
+IntArray * Concentrate::GetNodes()
+{
+	return Nodes;
+}
+
+FloatArray *Concentrate::GetValues()
+{
+	return Values;
 }
