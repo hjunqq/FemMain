@@ -721,6 +721,7 @@ void FemMain::ApplyLoad()
 			Lines = Faces[iface].GetLines();
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
+				ELoad->Clear();
 				ENode = Lines[ielem].GetNodeArray();
 				Coor = new FloatMatrix(Type, nDim);
 				for (int inode = 0; inode < Type; inode++)
@@ -752,9 +753,20 @@ void FemMain::ApplyLoad()
 				}
 				for (int inode = 0; inode < Type; inode++)
 				{
-
+					int NodeIdx = ENode->at(inode);
+					for (int idof = 0; idof < nDof; idof++)
+					{
+						if (DegreeOfFreedom->at(NodeIdx * 2 + idof) != 0)
+						{
+							ExternalForce->at(DegreeOfFreedom->at(NodeIdx * 2 + idof) - 1) -= ELoad->at(idof)*Normal->at(idof);
+						}
+					}
 				}
 			}
 		}
+	}
+	for (int iCon = 0; iCon < nConcentrate; iCon++)
+	{
+
 	}
 }

@@ -212,8 +212,10 @@ double FloatArray::Dot(FloatArray * B)
 // Çå¿Õ
 int FloatArray::Clear()
 {
-	delete[] Values;
-	size = 0;
+	for (int i = 0; i < size; i++)
+	{
+		Values[i] = 0;
+	}
 	return 0;
 }
 
