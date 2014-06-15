@@ -767,6 +767,22 @@ void FemMain::ApplyLoad()
 	}
 	for (int iCon = 0; iCon < nConcentrate; iCon++)
 	{
+		int nNode,Dir;
+		FloatArray *Values;
+		IntArray *Nodes;
+		nNode = Cons[iCon].GetnNode();
+		Values=new FloatArray(nNode);
+		Nodes = new IntArray(nNode);
+		Values = Cons[iCon].GetValues();
+		Nodes = Cons[iCon].GetNodes();
+		Dir = Cons[iCon].GetDir();
+		for (int inode = 0; inode < nNode; inode++)
+		{
+			if (DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) != 0)
+			{
+				ExternalForce->at(DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir)-1) += Values->at(inode);
+			}
+		}
 
 	}
 }
