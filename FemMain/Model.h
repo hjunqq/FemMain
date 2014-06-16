@@ -74,6 +74,7 @@ protected:
 	FloatMatrix **BMatrix;
 	FloatMatrix *DMatrix;
 	IntArray *DegreeOfFreedom;
+	FloatArray *Displacement;
 	FloatMatrix *ConstitutiveMatrix;
 	int nGaussPoint;
 	GaussPoint **GaussPointArray;
@@ -106,11 +107,14 @@ public:
 	void SetMaterial(Material *Mat);
 
 	void SetCoor(FloatMatrix *Coor);
+	void SetResult(FloatArray *Result);
 
 	int GetIndex();
 	void FillDof(IntArray * DegreeOfFreedom);
 	IntArray * GetDof();
 	FloatMatrix *GetStiff();
+	FloatArray *GetShape();
+	double GetDet();
 	virtual void Print();
 };
 

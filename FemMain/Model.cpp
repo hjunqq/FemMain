@@ -115,6 +115,26 @@ void Element::SetCoor(FloatMatrix *Coor)
 	this->Coors = new FloatMatrix(*Coor);
 }
 
+void Element::SetResult(FloatArray *Result)
+{
+	if (Displacement == NULL)
+	{
+		Displacement = new FloatArray(Dof);
+	}
+	else
+	{
+		Displacement->Clear();
+	}
+	for (int iDof = 0; iDof < Dof; iDof++)
+	{
+		int DofIdx = DegreeOfFreedom->at(iDof);
+		if (DofIdx != 0)
+		{
+			Displacement->at(iDof - 1) = Result->at(DofIdx - 1);
+		}
+	}
+}
+
 void Element::Print()
 {
 }
@@ -147,7 +167,14 @@ FloatMatrix *Element::GetStiff()
 {
 	return Stiff;
 }
-
+FloatArray *Element::GetShape()
+{
+	return Shape;
+}
+double Element::GetDet()
+{
+	return Det;
+}
 Node::Node()
 {
 	Index = 0;

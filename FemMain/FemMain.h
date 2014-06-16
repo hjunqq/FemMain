@@ -9,6 +9,7 @@
 #include "Boundary.h"
 #include "Material.h"
 #include "gidpost.h"
+#include "Solver.h"
 
 #define MAXCHAR 200
 
@@ -63,9 +64,13 @@ private:
 	FloatArray *InteractLoad;
 	FloatArray *InitialDispLoad;
 	FloatArray *TotalLoad;
+
+	LUSolve *LUSolver;
+
 public:
 	void ShowTime();
 	string & WorkDir();
+	int GetStep();
 	void ReadFiles();
     void GIDOutMesh();
 	void ComputeDOF();
@@ -73,4 +78,7 @@ public:
 	void ComputeElementStiff();
 	void AssembleStiff();
 	void ApplyLoad();
+	void ApplyInitial();
+	void Solve();
+	bool ConvergeCheck();
 };

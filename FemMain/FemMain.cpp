@@ -38,14 +38,20 @@ int main(int argc,char**argv)
 	Fem2.ReadFiles();
 
 	Fem1.GIDOutMesh();
-	Fem1.ComputeDOF();
-	Fem1.InitSolve();
-	Fem1.ComputeElementStiff();
 
-	Fem1.AssembleStiff();
+	int nStep = Fem1.GetStep();
+	Fem1.ShowTime();
+	for (int istep = 0; istep < nStep; istep++)
+	{
+		Fem1.ComputeDOF();
+		Fem1.InitSolve();
+		Fem1.ComputeElementStiff();
 
-	Fem1.ApplyLoad();
+		Fem1.AssembleStiff();
 
+		Fem1.ApplyLoad();
+		Fem1.Solve();
+	}
 	Fem1.ShowTime();
 	return 0;
 }
@@ -63,6 +69,10 @@ void FemMain::ShowTime()
 string & FemMain::WorkDir()
 {
 	return workdir;
+}
+int FemMain::GetStep()
+{
+	return nStep;
 }
 void FemMain::ReadFiles()
 {
@@ -783,6 +793,103 @@ void FemMain::ApplyLoad()
 				ExternalForce->at(DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir)-1) += Values->at(inode);
 			}
 		}
-
 	}
+	for (int iVol = 0; iVol < nVolumn; iVol++)
+	{
+		int nBodyGroup, Dir,Type,nEle;
+		int GroupIdx, iMat;
+		double Density;
+		IntArray *VolGroups,*Nodes;
+		Quadr *Elems;
+		FloatArray *NLoad, *Shape, *TLoad;
+		double Value;
+		nBodyGroup = Vols[iVol].GetnGroup();
+		Dir = Vols[iVol].GetDir();
+		VolGroups = Vols[iVol].GetGroup();
+		Value = Vols[iVol].GetValue();
+		for (int igroup = 0; igroup < nBodyGroup; igroup++)
+		{
+			
+			GroupIdx = VolGroups->at(igroup);
+			nEle = Groups[GroupIdx].GetnElements();
+			Type = Groups[GroupIdx].GetType();
+			iMat = Groups[GroupIdx].GetMaterial();
+			Density = Mats[iMat].GetDensity();
+			if (Type == 4)
+			{
+				Elems = new Quadr[nEle];
+				Elems = Groups[GroupIdx].GetElement(*Elems);
+				FloatArray *Eload = new FloatArray(2);
+				FloatArray GaussT(2);
+				Shape = new FloatArray(Type);
+				TLoad = new FloatArray(Type);
+				Nodes = new IntArray(Type);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					TLoad->Clear();
+					Nodes = Elems[ielem].GetNodeArray();
+					for (int iksi = 0; iksi < 3; iksi++)
+					{
+						double ksi = Gauss3[iksi];
+						double W1 = Weight3[iksi];
+						GaussT.at(0) = ksi;
+						for (int ieta = 0; ieta < 3; ieta++)
+						{
+							double eta = Gauss3[ieta];
+							double W2 = Weight3[ieta];
+							GaussT.at(2) = eta;
+							GaussPoint B;
+							double Det;
+							B.Init(0, &GaussT);
+							Elems[ielem].ComputeJacobi(&B);
+							Shape = Elems[ielem].GetShape();
+							Det = Elems[ielem].GetDet();
+							for (int inode = 0; inode < Type; inode++)
+							{
+								TLoad->at(inode) += Shape->at(inode)*Density*Value*Det*W1*W2;
+							}
+						}
+					}
+					for (int inode = 0; inode < Type; inode++)
+					{
+						if (DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) != 0)
+						{
+							ExternalForce->at(DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) - 1) += TLoad->at(inode);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void FemMain::Solve()
+{
+	ResultZero = new FloatArray(TotalDOF);
+	LUSolver= new LUSolve();
+	LUSolver->Decomposition(Stiff);
+	LUSolver->Solver(Stiff, ExternalForce, ResultZero);
+}
+
+bool FemMain::ConvergeCheck()
+{
+	int Type, nEle;
+	for (int igroup = 0; igroup < nGroup; igroup++)
+	{
+		Type = Groups[igroup].GetType();
+		nEle = Groups[igroup].GetnElements();
+		if (Type == 4)
+		{
+			Quadr *Elem;
+			Elem = new Quadr[nEle];
+			Elem = Groups[igroup].GetElement(*Elem);
+			for (int ielem = 0; ielem < nEle; ielem++)
+			{
+				Elem[ielem].SetResult(ResultZero);
+				Elem[ielem].ComputeStrain();
+				Elem[ielem]
+			}
+		}
+	}
+	return true;
 }

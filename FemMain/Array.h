@@ -87,6 +87,7 @@ public:
 	// 构造m行n列的矩阵
 	FloatMatrix(int i, int j);
 	FloatMatrix(const FloatMatrix & F);
+	int GetSize();
 	// 返回第m行n列的值
 	double & at(int i, int j);
 	// 转置

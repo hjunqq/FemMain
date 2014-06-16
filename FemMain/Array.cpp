@@ -409,6 +409,11 @@ FloatMatrix::FloatMatrix(int i, int j)
 	Values = new double[m*n]();
 }
 
+int FloatMatrix::GetSize()
+{
+	return m;
+}
+
 
 // 返回第m行n列的值
 double & FloatMatrix::at(int i, int j)
