@@ -65,19 +65,19 @@ protected:
 	Material *Mat;
 	IntArray  *Nodes;
 	FloatMatrix *Coors;
-	FloatArray *Shape;
-	FloatMatrix *DShape;
-	FloatMatrix *DShapeX;
-	FloatMatrix *Jacobi;
-	FloatMatrix *InvJacobi;
-	FloatMatrix *Stiff;
-	FloatMatrix **BMatrix;
-	FloatMatrix *DMatrix;
-	IntArray *DegreeOfFreedom;
-	FloatArray *Displacement;
-	FloatMatrix *ConstitutiveMatrix;
+	FloatArray *Shape=NULL;
+	FloatMatrix *DShape=NULL;
+	FloatMatrix *DShapeX=NULL;
+	FloatMatrix *Jacobi=NULL;
+	FloatMatrix *InvJacobi=NULL;
+	FloatMatrix *Stiff=NULL;
+	FloatMatrix *BMatrix=NULL;
+	FloatMatrix *DMatrix=NULL;
+	IntArray *DegreeOfFreedom=NULL;
+	FloatArray *Displacement=NULL;
+	FloatMatrix *ConstitutiveMatrix=NULL;
 	int nGaussPoint;
-	GaussPoint **GaussPointArray;
+	GaussPoint **GaussPointArray=NULL;
 public:
 	void Init(int nNodes, int mat, int Index, int Group, int Dof, IntArray *Node);
 	// 计算J
@@ -89,7 +89,7 @@ public:
 	// 计算高斯点应变
 	virtual FloatArray * ComputeStrain(GaussPoint * B);
 	// 计算B矩阵
-	virtual FloatMatrix ** ComputeBMarix(GaussPoint * B);
+	virtual FloatMatrix * ComputeBMarix(GaussPoint * B);
 	// 打印单元结果
 	void PrintRes();
 	// 获得单元节点数
@@ -128,7 +128,7 @@ public:
 	Quadr & operator=(const Quadr &Q);
 	FloatMatrix * ComputeStiff();
 	FloatMatrix * ComputeJacobi(GaussPoint * B);
-	FloatMatrix ** ComputeBMarix();
+	FloatMatrix * ComputeBMarix(int inode);
 	FloatMatrix * ComputeConstitutiveMatrix();
 };
 class Line :

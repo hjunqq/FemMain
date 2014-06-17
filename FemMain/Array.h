@@ -43,6 +43,7 @@ class FloatArray
 public:
 	FloatArray();
 	virtual ~FloatArray();
+	bool IsNULL();
 private:
 	int size;
 	double *Values;

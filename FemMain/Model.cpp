@@ -52,7 +52,7 @@ FloatArray * Element::ComputeStrain(GaussPoint * B)
 
 
 // ¼ÆËãB¾ØÕó
-FloatMatrix ** Element::ComputeBMarix(GaussPoint * B)
+FloatMatrix * Element::ComputeBMarix(GaussPoint * B)
 {
 	return NULL;
 }
@@ -358,6 +358,11 @@ Quadr::Quadr()
 	this->type = Quadrilateral;
 	this->nNodes = 4;
 	this->Nodes = new IntArray(4);
+	Shape = new FloatArray(4);
+	DShape = new FloatMatrix(2, 4);
+	Jacobi = new FloatMatrix(2, 2);
+	DShapeX = new FloatMatrix(2, 4);
+	BMatrix = new FloatMatrix(3, 2);
 }
 
 FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
@@ -366,7 +371,6 @@ FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 	{
 		cout << "No Coordiantes" << endl;
 	}
-	Shape = new FloatArray(4);
 	double ksi, eta;
 	ksi = B->GetCoordinate(0);
 	eta = B->GetCoordinate(1);
@@ -374,7 +378,7 @@ FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 	Shape->at(1) = 0.25*(1 - ksi)*(1 + eta);
 	Shape->at(2) = 0.25*(1 - ksi)*(1 - eta);
 	Shape->at(3) = 0.25*(1 + ksi)*(1 - eta);
-	DShape = new FloatMatrix(2, 4);
+
 	DShape->at(0, 0) = 0.25*(1 + eta);
 	DShape->at(1, 0) = 0.25*(1 + ksi);
 	DShape->at(0, 1) = -0.25*(1 + eta);
@@ -383,30 +387,27 @@ FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 	DShape->at(1, 2) = -0.25*(1 - ksi);
 	DShape->at(0, 3) = 0.25*(1 - eta);
 	DShape->at(1, 3) = -0.25*(1 + ksi);
-	Jacobi = new FloatMatrix(2, 2);
+
 	DShape->Print();
 	//Coors->Print();
 	Jacobi =& DShape->Mult(*Coors);
 	//Jacobi->Print();
 	Det = Jacobi->Determinant();
-	InvJacobi = new FloatMatrix(2, 2);
+
 	InvJacobi = &Jacobi->Inverse();
 	//InvJacobi->Print();
-	DShapeX = new FloatMatrix(2, 4);
+
 	DShapeX = &InvJacobi->Mult(*DShape);
+	DShapeX->Print();
 	return NULL;
 }
-FloatMatrix ** Quadr::ComputeBMarix()
+FloatMatrix * Quadr::ComputeBMarix(int inode)
 {
-	BMatrix = new FloatMatrix*[4];
-	for (int inode = 0; inode < 4; inode++)
-	{
-		BMatrix[inode] = new FloatMatrix(3, 2);
-		BMatrix[inode]->at(0, 0) = DShape->at(0, inode);
-		BMatrix[inode]->at(1, 1) = DShape->at(1, inode);
-		BMatrix[inode]->at(2, 0) = DShape->at(1, inode);
-		BMatrix[inode]->at(2, 1) = DShape->at(0, inode);
-	}
+	BMatrix->at(0, 0) = DShapeX->at(0, inode);
+	BMatrix->at(1, 1) = DShapeX->at(1, inode);
+	BMatrix->at(2, 0) = DShapeX->at(1, inode);
+	BMatrix->at(2, 1) = DShapeX->at(0, inode);
+
 	return BMatrix;
 }
 FloatMatrix * Quadr::ComputeConstitutiveMatrix()
@@ -453,12 +454,13 @@ FloatMatrix * Quadr::ComputeStiff()
 					W2 = Weight3[ieta];
 					B->Init(0, GaussCoor);
 					ComputeJacobi(B);
-					BMatrix = ComputeBMarix();
-					BT = &BMatrix[inode]->Trans();
+					BMatrix = ComputeBMarix(inode);
+					BT = &BMatrix->Trans();
 					BT->Print(); 
 					DT = &BT->Mult(*DMatrix);
 					DT->Print();
-					G = &DT->Mult(*BMatrix[jnode]);
+					BMatrix = ComputeBMarix(jnode);
+					G = &DT->Mult(*BMatrix);
 					W2 = W1*W2*Det;
 					G = &G->Mult(W2);
 					G->Print();
@@ -474,7 +476,7 @@ FloatMatrix * Quadr::ComputeStiff()
 		}
 	}
 	
-	for (int i = 0; i < 3; i++)
+	/*for (int i = 0; i < 3; i++)
 	{
 		GaussCoor->at(0) = Gauss3[i];
 		W1 = Weight3[i];
@@ -502,7 +504,7 @@ FloatMatrix * Quadr::ComputeStiff()
 				}
 			}
 		}
-	}
+	}*/
 	//Stiff->Print();
 	return Stiff;
 }

@@ -149,6 +149,14 @@ FloatArray::~FloatArray()
 {
 }
 
+bool FloatArray::IsNULL()
+{
+	if (Values == NULL)
+	{
+		return true;
+	}
+	return false;
+}
 
 // 返回第i个元素
 double & FloatArray::at(int i)
@@ -301,7 +309,6 @@ FloatMatrix::FloatMatrix()
 {
 	m = 0;
 	n = 0;
-	Values = new double[m*n]();
 }
 
 FloatMatrix::FloatMatrix(const FloatMatrix &F)
