@@ -384,7 +384,7 @@ FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 	DShape->at(0, 3) = 0.25*(1 - eta);
 	DShape->at(1, 3) = -0.25*(1 + ksi);
 	Jacobi = new FloatMatrix(2, 2);
-	//DShape->Print();
+	DShape->Print();
 	//Coors->Print();
 	Jacobi =& DShape->Mult(*Coors);
 	//Jacobi->Print();
@@ -419,7 +419,7 @@ FloatMatrix * Quadr::ComputeConstitutiveMatrix()
 	double D1, D2, D3;
 	D1 = (1 - Possion)*Young / ((1 + Possion)*(1 - 2 * Possion));
 	D2 = Possion*Young / ((1 + Possion)*(1 - 2 * Possion));
-	D3 = Young / (2 * (1 - Possion));
+	D3 = Young / (2 * (1 + Possion));
 	T->at(0, 0) = D1;
 	T->at(1, 0) = D2;
 	T->at(0, 1) = D2;
@@ -438,6 +438,42 @@ FloatMatrix * Quadr::ComputeStiff()
 	FloatMatrix *DT = new FloatMatrix(3, 3);
 	Stiff = new FloatMatrix(8, 8);
 	double W1,W2;
+	DMatrix = ComputeConstitutiveMatrix();
+	for (int inode = 0; inode < 4; inode++)
+	{
+		for (int jnode = 0; jnode < 4; jnode++)
+		{
+			for (int iksi = 0; iksi < 3; iksi++)
+			{
+				GaussCoor ->at(0) = Gauss3[iksi];
+				W1 = Weight3[iksi];
+				for (int ieta = 0; ieta < 3; ieta++)
+				{
+					GaussCoor->at(1) = Gauss3[ieta];
+					W2 = Weight3[ieta];
+					B->Init(0, GaussCoor);
+					ComputeJacobi(B);
+					BMatrix = ComputeBMarix();
+					BT = &BMatrix[inode]->Trans();
+					BT->Print(); 
+					DT = &BT->Mult(*DMatrix);
+					DT->Print();
+					G = &DT->Mult(*BMatrix[jnode]);
+					W2 = W1*W2*Det;
+					G = &G->Mult(W2);
+					G->Print();
+					Stiff->at(2 * inode, 2 * jnode) += G->at(0, 0);
+					Stiff->at(2 * inode + 1, 2 * jnode) += G->at(1, 0);
+					Stiff->at(2 * inode, 2 * jnode + 1) += G->at(0, 1);
+					Stiff->at(2 * inode + 1, 2 * jnode + 1) += G->at(1, 1);
+					
+				}
+			}
+			cout << "**********************************************" << endl;
+			Stiff->Print();
+		}
+	}
+	
 	for (int i = 0; i < 3; i++)
 	{
 		GaussCoor->at(0) = Gauss3[i];
@@ -457,7 +493,7 @@ FloatMatrix * Quadr::ComputeStiff()
 					DT = &BT->Mult(*DMatrix);
 					G = &DT->Mult(*BMatrix[jnode]);
 					W2 = Weight3[j];
-					W2 = W1*W2;
+					W2 = W1*W2*Det;
 					G = &G->Mult(W2);
 					Stiff->at(2*inode, 2*jnode) += G->at(0, 0);
 					Stiff->at(2*inode+1, 2*jnode) += G->at(1, 0);

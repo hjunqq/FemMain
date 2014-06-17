@@ -430,7 +430,7 @@ FloatMatrix FloatMatrix::Trans()
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i, j) = this->at(j, i);
+			Temp.at(j, i) = this->at(i, j);
 		}
 	}
 	return Temp;

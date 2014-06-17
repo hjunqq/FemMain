@@ -53,6 +53,7 @@ int main(int argc,char**argv)
 		Fem1.Solve();
 	}
 	Fem1.ShowTime();
+	Fem1.ShowTime();
 	return 0;
 }
 void FemMain::ShowTime()
@@ -62,9 +63,9 @@ void FemMain::ShowTime()
 	cout << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon + 1 << "-" <<
 		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
 		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-	chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
-		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
+	//chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
+	//	tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
+	//	<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
 }
 string & FemMain::WorkDir()
 {
@@ -865,10 +866,10 @@ void FemMain::ApplyLoad()
 
 void FemMain::Solve()
 {
-	ResultZero = new FloatArray(TotalDOF);
-	LUSolver= new LUSolve();
+	LUSolver = new LUSolve();
 	LUSolver->Decomposition(Stiff);
-	LUSolver->Solver(Stiff, ExternalForce, ResultZero);
+	LUSolver->Solver(ExternalForce, ResultZero);
+	LUSolver->Check(ExternalForce, ResultZero);
 }
 
 bool FemMain::ConvergeCheck()
@@ -886,8 +887,6 @@ bool FemMain::ConvergeCheck()
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elem[ielem].SetResult(ResultZero);
-				Elem[ielem].ComputeStrain();
-				Elem[ielem]
 			}
 		}
 	}
