@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../FemMain/Array.h"
-#include "../FemMain/Model.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -19,14 +18,14 @@ namespace ProgramTest
 			{
 				A.at(i) = i;
 			}
-			IntArray *B;
-			B = new IntArray(10);
-			*B = A.Append(*B);
-			*B = B->Add(A);
-			*B = A.Append(*B);
-			Assert::AreEqual(30, B->GetSize());
-			B = &A;
-			Assert::AreEqual(9, B->at(9));
+			IntArray B;
+			B.SetSize(10);
+			B = A;
+			Assert::AreEqual(B.at(5), A.at(5));
+			B = B + A;
+			Assert::AreEqual(10, B.at(5));
+			B = B - A;
+			Assert::AreEqual(5, B.at(5));
 		}
 		TEST_METHOD(TestFloat)
 		{
@@ -71,7 +70,7 @@ namespace ProgramTest
 			}
 			Assert::AreEqual(13.0, A.at(4, 1));
 		}
-		TEST_METHOD(TestNode)
+		/*TEST_METHOD(TestNode)
 		{
 			Node A;
 			FloatArray *Coor;
@@ -114,7 +113,20 @@ namespace ProgramTest
 			A->Init(1, 1, 1, 1, Nodes);
 			Line B;
 			B = *A;
-			Assert::AreEqual(1, B.GetNode(2));
+			Assert::AreEqual(1, B.GetNode(2));*/
+		//}
+	};
+	TEST_CLASS(TimeTest)
+	{
+	public:
+		TEST_METHOD(TimeAdd)
+		{
+			Time coding(2, 40);
+			Time fixing(5, 55);
+			Time total;
+
+			total = fixing;
+			total.Show();
 		}
 	};
 }

@@ -1,5 +1,54 @@
 #include "Array.h"
 
+Time::Time()
+{
+	hours = minutes = 0;
+}
+
+Time::Time(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+void Time::AddMain(int m)
+{
+	minutes += m;
+	hours += minutes / 60;
+	minutes %= 60;
+}
+
+void Time::AddHr(int h)
+{
+	hours += h;
+}
+
+void Time::Reset(int h, int m)
+{
+	hours = h;
+	minutes = m;
+}
+
+Time Time ::operator+(const Time & t)const
+{
+	Time sum;
+	sum.minutes = minutes + t.minutes;
+	sum.hours = hours + t.hours + sum.minutes/60;
+	sum.minutes %= 60;
+	return sum;
+}
+Time& Time ::operator=(const Time & t)
+{
+	this->minutes = t.minutes;
+	this->hours = t.hours;
+	return *this;
+}
+
+void Time::Show() const
+{
+	cout << hours << " hours, " << minutes << " minutes"<<endl;
+}
+
 IntArray::IntArray()
 {
 	size = 0;
@@ -33,8 +82,14 @@ void IntArray::Set(int Value)
 	}
 }
 
+void IntArray::SetSize(int Size)
+{
+	size = Size;
+	Values = new int[size]();
+}
+
 // 两个向量直接叠加
-IntArray IntArray::Append(const IntArray & I)
+IntArray IntArray::Append(const IntArray & I)const
 {
 	IntArray Temp;
 	int nNew;
@@ -54,7 +109,7 @@ IntArray IntArray::Append(const IntArray & I)
 
 
 // 数组相加
-IntArray IntArray::Add(const IntArray & I)
+IntArray IntArray::Add(const IntArray & I)const
 {
 	IntArray Temp;
 	Temp.Values = new int[size]();
@@ -76,7 +131,7 @@ IntArray::IntArray(const IntArray & I)
 		Values[i] = I.Values[i];
 	}
 }
-IntArray IntArray::Copy(const IntArray & I)
+IntArray IntArray::Copy(const IntArray & I)const
 {
 	IntArray Temp;
 	Temp.size = I.size;
@@ -105,7 +160,7 @@ void IntArray::Print()
 	cout << endl;
 }
 
-IntArray &  IntArray::operator + (const IntArray & I)
+IntArray  IntArray::operator + (const IntArray & I)const
 {
 	IntArray T;
 	T.size = I.size;
@@ -118,16 +173,15 @@ IntArray &  IntArray::operator + (const IntArray & I)
 }
 IntArray & IntArray::operator = (const IntArray & I)
 {
-	IntArray T;
-	T.size =  I.size;
-	T.Values = new int[T.size];
-	for (int i = 0; i < T.size; i++)
+	size =  I.size;
+	Values = new int[size];
+	for (int i = 0; i < size; i++)
 	{
-		T.Values[i] = I.Values[i];
+		Values[i] = I.Values[i];
 	}
-	return T;
+	return *this;
 }
-IntArray & IntArray::operator - (const IntArray & I)
+IntArray IntArray::operator - (const IntArray & I)const
 {
 	IntArray T;
 	T.size = I.size;
@@ -277,7 +331,7 @@ FloatArray::FloatArray(const FloatArray & F)
 	}
 }
 
-FloatArray & FloatArray::operator + (const FloatArray & I)
+FloatArray & FloatArray::operator + (const FloatArray & I)const
 {
 	FloatArray T;
 	T.size = I.size;
@@ -288,7 +342,7 @@ FloatArray & FloatArray::operator + (const FloatArray & I)
 	}
 	return T;
 }
-FloatArray & FloatArray::operator = (const FloatArray & I)
+FloatArray & FloatArray::operator = (const FloatArray & I)const
 {
 	FloatArray T;
 	T.size = I.size;
@@ -299,7 +353,7 @@ FloatArray & FloatArray::operator = (const FloatArray & I)
 	}
 	return T;
 }
-FloatArray & FloatArray::operator - (const FloatArray & I)
+FloatArray & FloatArray::operator - (const FloatArray & I)const
 {
 	FloatArray T;
 	return T;
@@ -363,7 +417,7 @@ int & IntMatrix::at(int i, int j)
 {
 	return Values[i*n + j];
 }
-IntMatrix & IntMatrix::operator + (const IntMatrix & I)
+IntMatrix & IntMatrix::operator + (const IntMatrix & I)const
 {
 	IntMatrix T;
 	T.m = m;
@@ -373,12 +427,12 @@ IntMatrix & IntMatrix::operator + (const IntMatrix & I)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			T.at(i, j) = this->at(i, j) + I.Values[i*n+j];
+			T.at(i, j) = Values[i*n + j] + I.Values[i*n + j];
 		}
 	}
 	return T;
 }
-IntMatrix & IntMatrix::operator=(const IntMatrix & I)
+IntMatrix & IntMatrix::operator=(const IntMatrix & I)const
 {
 	IntMatrix T;
 	T.m = m;
@@ -393,7 +447,7 @@ IntMatrix & IntMatrix::operator=(const IntMatrix & I)
 	}
 	return T;
 }
-IntMatrix & IntMatrix::operator-(const IntMatrix & I)
+IntMatrix & IntMatrix::operator-(const IntMatrix & I)const
 {
 	IntMatrix T;
 	T.m = m;
@@ -403,7 +457,7 @@ IntMatrix & IntMatrix::operator-(const IntMatrix & I)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			T.at(i, j) = this->at(i, j) - I.Values[i*n + j];
+			T.at(i, j) = Values[i*n + j] - I.Values[i*n + j];
 		}
 	}
 	return T;
@@ -430,27 +484,27 @@ double & FloatMatrix::at(int i, int j)
 
 
 // 转置
-FloatMatrix FloatMatrix::Trans()
+FloatMatrix FloatMatrix::Trans()const
 {
 	FloatMatrix Temp(n,m);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(j, i) = this->at(i, j);
+			Temp.at(j, i) = Values[i*n + j];
 		}
 	}
 	return Temp;
 }
 
-FloatMatrix FloatMatrix::Mult(double &D)
+FloatMatrix FloatMatrix::Mult(double &D)const
 {
 	FloatMatrix Temp(m,n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i,j) = this->at(i, j)*D;
+			Temp.at(i, j) = Values[i*n + j]*D;
 		}
 	}
 	return Temp;
@@ -470,7 +524,7 @@ FloatArray FloatMatrix::Mult(FloatArray & F)
 }
 
  // 乘以矩阵
-FloatMatrix FloatMatrix::Mult( FloatMatrix & F)
+FloatMatrix FloatMatrix::Mult( FloatMatrix & F)const
 {
 	FloatMatrix Temp(m, F.n);
 	for (int i = 0; i < m; i++)
@@ -479,7 +533,7 @@ FloatMatrix FloatMatrix::Mult( FloatMatrix & F)
 		{
 			for (int k = 0; k < n; k++)
 			{
-				Temp.at(i, j) += this->at(i, k)*F.at(k,j);
+				Temp.at(i, j) += Values[i*n + j] * F.at(k, j);
 			}			
 		}
 	}
@@ -608,7 +662,7 @@ FloatMatrix FloatMatrix::Inverse()
 }
 
 
-FloatMatrix & FloatMatrix::operator + (const FloatMatrix & I)
+FloatMatrix & FloatMatrix::operator + (const FloatMatrix & I)const
 {
 	FloatMatrix T;
 	T.m = m;
@@ -618,12 +672,12 @@ FloatMatrix & FloatMatrix::operator + (const FloatMatrix & I)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			T.at(i, j) = this->at(i, j) + I.Values[i*n + j];
+			T.at(i, j) = Values[i*n + j] + I.Values[i*n + j];
 		}
 	}
 	return T;
 }
-FloatMatrix & FloatMatrix::operator = (const FloatMatrix & I)
+FloatMatrix  FloatMatrix::operator = (const FloatMatrix & I)const
 {
 	FloatMatrix T;
 	T.m = m;
@@ -638,7 +692,7 @@ FloatMatrix & FloatMatrix::operator = (const FloatMatrix & I)
 	}
 	return T;
 }
-FloatMatrix &  FloatMatrix::operator - (const FloatMatrix & I)
+FloatMatrix & FloatMatrix::operator - (const FloatMatrix & I) const
 {
 	FloatMatrix T;
 	T.m = m;
@@ -648,7 +702,7 @@ FloatMatrix &  FloatMatrix::operator - (const FloatMatrix & I)
 	{
 		for (int j = 0; j < n; j++)
 		{
-			T.at(i, j) = this->at(i, j) - I.Values[i*n + j];
+			T.at(i, j) = Values[i*n + j] - I.Values[i*n + j];
 		}
 	}
 	return T;

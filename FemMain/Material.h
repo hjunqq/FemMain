@@ -7,7 +7,7 @@ class Material
 public:
 	Material();
 	virtual ~Material();
-	Material(const Material *Mat);
+	Material(const Material & Mat);
 protected:
 	int Index;
 	int type;

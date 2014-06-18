@@ -24,37 +24,35 @@ void Element::Init(int nNodes, int Material, int Index, int Group,int Dof, IntAr
 	this->Index = Index;
 	this->group = Group;
 	this->Dof = Dof;
-	this->Nodes = new IntArray(*Node);
-	this->DegreeOfFreedom = NULL;
-	this->Stiff = NULL;
+	this->Nodes = *Node;
 }
 
-FloatMatrix *Element::ComputeJacobi(GaussPoint *B)
+FloatMatrix Element::ComputeJacobi(GaussPoint *B)
 {
-	return NULL;
+	return Jacobi;
 }
 
-FloatMatrix *Element::ComputeStiff()
+FloatMatrix Element::ComputeStiff()
 {
-	return NULL;
+	return Stiff;
 }
 
-FloatMatrix *Element::ComputeConstitutiveMatrix()
+FloatMatrix Element::ComputeConstitutiveMatrix()
 {
-	return NULL;
+	return ConstitutiveMatrix;
 }
 
 // 计算高斯点应变
-FloatArray * Element::ComputeStrain(GaussPoint * B)
+FloatArray  Element::ComputeStrain(GaussPoint * B)
 {
-	return NULL;
+	return Strain;
 }
 
 
 // 计算B矩阵
-FloatMatrix * Element::ComputeBMarix(GaussPoint * B)
+FloatMatrix  Element::ComputeBMarix(GaussPoint * B)
 {
-	return NULL;
+	return BMatrix;
 }
 
 
@@ -73,7 +71,7 @@ int Element::GetnNode()
 
 
 // 获得单元节点
-IntArray * Element::GetNodeArray()
+IntArray  Element::GetNodeArray()
 {
 	return Nodes;
 }
@@ -81,7 +79,7 @@ IntArray * Element::GetNodeArray()
 // 获得单元节点
 int Element::GetNode(int i)
 {
-	return Nodes->at(i);
+	return Nodes.at(i);
 }
 
 
@@ -105,32 +103,24 @@ int Element::GetMaterial()
 	return mat;
 }
 
-void Element::SetMaterial(Material *Mat)
+void Element::SetMaterial(Material & Mat)
 {
-	this->Mat =new Material( *Mat);
+	this->Mat =Mat;
 }
 
-void Element::SetCoor(FloatMatrix *Coor)
+void Element::SetCoor(FloatMatrix &Coor)
 {
-	this->Coors = new FloatMatrix(*Coor);
+	this->Coors= Coor;
 }
 
-void Element::SetResult(FloatArray *Result)
+void Element::SetResult(FloatArray & Result)
 {
-	if (Displacement == NULL)
-	{
-		Displacement = new FloatArray(Dof);
-	}
-	else
-	{
-		Displacement->Clear();
-	}
 	for (int iDof = 0; iDof < Dof; iDof++)
 	{
-		int DofIdx = DegreeOfFreedom->at(iDof);
+		int DofIdx = DegreeOfFreedom.at(iDof);
 		if (DofIdx != 0)
 		{
-			Displacement->at(iDof - 1) = Result->at(DofIdx - 1);
+			Displacement.at(iDof - 1) = Result.at(DofIdx - 1);
 		}
 	}
 }
@@ -144,30 +134,30 @@ int Element::GetIndex()
 	return Index;
 }
 
-void Element::FillDof(IntArray * DegreeOfFreedom)
+void Element::FillDof(IntArray & DegreeOfFreedom)
 {
 	int Node;
-	this->DegreeOfFreedom = new IntArray(nNodes*Dof);
+	this->DegreeOfFreedom.SetSize(nNodes*Dof);
 	for (int inode = 0; inode < nNodes; inode++)
 	{
-		Node = Nodes->at(inode);
+		Node = Nodes.at(inode);
 		for (int idof = 0; idof < Dof; idof++)
 		{
-			this->DegreeOfFreedom->at(inode*Dof + idof) = DegreeOfFreedom->at(Node*Dof + idof);
+			this->DegreeOfFreedom.at(inode*Dof + idof) = DegreeOfFreedom.at(Node*Dof + idof);
 		}
 	}
 }
 
-IntArray *Element::GetDof()
+IntArray Element::GetDof()
 {
 	return DegreeOfFreedom;
 }
 
-FloatMatrix *Element::GetStiff()
+FloatMatrix Element::GetStiff()
 {
 	return Stiff;
 }
-FloatArray *Element::GetShape()
+FloatArray Element::GetShape()
 {
 	return Shape;
 }
@@ -212,14 +202,13 @@ double Node::GetCoordinate(int i)
 
 Node & Node::operator=(const Node & N)
 {
-	Node T;
-	T.Index = N.Index;
-	T.Coordinates = N.Coordinates;
-	T.Displacement = N.Displacement;
-	T.Stress = N.Stress;
-	T.Strain = N.Strain;
-	T.PrincipleStrain = N.PrincipleStrain;
-	return T;
+	Index = N.Index;
+	Coordinates = N.Coordinates;
+	Displacement = N.Displacement;
+	Stress = N.Stress;
+	Strain = N.Strain;
+	PrincipleStrain = N.PrincipleStrain;
+	return *this;
 }
 
 // 获得节点坐标
@@ -398,6 +387,7 @@ FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
 	//InvJacobi->Print();
 
 	DShapeX = &InvJacobi->Mult(*DShape);
+	DShapeX = DShapeX;
 	DShapeX->Print();
 	return NULL;
 }
@@ -435,7 +425,7 @@ FloatMatrix * Quadr::ComputeStiff()
 	GaussPoint *B = new GaussPoint;
 	DMatrix = new FloatMatrix(3, 3);
 	FloatMatrix *G = new FloatMatrix(2, 2);
-	FloatMatrix *BT=new FloatMatrix(3, 2);
+	FloatMatrix BT(3, 2);
 	FloatMatrix *DT = new FloatMatrix(3, 3);
 	Stiff = new FloatMatrix(8, 8);
 	double W1,W2;
@@ -455,9 +445,9 @@ FloatMatrix * Quadr::ComputeStiff()
 					B->Init(0, GaussCoor);
 					ComputeJacobi(B);
 					BMatrix = ComputeBMarix(inode);
-					BT = &BMatrix->Trans();
-					BT->Print(); 
-					DT = &BT->Mult(*DMatrix);
+					BT=BMatrix->Trans();
+					BT.Print(); 
+					DT = &BT.Mult(*DMatrix);
 					DT->Print();
 					BMatrix = ComputeBMarix(jnode);
 					G = &DT->Mult(*BMatrix);

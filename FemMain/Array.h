@@ -6,7 +6,21 @@
 
 
 using namespace std;
-
+class Time
+{
+private:
+	int hours;
+	int minutes;
+public:
+	Time();
+	Time(int h, int m = 0);
+	void AddMain(int m);
+	void AddHr(int h);
+	void Reset(int h = 0, int m = 0);
+	Time operator+(const Time &t)const;
+	Time& operator=(const Time &t);
+	void Show() const;
+};
 class IntArray
 {
 public:
@@ -21,21 +35,22 @@ public:
 	// 返回第i个函数值	
 	int & at(int i);
 	// 两个向量直接叠加
-	IntArray Append(const IntArray & I);
+	IntArray Append(const IntArray & I)const;
 	// 数组相加
-	IntArray Add(const IntArray & I);
+	IntArray Add(const IntArray & I)const;
 	// 数组复制
-	IntArray Copy(const IntArray & I);
+	IntArray Copy(const IntArray & I)const;
 	IntArray(const IntArray & I);
 	// 获取数组大小
 	int GetSize();
 	// 打印变量内容
 	void Print();
 	void Set(int Value);
+	void SetSize(int Size);
 
-	IntArray & operator+(const IntArray & I);
+	IntArray operator+(const IntArray & I)const;
 	IntArray & operator=(const IntArray & I);
-	IntArray & operator-(const IntArray & I);
+	IntArray operator-(const IntArray & I)const;
 };
 
 class FloatArray
@@ -63,16 +78,16 @@ public:
 	// 清空
 	int Clear();
 	// 数组相加
-	FloatArray Plus(const FloatArray & F);
+	FloatArray Plus(const FloatArray & F)const;
 	// 数组相减
-	FloatArray Minus(const FloatArray & F );
+	FloatArray Minus(const FloatArray & F )const;
 	// 数组复制
-	FloatArray Copy(const FloatArray & F);
+	FloatArray Copy(const FloatArray & F)const;
 	FloatArray(const FloatArray & F);
-
-	FloatArray & operator+(const FloatArray & I);
+	void SetSize(int Size);
+	FloatArray  operator+(const FloatArray & I)const;
 	FloatArray & operator=(const FloatArray & I);
-	FloatArray & operator-(const FloatArray & I);
+	FloatArray  operator-(const FloatArray & I)const;
 };
 
 class FloatMatrix
@@ -92,27 +107,27 @@ public:
 	// 返回第m行n列的值
 	double & at(int i, int j);
 	// 转置
-	FloatMatrix Trans();
+	FloatMatrix Trans() const;
 	// 乘以数组
-	FloatArray Mult(FloatArray & F );
-	FloatMatrix Mult(double &D);
+	FloatArray Mult(FloatArray & F )const;
+	FloatMatrix Mult(double &D)const;
 	// 乘以矩阵
-	FloatMatrix Mult( FloatMatrix & F );
+	FloatMatrix Mult( FloatMatrix & F )const;
 	// 矩阵相加
-	FloatMatrix Plus(FloatMatrix & F);
+	FloatMatrix Plus(FloatMatrix & F)const;
 	// 矩阵相减
-	FloatMatrix Minus(FloatMatrix & F );
-	FloatMatrix Copy(FloatMatrix & F);
-	
+	FloatMatrix Minus(FloatMatrix & F )const;
+	FloatMatrix Copy(FloatMatrix & F)const;
+	void SetSize(int m, int n);
 	double Determinant();
 
 	FloatMatrix Inverse();
 
 	void Print();
 
-	FloatMatrix & operator+(const FloatMatrix & I);
-	FloatMatrix & operator=(const FloatMatrix & I);
-	FloatMatrix & operator-(const FloatMatrix & I);
+	FloatMatrix  operator+(const FloatMatrix & I)const;
+	FloatMatrix  & operator=(const FloatMatrix & I);
+	FloatMatrix  operator-(const FloatMatrix & I)const;
 };
 
 class IntMatrix
@@ -131,9 +146,9 @@ public:
 	// 返回第m行n列元素
 	int & at(int i, int j);
 
-	IntMatrix & operator+(const IntMatrix & I);
+	IntMatrix  operator+(const IntMatrix & I)const;
 	IntMatrix & operator=(const IntMatrix & I);
-	IntMatrix & operator-(const IntMatrix & I);
+	IntMatrix  operator-(const IntMatrix & I)const;
 
 };
  // Compressed Sparse Row Storage Format
@@ -157,8 +172,8 @@ public:
 	// 返回i行j列的值
 	double & at(int i, int j);
 	// 矩阵转置
-	CSRMatrix Trans(CSRMatrix & C);
-	CSRMatrix Copy(CSRMatrix & C);
+	CSRMatrix Trans(CSRMatrix & C)const;
+	CSRMatrix Copy(CSRMatrix & C)const;
 	int GetRows();
 	int GetCols();
 	int GetNonZero();
