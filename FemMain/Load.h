@@ -51,15 +51,15 @@ public:
 private:
 	int Index;
 	int nGroup;
-	IntArray *group;
+	IntArray group;
 	int Dir;
 	double Value;
 public:
-	void Init(int Index,int nGroup, IntArray * group, double Value, int Dir);
+	void Init(int Index,int nGroup, IntArray & group, double Value, int Dir);
 	int GetnGroup();
 	int GetDir();
 	double GetValue();
-	IntArray *GetGroup();
+	IntArray GetGroup();
 };
 
 class Concentrate :
@@ -69,14 +69,14 @@ public:
 	Concentrate();
 	virtual ~Concentrate();
 private:
-	IntArray *Nodes;
+	IntArray Nodes;
 	int nNode;
-	FloatArray *Values;
+	FloatArray Values;
 	int Dir;
 public:
-	void Init(int Index,int nNode, IntArray * Nodes, FloatArray * Values, int Dir);
+	void Init(int Index,int nNode, IntArray & Nodes, FloatArray & Values, int Dir);
 	int GetnNode();
 	int GetDir();
-	IntArray *GetNodes();
-	FloatArray *GetValues();
+	IntArray GetNodes();
+	FloatArray GetValues();
 };

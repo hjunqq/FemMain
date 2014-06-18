@@ -24,12 +24,12 @@ Fixed::~Fixed()
 }
 
 
-void Fixed::Init(int Index, int nNode, IntArray * Node, int Dir)
+void Fixed::Init(int Index, int nNode, IntArray & Node, int Dir)
 {
 	this->Index = Index;
 	this->nNode = nNode;
 	this->Dir = Dir;
-	this->Node = new IntArray(*Node);
+	this->Node = Node;
 }
 
 
@@ -39,12 +39,12 @@ Displace::Displace()
 	Dir = 0;
 }
 
-void Displace::Init(int nNode, int Dir, IntArray *Node, FloatArray *Values)
+void Displace::Init(int nNode, int Dir, IntArray &Node, FloatArray &Values)
 {
 	this->nNode = nNode;
 	this->Dir = Dir;
-	this->Node = new IntArray(*Node);
-	this->Values = new FloatArray(*Values);
+	this->Node =Node;
+	this->Values =Values;
 }
 
 
@@ -58,12 +58,12 @@ Interact::Interact()
 	AdjDomain = 0;
 }
 
-void Interact::Init(int nNode, int AdjDomain, IntArray *Local, IntArray *Remote)
+void Interact::Init(int nNode, int AdjDomain, IntArray &Local, IntArray &Remote)
 {
 	this->nNode = nNode;
 	this->AdjDomain = AdjDomain;
-	this->Local = new IntArray(*Local);
-	this->Remote = new IntArray(*Remote);
+	this->Local = Local;
+	this->Remote = Remote;
 }
 
 Interact::~Interact()
@@ -75,7 +75,7 @@ Interact::~Interact()
 // 获得第i个元素
 int Fixed::at(int i)
 {
-	return Node->at(i);
+	return Node.at(i);
 }
 
 
@@ -99,13 +99,13 @@ int Displace::GetnNode()
 
 int Displace::at(int i)
 {
-	return Node->at(i);
+	return Node.at(i);
 }
 
 
 double Displace::atValue(int i)
 {
-	return Values->at(i);
+	return Values.at(i);
 }
 
 
@@ -127,13 +127,13 @@ int Interact::GetAdj()
 }
 
 
-IntArray * Interact::GetLocal()
+IntArray  Interact::GetLocal()
 {
 	return Local;
 }
 
 
-IntArray * Interact::GetRemote()
+IntArray  Interact::GetRemote()
 {
 	return Remote;
 }

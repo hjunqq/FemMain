@@ -10,7 +10,7 @@ namespace ProgramTest
 	{
 	public:
 		
-		TEST_METHOD(TestArray)
+		TEST_METHOD(TestIntArray)
 		{
 			// TODO:  在此输入测试代码
 			IntArray A(10);
@@ -27,19 +27,22 @@ namespace ProgramTest
 			B = B - A;
 			Assert::AreEqual(5, B.at(5));
 		}
-		TEST_METHOD(TestFloat)
+		TEST_METHOD(TestFloatArray)
 		{
 			FloatArray A(10);
 			for (int i = 0; i < 10; i++)
 			{
 				A.at(i) = i;
 			}
+			A = A.Times(2);
+			Assert::AreEqual(2.0, A.at(1));
+			double sum = A.Dot(&A);
 			FloatMatrix B(10, 10);
 			for (int i = 0; i < 10; i++)
 			{
 				for (int j = 0; j < 10; j++)
 				{
-					B.at(i, j) = i + j;
+					B.at(i, j) = i*10 + j;
 				}
 			}
 			B = B.Trans();

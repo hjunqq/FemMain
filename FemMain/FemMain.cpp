@@ -135,7 +135,7 @@ void FemMain::ReadFiles()
 		{
 			stream >> Coors->at(idim);
 		}
-		Nodes[inode].Init(Idx, Coors);
+		Nodes[inode].Init(Idx, *Coors);
 	}
 	for (int inode = 0; inode < nNode; inode++)
 	{
@@ -264,7 +264,7 @@ void FemMain::ReadFiles()
 			stream >> group->at(igroup);
 			group->at(igroup)--;
 		}
-		Vols[ivol].Init(ivol, nGroup, group, Acc, Dir);
+		Vols[ivol].Init(ivol, nGroup, *group, Acc, Dir);
 	}
 	for (int icon = 0; icon < nConcentrate; icon++)
 	{
@@ -300,7 +300,7 @@ void FemMain::ReadFiles()
 			stream >> Node->at(inode);
 			Node->at(inode)--;
 		}
-		Cons[icon].Init(icon, nNode, Node, Value, Dir);
+		Cons[icon].Init(icon, nNode,* Node, *Value, Dir);
 	}
 
 	
@@ -334,7 +334,7 @@ void FemMain::ReadFiles()
 			stream >> Nodes->at(inode);
 			Nodes->at(inode)--;
 		}
-		Fix[ifix].Init(ifix, nNode, Nodes, Dir);
+		Fix[ifix].Init(ifix, nNode,* Nodes, Dir);
 	}
 	for (int idisp = 0; idisp < nDisp; idisp++)
 	{
@@ -366,7 +366,7 @@ void FemMain::ReadFiles()
 			stream >> Node->at(inode);
 			Node->at(inode)--;
 		}
-		Disp[idisp].Init(nNode, Dir, Node, Value);
+		Disp[idisp].Init(nNode, Dir, *Node, *Value);
 	}
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
@@ -398,7 +398,7 @@ void FemMain::ReadFiles()
 			stream >> Remote->at(inode);
 			Remote->at(inode)--;
 		}
-		Inters[iinter].Init(nNode, AdjDomain, Local, Remote);
+		Inters[iinter].Init(nNode, AdjDomain,* Local,* Remote);
 	}
 
 	glb.close();
@@ -444,20 +444,19 @@ void FemMain::GIDOutMesh()
 		GiD_BeginElements();
 		if (type == 4)
 		{
-			Quadr *Elems;
-			IntArray *Nodes;
-			Elems = new Quadr[nEle];
-			Nodes = new IntArray();
+			Quadr **Elems;
+			IntArray Nodes;
+			Elems = new Quadr*[nEle];
 			nid = new int[type];
-			Elems = Groups[igroup].GetElement(*Elems);
+			Elems = Groups[igroup].GetElement(**Elems);
 			for (int iele = 0; iele < nEle; iele++)
 			{
-				Nodes = Elems[iele].GetNodeArray();
+				Nodes = Elems[iele]->GetNodeArray();
 				for (int inode = 0; inode < type; inode++)
 				{
-					nid[inode] = Nodes->at(inode)+1;
+					nid[inode] = Nodes.at(inode)+1;
 				}
-				GiD_WriteElement(Elems[iele].GetIndex(), nid);
+				GiD_WriteElement(Elems[iele]->GetIndex(), nid);
 			}
 		}
 		
@@ -496,7 +495,7 @@ void FemMain::ComputeDOF()
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
 		int nInterNode = Inters[iinter].GetnNode();
-		IntArray Local(*Inters[iinter].GetLocal());
+		IntArray Local(Inters[iinter].GetLocal());
 		int InterNode;
 		for (int inode = 0; inode < nInterNode; inode++)
 		{
@@ -523,12 +522,12 @@ void FemMain::ComputeDOF()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
-			Elems = Groups[igroup].GetElement(*Elems);
+			Quadr **Elems;
+			Elems = new Quadr*[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				Elems[ielem].FillDof(DegreeOfFreedom);
+				Elems[ielem]->FillDof(*DegreeOfFreedom);
 			}
 		}
 	}
@@ -559,13 +558,13 @@ void FemMain::InitSolve()
 		int Dof = Groups[igroup].GetDof();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr **Elems;
+			Elems = new Quadr*[nEle];
 			EDof = new IntArray(Type*Dof);
-			Elems = Groups[igroup].GetElement(*Elems);
+			Elems = Groups[igroup].GetElement(**Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				EDof=Elems[ielem].GetDof();
+				*EDof=Elems[ielem]->GetDof();
 				for (int iDof = 0; iDof < Type*Dof; iDof++)
 				{
 					if (EDof->at(iDof) !=0 )
@@ -623,28 +622,27 @@ void FemMain::ComputeElementStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			IntArray *ENode;
+			Quadr **Elems;
+			IntArray ENode(Type);
 			FloatMatrix *Coor;
 			Material *Mat;
-			Elems = new Quadr[nEle];
-			ENode = new IntArray(Type);
+			Elems = new Quadr*[nEle];
 			Coor = new FloatMatrix (Type,nDim);
 			Mat = new Material(Mats[Groups[igroup].GetMaterial()]);
-			Elems = Groups[igroup].GetElement(*Elems);
+			Elems = Groups[igroup].GetElement(**Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				ENode = Elems[ielem].GetNodeArray();
-				Elems[ielem].SetMaterial(Mat);
+				ENode = Elems[ielem]->GetNodeArray();
+				Elems[ielem]->SetMaterial(*Mat);
 				for (int inode = 0; inode < Type; inode++)
 				{
 					for (int idim = 0; idim < nDim; idim++)
 					{
-						Coor->at(inode, idim) = Nodes[ENode->at(inode)].GetCoordinate().at(idim);
+						Coor->at(inode, idim) = Nodes[ENode.at(inode)].GetCoordinate().at(idim);
 					}
 				}
-				Elems[ielem].SetCoor(Coor);
-				Elems[ielem].ComputeStiff();
+				Elems[ielem]->SetCoor(*Coor);
+				Elems[ielem]->ComputeStiff();
 			}
 		}
 	}
@@ -653,8 +651,7 @@ void FemMain::ComputeElementStiff()
 void FemMain::AssembleStiff()
 {
 	Stiff = new FloatMatrix(TotalDOF, TotalDOF);
-	FloatMatrix *EStiff;
-	IntArray *Dof;
+	
 	int iedof, jedof;
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
@@ -662,24 +659,24 @@ void FemMain::AssembleStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			EStiff = new FloatMatrix(Type*nDof, Type*nDof);
-			Elems = new Quadr[nEle];
-			Elems = Groups[igroup].GetElement(*Elems);
-			Dof = new IntArray(Type*nDof);
+			Quadr **Elems;
+			FloatMatrix EStiff(Type*nDof, Type*nDof);
+			Elems = new Quadr*[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
+			IntArray Dof(Type*nDof);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				Dof = Elems[ielem].GetDof();
-				EStiff = Elems[ielem].GetStiff();
+				Dof = Elems[ielem]->GetDof();
+				EStiff = Elems[ielem]->GetStiff();
 				for (int idof = 0; idof < Type*nDof; idof++)
 				{
-					iedof = Dof->at(idof);
+					iedof = Dof.at(idof);
 					for (int jdof = 0; jdof < Type*nDof; jdof++)
 					{
-						jedof = Dof->at(jdof);
+						jedof = Dof.at(jdof);
 						if (iedof != 0 && jedof != 0)
 						{
-							Stiff->at(iedof - 1, jedof - 1) = EStiff->at(idof, jdof);
+							Stiff->at(iedof - 1, jedof - 1) = EStiff.at(idof, jdof);
 						}
 					}
 				}
@@ -733,7 +730,7 @@ void FemMain::ApplyLoad()
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				ELoad->Clear();
-				ENode = Lines[ielem].GetNodeArray();
+				*ENode = Lines[ielem].GetNodeArray();
 				Coor = new FloatMatrix(Type, nDim);
 				for (int inode = 0; inode < Type; inode++)
 				{
@@ -779,19 +776,17 @@ void FemMain::ApplyLoad()
 	for (int iCon = 0; iCon < nConcentrate; iCon++)
 	{
 		int nNode,Dir;
-		FloatArray *Values;
-		IntArray *Nodes;
 		nNode = Cons[iCon].GetnNode();
-		Values=new FloatArray(nNode);
-		Nodes = new IntArray(nNode);
+		FloatArray Values(nNode);
+		IntArray Nodes(nNode);
 		Values = Cons[iCon].GetValues();
 		Nodes = Cons[iCon].GetNodes();
 		Dir = Cons[iCon].GetDir();
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			if (DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) != 0)
+			if (DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) != 0)
 			{
-				ExternalForce->at(DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir)-1) += Values->at(inode);
+				ExternalForce->at(DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir)-1) += Values.at(inode);
 			}
 		}
 	}
@@ -800,35 +795,34 @@ void FemMain::ApplyLoad()
 		int nBodyGroup, Dir,Type,nEle;
 		int GroupIdx, iMat;
 		double Density;
-		IntArray *VolGroups,*Nodes;
-		Quadr *Elems;
-		FloatArray *NLoad, *Shape, *TLoad;
+		Quadr **Elems;
 		double Value;
 		nBodyGroup = Vols[iVol].GetnGroup();
 		Dir = Vols[iVol].GetDir();
-		VolGroups = Vols[iVol].GetGroup();
+		IntArray VolGroups(nBodyGroup);
+		VolGroups= Vols[iVol].GetGroup();
 		Value = Vols[iVol].GetValue();
 		for (int igroup = 0; igroup < nBodyGroup; igroup++)
 		{
 			
-			GroupIdx = VolGroups->at(igroup);
+			GroupIdx = VolGroups.at(igroup);
 			nEle = Groups[GroupIdx].GetnElements();
 			Type = Groups[GroupIdx].GetType();
 			iMat = Groups[GroupIdx].GetMaterial();
 			Density = Mats[iMat].GetDensity();
 			if (Type == 4)
 			{
-				Elems = new Quadr[nEle];
-				Elems = Groups[GroupIdx].GetElement(*Elems);
+				Elems = new Quadr*[nEle];
+				Elems = Groups[GroupIdx].GetElement(**Elems);
 				FloatArray *Eload = new FloatArray(2);
 				FloatArray GaussT(2);
-				Shape = new FloatArray(Type);
-				TLoad = new FloatArray(Type);
-				Nodes = new IntArray(Type);
+				FloatArray Shape(Type);
+				FloatArray TLoad(Type);
+				IntArray Nodes(Type);
 				for (int ielem = 0; ielem < nEle; ielem++)
 				{
-					TLoad->Clear();
-					Nodes = Elems[ielem].GetNodeArray();
+					TLoad.Clear();
+					Nodes = Elems[ielem]->GetNodeArray();
 					for (int iksi = 0; iksi < 3; iksi++)
 					{
 						double ksi = Gauss3[iksi];
@@ -841,21 +835,21 @@ void FemMain::ApplyLoad()
 							GaussT.at(2) = eta;
 							GaussPoint B;
 							double Det;
-							B.Init(0, &GaussT);
-							Elems[ielem].ComputeJacobi(&B);
-							Shape = Elems[ielem].GetShape();
-							Det = Elems[ielem].GetDet();
+							B.Init(0, GaussT);
+							Elems[ielem]->ComputeJacobi(B);
+							Shape = Elems[ielem]->GetShape();
+							Det = Elems[ielem]->GetDet();
 							for (int inode = 0; inode < Type; inode++)
 							{
-								TLoad->at(inode) += Shape->at(inode)*Density*Value*Det*W1*W2;
+								TLoad.at(inode) += Shape.at(inode)*Density*Value*Det*W1*W2;
 							}
 						}
 					}
 					for (int inode = 0; inode < Type; inode++)
 					{
-						if (DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) != 0)
+						if (DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) != 0)
 						{
-							ExternalForce->at(DegreeOfFreedom->at(Nodes->at(inode)*nDof + Dir) - 1) += TLoad->at(inode);
+							ExternalForce->at(DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) - 1) += TLoad.at(inode);
 						}
 					}
 				}
@@ -881,12 +875,12 @@ bool FemMain::ConvergeCheck()
 		nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elem;
-			Elem = new Quadr[nEle];
-			Elem = Groups[igroup].GetElement(*Elem);
+			Quadr **Elem;
+			Elem = new Quadr*[nEle];
+			Elem = Groups[igroup].GetElement(**Elem);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				Elem[ielem].SetResult(ResultZero);
+				Elem[ielem]->SetResult(*ResultZero);
 			}
 		}
 	}

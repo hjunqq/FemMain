@@ -1,8 +1,14 @@
 #pragma once
-#pragma comment(lib,"zlib.lib")
-#pragma comment(lib,"hdf5.lib")
-#pragma comment(lib,"gidpost.lib")
 #pragma comment(linker,"/NODEFAULTLIB:libcmt.lib")
+#ifdef WIN32
+#pragma comment(lib,"GidLib\\x32\\zlib.lib")
+#pragma comment(lib,"GidLib\\x32\\hdf5.lib")
+#pragma comment(lib,"GidLib\\x32\\gidpost.lib")
+#else
+#pragma comment(lib,"GidLib\x64\zlib.lib")
+#pragma comment(lib,"GidLib\x64\hdf5.lib")
+#pragma comment(lib,"GidLib\x64\gidpost.lib")
+#endif
 #include "Array.h"
 #include "Model.h"
 #include "Load.h"

@@ -177,12 +177,12 @@ Node::~Node()
 
 
 // 节点初始化
-void Node::Init(int Index, FloatArray * Coordinate)
+void Node::Init(int Index, FloatArray & Coordinate)
 {
 	this->Index = Index;
 	int size;
-	size = Coordinate->GetSize();
-	Coordinates = new FloatArray(*Coordinate);
+	size = Coordinate.GetSize();
+	Coordinates = Coordinate;
 }
 
 
@@ -190,14 +190,14 @@ void Node::Init(int Index, FloatArray * Coordinate)
 void Node::Print()
 {
 	cout << "Node " << Index ;
-	Coordinates->Print();
+	Coordinates.Print();
 }
 
 
 // 获得节点坐标
 double Node::GetCoordinate(int i)
 {
-	return Coordinates->at(i);
+	return Coordinates.at(i);
 }
 
 Node & Node::operator=(const Node & N)
@@ -212,40 +212,40 @@ Node & Node::operator=(const Node & N)
 }
 
 // 获得节点坐标
-FloatArray & Node::GetCoordinate()
+FloatArray Node::GetCoordinate()
 {
-	return *Coordinates;
+	return Coordinates;
 }
 
 
 // 获得位移
-FloatArray & Node::GetDisplacement()
+FloatArray Node::GetDisplacement()
 {
-	return *Displacement;
+	return Displacement;
 	//TODO: insert return statement here
 }
 
 
 // 获得主应力
-FloatArray & Node::GetPriStess()
+FloatArray Node::GetPriStess()
 {
-	return *PrincipleStrain;
+	return PrincipleStrain;
 	//TODO: insert return statement here
 }
 
 
 // 获得应力
-FloatMatrix & Node::GetStress()
+FloatMatrix Node::GetStress()
 {
-	return *Stress;
+	return Stress;
 	//TODO: insert return statement here
 }
 
 
 // 获得应变
-FloatMatrix & Node::GetStrain()
+FloatMatrix Node::GetStrain()
 {
-	return *Strain;
+	return Strain;
 	//TODO: insert return statement here
 }
 
@@ -303,9 +303,9 @@ void Group::FillElement(Quadr *Q)
 }
 
 // 获取第i个单元
-Quadr * Group::GetElement(Quadr & )
+Quadr ** Group::GetElement(Quadr & )
 {
-	return *Quadrs;
+	return Quadrs;
 }
 
 
@@ -335,7 +335,7 @@ int Group::GetMaterial()
 
 
 // 设置是否出现
-bool & Group::IsAppear()
+bool Group::IsAppear()
 {
 	return Appear;
 	//TODO: insert return statement here
@@ -346,88 +346,81 @@ Quadr::Quadr()
 {
 	this->type = Quadrilateral;
 	this->nNodes = 4;
-	this->Nodes = new IntArray(4);
-	Shape = new FloatArray(4);
-	DShape = new FloatMatrix(2, 4);
-	Jacobi = new FloatMatrix(2, 2);
-	DShapeX = new FloatMatrix(2, 4);
-	BMatrix = new FloatMatrix(3, 2);
+	this->Nodes.SetSize(4);
+	Shape.SetSize(4);
+	DShape.SetSize(2, 4);
+	Jacobi.SetSize(2, 2);
+	DShapeX.SetSize(2, 4);
+	BMatrix.SetSize(3, 2);
+	DMatrix.SetSize(3, 3);
+	Stiff.SetSize(8, 8);
 }
 
-FloatMatrix * Quadr::ComputeJacobi(GaussPoint * B)
+FloatMatrix Quadr::ComputeJacobi(GaussPoint & B)
 {
-	if (this->Coors == NULL)
-	{
-		cout << "No Coordiantes" << endl;
-	}
 	double ksi, eta;
-	ksi = B->GetCoordinate(0);
-	eta = B->GetCoordinate(1);
-	Shape->at(0) = 0.25*(1 + ksi)*(1 + eta);
-	Shape->at(1) = 0.25*(1 - ksi)*(1 + eta);
-	Shape->at(2) = 0.25*(1 - ksi)*(1 - eta);
-	Shape->at(3) = 0.25*(1 + ksi)*(1 - eta);
+	ksi = B.GetCoordinate(0);
+	eta = B.GetCoordinate(1);
+	Shape.at(0) = 0.25*(1 + ksi)*(1 + eta);
+	Shape.at(1) = 0.25*(1 - ksi)*(1 + eta);
+	Shape.at(2) = 0.25*(1 - ksi)*(1 - eta);
+	Shape.at(3) = 0.25*(1 + ksi)*(1 - eta);
 
-	DShape->at(0, 0) = 0.25*(1 + eta);
-	DShape->at(1, 0) = 0.25*(1 + ksi);
-	DShape->at(0, 1) = -0.25*(1 + eta);
-	DShape->at(1, 1) = 0.25*(1 - ksi);
-	DShape->at(0, 2) = -0.25*(1 - eta);
-	DShape->at(1, 2) = -0.25*(1 - ksi);
-	DShape->at(0, 3) = 0.25*(1 - eta);
-	DShape->at(1, 3) = -0.25*(1 + ksi);
+	DShape.at(0, 0) = 0.25*(1 + eta);
+	DShape.at(1, 0) = 0.25*(1 + ksi);
+	DShape.at(0, 1) = -0.25*(1 + eta);
+	DShape.at(1, 1) = 0.25*(1 - ksi);
+	DShape.at(0, 2) = -0.25*(1 - eta);
+	DShape.at(1, 2) = -0.25*(1 - ksi);
+	DShape.at(0, 3) = 0.25*(1 - eta);
+	DShape.at(1, 3) = -0.25*(1 + ksi);
 
-	DShape->Print();
+	DShape.Print();
 	//Coors->Print();
-	Jacobi =& DShape->Mult(*Coors);
-	//Jacobi->Print();
-	Det = Jacobi->Determinant();
+	Jacobi = DShape.Mult(Coors);
+	//Jacobi.Print();
+	Det = Jacobi.Determinant();
 
-	InvJacobi = &Jacobi->Inverse();
-	//InvJacobi->Print();
+	InvJacobi = Jacobi.Inverse();
+	//InvJacobi.Print();
 
-	DShapeX = &InvJacobi->Mult(*DShape);
-	DShapeX = DShapeX;
-	DShapeX->Print();
-	return NULL;
+	DShapeX = InvJacobi.Mult(DShape);
+	//DShapeX.Print();
+	return Jacobi;
 }
-FloatMatrix * Quadr::ComputeBMarix(int inode)
+FloatMatrix Quadr::ComputeBMarix(int inode)
 {
-	BMatrix->at(0, 0) = DShapeX->at(0, inode);
-	BMatrix->at(1, 1) = DShapeX->at(1, inode);
-	BMatrix->at(2, 0) = DShapeX->at(1, inode);
-	BMatrix->at(2, 1) = DShapeX->at(0, inode);
+	BMatrix.at(0, 0) = DShapeX.at(0, inode);
+	BMatrix.at(1, 1) = DShapeX.at(1, inode);
+	BMatrix.at(2, 0) = DShapeX.at(1, inode);
+	BMatrix.at(2, 1) = DShapeX.at(0, inode);
 
 	return BMatrix;
 }
-FloatMatrix * Quadr::ComputeConstitutiveMatrix()
+FloatMatrix  Quadr::ComputeConstitutiveMatrix()
 {
-	FloatMatrix *T;
-	T = new FloatMatrix(3, 3);
+	FloatMatrix T(3,3);
 	double Young, Possion;
-	Young = Mat->GetYoung();
-	Possion = Mat->GetPossion();
+	Young = Mat.GetYoung();
+	Possion = Mat.GetPossion();
 	double D1, D2, D3;
 	D1 = (1 - Possion)*Young / ((1 + Possion)*(1 - 2 * Possion));
 	D2 = Possion*Young / ((1 + Possion)*(1 - 2 * Possion));
 	D3 = Young / (2 * (1 + Possion));
-	T->at(0, 0) = D1;
-	T->at(1, 0) = D2;
-	T->at(0, 1) = D2;
-	T->at(1, 1) = D1;
-	T->at(2, 2) = D3;
+	T.at(0, 0) = D1;
+	T.at(1, 0) = D2;
+	T.at(0, 1) = D2;
+	T.at(1, 1) = D1;
+	T.at(2, 2) = D3;
 	return T;
 }
-FloatMatrix * Quadr::ComputeStiff()
+FloatMatrix  Quadr::ComputeStiff()
 {
-	FloatArray *GaussCoor;
-	GaussCoor = new FloatArray(2);
-	GaussPoint *B = new GaussPoint;
-	DMatrix = new FloatMatrix(3, 3);
-	FloatMatrix *G = new FloatMatrix(2, 2);
+	FloatArray GaussCoor(2);
+	GaussPoint B;
+	FloatMatrix G(2, 2);
 	FloatMatrix BT(3, 2);
-	FloatMatrix *DT = new FloatMatrix(3, 3);
-	Stiff = new FloatMatrix(8, 8);
+	FloatMatrix DT(3, 3);
 	double W1,W2;
 	DMatrix = ComputeConstitutiveMatrix();
 	for (int inode = 0; inode < 4; inode++)
@@ -436,33 +429,33 @@ FloatMatrix * Quadr::ComputeStiff()
 		{
 			for (int iksi = 0; iksi < 3; iksi++)
 			{
-				GaussCoor ->at(0) = Gauss3[iksi];
+				GaussCoor .at(0) = Gauss3[iksi];
 				W1 = Weight3[iksi];
 				for (int ieta = 0; ieta < 3; ieta++)
 				{
-					GaussCoor->at(1) = Gauss3[ieta];
+					GaussCoor.at(1) = Gauss3[ieta];
 					W2 = Weight3[ieta];
-					B->Init(0, GaussCoor);
+					B.Init(0, GaussCoor);
 					ComputeJacobi(B);
 					BMatrix = ComputeBMarix(inode);
-					BT=BMatrix->Trans();
-					BT.Print(); 
-					DT = &BT.Mult(*DMatrix);
-					DT->Print();
+					BT=BMatrix.Trans();
+					//BT.Print(); 
+					DT = BT.Mult(DMatrix);
+					//DT.Print();
 					BMatrix = ComputeBMarix(jnode);
-					G = &DT->Mult(*BMatrix);
+					G = DT.Mult(BMatrix);
 					W2 = W1*W2*Det;
-					G = &G->Mult(W2);
-					G->Print();
-					Stiff->at(2 * inode, 2 * jnode) += G->at(0, 0);
-					Stiff->at(2 * inode + 1, 2 * jnode) += G->at(1, 0);
-					Stiff->at(2 * inode, 2 * jnode + 1) += G->at(0, 1);
-					Stiff->at(2 * inode + 1, 2 * jnode + 1) += G->at(1, 1);
+					G = G.Mult(W2);
+					//G.Print();
+					Stiff.at(2 * inode, 2 * jnode) += G.at(0, 0);
+					Stiff.at(2 * inode + 1, 2 * jnode) += G.at(1, 0);
+					Stiff.at(2 * inode, 2 * jnode + 1) += G.at(0, 1);
+					Stiff.at(2 * inode + 1, 2 * jnode + 1) += G.at(1, 1);
 					
 				}
 			}
-			cout << "**********************************************" << endl;
-			Stiff->Print();
+			//cout << "**********************************************" << endl;
+			//Stiff.Print();
 		}
 	}
 	
@@ -506,20 +499,19 @@ Quadr::~Quadr()
 
 Quadr & Quadr::operator=(const Quadr &Q)
 {
-	Quadr T;
-	T.Index = Q.Index;
-	T.ConstitutiveMatrix = Q.ConstitutiveMatrix;
-	T.DegreeOfFreedom = Q.DegreeOfFreedom;
-	T.GaussPointArray = Q.GaussPointArray;
-	T.DegreeOfFreedom = Q.DegreeOfFreedom;
-	T.group = Q.group;
-	T.mat = Q.mat;
-	T.nGaussPoint = Q.nGaussPoint;
-	T.nNodes = Q.nNodes;
-	T.Nodes = Q.Nodes;
-	T.Stiff = Q.Stiff;
-	T.type = Q.type;
-	return T;
+	Index = Q.Index;
+	ConstitutiveMatrix = Q.ConstitutiveMatrix;
+	DegreeOfFreedom = Q.DegreeOfFreedom;
+	GaussPointArray = Q.GaussPointArray;
+	DegreeOfFreedom = Q.DegreeOfFreedom;
+	group = Q.group;
+	mat = Q.mat;
+	nGaussPoint = Q.nGaussPoint;
+	nNodes = Q.nNodes;
+	Nodes = Q.Nodes;
+	Stiff = Q.Stiff;
+	type = Q.type;
+	return *this;
 }
 
 
@@ -528,7 +520,7 @@ void Quadr::Print()
 	cout << "Quadr Element "<<setw(5)<<this->Index;
 	for (int i = 0; i < 4; i++)
 	{
-		cout <<setw(5)<< this->Nodes->at(i);
+		cout <<setw(5)<< this->Nodes.at(i);
 	}
 	cout << endl;
 }
@@ -537,7 +529,7 @@ Line::Line()
 {
 	this->type = Linear;
 	this->nNodes = 2;
-	this->Nodes = new IntArray(2);
+	this->Nodes.SetSize(2);
 }
 Line::~Line()
 {
@@ -549,8 +541,9 @@ Line::Line(const Line & L)
 	Index = L.Index;
 	group = L.group;
 	type = L.type;
-	Nodes = new IntArray(nNodes);
+	Nodes.SetSize(nNodes);
 	Nodes = L.Nodes;
+	Shape.SetSize(2);
 }
 
 
@@ -566,29 +559,27 @@ int & Line::AtAdjElem()
 
 Line & Line::operator=(const Line &L)
 {
-	Line T;
-	T.Index = L.Index;
-	T.ConstitutiveMatrix = L.ConstitutiveMatrix;
-	T.DegreeOfFreedom = L.DegreeOfFreedom;
-	T.GaussPointArray = L.GaussPointArray;
-	T.DegreeOfFreedom = L.DegreeOfFreedom;
-	T.group = L.group;
-	T.mat = L.mat;
-	T.nGaussPoint = L.nGaussPoint;
-	T.nNodes = L.nNodes;
-	T.Nodes = L.Nodes;
-	T.Stiff = L.Stiff;
-	T.type = L.type;
-	T.AdjElem = L.AdjElem;
-	return T;
+	Index = L.Index;
+	ConstitutiveMatrix = L.ConstitutiveMatrix;
+	DegreeOfFreedom = L.DegreeOfFreedom;
+	GaussPointArray = L.GaussPointArray;
+	DegreeOfFreedom = L.DegreeOfFreedom;
+	group = L.group;
+	mat = L.mat;
+	nGaussPoint = L.nGaussPoint;
+	nNodes = L.nNodes;
+	Nodes = L.Nodes;
+	Stiff = L.Stiff;
+	type = L.type;
+	AdjElem = L.AdjElem;
+	return *this;
 }
 
-FloatArray *Line::ComputeShape(GaussPoint *B)
+FloatArray Line::ComputeShape(GaussPoint *B)
 {
-	Shape = new FloatArray(2);
 	double ksi;
 	ksi = B->GetCoordinate(0);
-	Shape->at(0) = 0.5*(1 - ksi);
-	Shape->at(1) = 0.5*(1 + ksi);
+	Shape.at(0) = 0.5*(1 - ksi);
+	Shape.at(1) = 0.5*(1 + ksi);
 	return Shape;
 }

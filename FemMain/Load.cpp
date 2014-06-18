@@ -105,13 +105,13 @@ Volumn::~Volumn()
 }
 
 
-void Volumn::Init(int Index, int nGroup,IntArray *group, double Value, int Dir)
+void Volumn::Init(int Index, int nGroup,IntArray &group, double Value, int Dir)
 {
 	this->Index = Index;
 	this->Value = Value;
 	this->Dir = Dir;
 	this->nGroup = nGroup;
-	this->group = new IntArray(*group);
+	this->group = group;
 }
 
 int Volumn::GetnGroup()
@@ -129,7 +129,7 @@ double Volumn::GetValue()
 	return Value;
 }
 
-IntArray * Volumn::GetGroup()
+IntArray  Volumn::GetGroup()
 {
 	return group;
 }
@@ -146,13 +146,13 @@ Concentrate::~Concentrate()
 }
 
 
-void Concentrate::Init(int Index,int nNode, IntArray * Nodes, FloatArray * Values, int Dir)
+void Concentrate::Init(int Index,int nNode, IntArray & Nodes, FloatArray & Values, int Dir)
 {
 	this->Index = Index;
 	this->nNode = nNode;
 	this->Dir = Dir;
-	this->Nodes = new IntArray(*Nodes);
-	this->Values = new FloatArray(*Values);
+	this->Nodes = Nodes;
+	this->Values = Values;
 }
 
 int Concentrate::GetnNode()
@@ -165,12 +165,12 @@ int Concentrate::GetDir()
 	return Dir;
 }
 
-IntArray * Concentrate::GetNodes()
+IntArray  Concentrate::GetNodes()
 {
 	return Nodes;
 }
 
-FloatArray *Concentrate::GetValues()
+FloatArray Concentrate::GetValues()
 {
 	return Values;
 }

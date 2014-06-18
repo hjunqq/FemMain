@@ -14,7 +14,7 @@ private:
 public:
 	Time();
 	Time(int h, int m = 0);
-	void AddMain(int m);
+	void AddMin(int m);
 	void AddHr(int h);
 	void Reset(int h = 0, int m = 0);
 	Time operator+(const Time &t)const;
@@ -72,7 +72,7 @@ public:
 	// 打印数组
 	void Print();
 	// 乘以标量
-	FloatArray Times(double Scalar);
+	FloatArray Times(double Scalar)const;
 	// 点乘
 	double Dot(FloatArray * );
 	// 清空

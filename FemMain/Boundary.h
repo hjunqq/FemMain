@@ -15,10 +15,10 @@ class Fixed :
 public:
 	Fixed();
 	virtual ~Fixed();
-	void Init(int Index, int nNode, IntArray * Node, int Dir);
+	void Init(int Index, int nNode, IntArray & Node, int Dir);
 private:
 	int nNode;
-	IntArray *Node;
+	IntArray Node;
 	int Dir;
 public:
 	// 获得第i个元素
@@ -33,11 +33,11 @@ class Displace :
 public:
 	Displace();
 	virtual ~Displace();
-	void Init(int nNode, int Dir, IntArray *Node, FloatArray *Values);
+	void Init(int nNode, int Dir, IntArray &Node, FloatArray &Values);
 private:
 	int nNode;
-	IntArray *Node;
-	FloatArray *Values;
+	IntArray Node;
+	FloatArray Values;
 	int Dir;
 public:
 	int GetnNode();
@@ -52,15 +52,15 @@ class Interact :
 public:
 	Interact();
 	virtual ~Interact();
-	void Init(int nNode, int AdjDomain, IntArray *Local, IntArray *Remote);
+	void Init(int nNode, int AdjDomain, IntArray &Local, IntArray &Remote);
 private:
 	int nNode;
-	IntArray *Local;
-	IntArray *Remote;
+	IntArray Local;
+	IntArray Remote;
 	int AdjDomain;
 public:
 	int GetnNode();
 	int GetAdj();
-	IntArray * GetLocal();
-	IntArray * GetRemote();
+	IntArray  GetLocal();
+	IntArray  GetRemote();
 };

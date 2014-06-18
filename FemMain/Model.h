@@ -38,7 +38,7 @@ public:
 	FloatMatrix  GetStress();
 	// 获得应变
 	FloatMatrix  GetStrain();
-	Node  operator =(const Node & N) const;
+	Node & operator =(const Node & N);
 };
 
 class GaussPoint :
@@ -67,7 +67,7 @@ protected:
 	FloatMatrix Coors;
 	FloatArray Shape;
 	FloatMatrix DShape;
-	FloatMatrix DShape;
+	FloatMatrix DShapeX;
 	FloatMatrix Jacobi;
 	FloatMatrix InvJacobi;
 	FloatMatrix Stiff;
@@ -126,7 +126,7 @@ public:
 	Quadr();
 	virtual ~Quadr();
 	void Print();
-	Quadr  operator=(const Quadr &Q);
+	Quadr & operator=(const Quadr &Q);
 	FloatMatrix  ComputeStiff();
 	FloatMatrix  ComputeJacobi(GaussPoint & B);
 	FloatMatrix  ComputeBMarix(int inode);
@@ -144,7 +144,7 @@ public:
 	void Print();
 	int & AtAdjElem();
 	FloatArray ComputeShape(GaussPoint *B);
-	Line  operator=(const Line &L);
+	Line & operator=(const Line &L);
 };
 
 class Group
@@ -168,7 +168,7 @@ public:
 	void FillElement(IntArray * ElementList);
 	void FillElement(Quadr * Quadrs);
 	// 获取第i个单元号
-	Quadr GetElement(Quadr &);
+	Quadr ** GetElement(Quadr &);
 	// 获取单元个数
 	int GetnElements();
 	// 获取材料号
