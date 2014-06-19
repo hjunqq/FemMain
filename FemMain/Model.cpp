@@ -375,7 +375,7 @@ FloatMatrix Quadr::ComputeJacobi(GaussPoint & B)
 	DShape.at(0, 3) = 0.25*(1 - eta);
 	DShape.at(1, 3) = -0.25*(1 + ksi);
 
-	DShape.Print();
+	//DShape.Print();
 	//Coors->Print();
 	Jacobi = DShape.Mult(Coors);
 	//Jacobi.Print();
@@ -454,11 +454,10 @@ FloatMatrix  Quadr::ComputeStiff()
 					
 				}
 			}
-			//cout << "**********************************************" << endl;
-			//Stiff.Print();
 		}
 	}
-	
+	cout << "**********************************************" << endl;
+	Stiff.Print();
 	/*for (int i = 0; i < 3; i++)
 	{
 		GaussCoor->at(0) = Gauss3[i];

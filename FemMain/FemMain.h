@@ -4,7 +4,8 @@
 #pragma comment(lib,"GidLib\\x32\\zlib.lib")
 #pragma comment(lib,"GidLib\\x32\\hdf5.lib")
 #pragma comment(lib,"GidLib\\x32\\gidpost.lib")
-#else
+#endif
+#ifdef x64
 #pragma comment(lib,"GidLib\x64\zlib.lib")
 #pragma comment(lib,"GidLib\x64\hdf5.lib")
 #pragma comment(lib,"GidLib\x64\gidpost.lib")
@@ -62,14 +63,14 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix *Stiff;
-	FloatArray *ResultZero;
-	IntArray *DegreeOfFreedom;
-	FloatArray *ExternalForce;
-	FloatArray *InitialStain;
-	FloatArray *InteractLoad;
-	FloatArray *InitialDispLoad;
-	FloatArray *TotalLoad;
+	FloatMatrix Stiff;
+	FloatArray ResultZero;
+	IntArray DegreeOfFreedom;
+	FloatArray ExternalForce;
+	FloatArray InitialStain;
+	FloatArray InteractLoad;
+	FloatArray InitialDispLoad;
+	FloatArray TotalLoad;
 
 	LUSolve *LUSolver;
 

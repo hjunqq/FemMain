@@ -24,6 +24,10 @@ int main(int argc,char**argv)
 	string text;
 	stringstream stream;
 	ifstream inp("1.inp");
+	streambuf* coutBuf = cout.rdbuf();
+	ofstream of("out.txt");
+	streambuf* fileBuf = of.rdbuf();
+	cout.rdbuf(fileBuf);
 	getline(inp, text);
 
 	getline(inp, text);
@@ -52,8 +56,9 @@ int main(int argc,char**argv)
 		Fem1.ApplyLoad();
 		Fem1.Solve();
 	}
-	Fem1.ShowTime();
-	Fem1.ShowTime();
+	of.flush();
+	of.close();
+	cout.rdbuf(coutBuf);
 	return 0;
 }
 void FemMain::ShowTime()
@@ -63,9 +68,9 @@ void FemMain::ShowTime()
 	cout << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon + 1 << "-" <<
 		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
 		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-	//chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
-	//	tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-	//	<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
+	chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
+		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
+		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
 }
 string & FemMain::WorkDir()
 {
@@ -468,8 +473,8 @@ void FemMain::GIDOutMesh()
 
 void FemMain::ComputeDOF()
 {
-	DegreeOfFreedom = new IntArray(nDof*nNode);
-	DegreeOfFreedom->Set(1);
+	DegreeOfFreedom.SetSize(nDof*nNode);
+	DegreeOfFreedom.Set(1);
 	for (int ifix = 0; ifix < nFix; ifix++)
 	{
 		int iDir = Fix[ifix].GetDir();
@@ -478,7 +483,7 @@ void FemMain::ComputeDOF()
 		for (int inode = 0; inode < nFixNode; inode++)
 		{
 			FixNode = Fix[ifix].at(inode);
-			DegreeOfFreedom->at(FixNode*nDof + iDir) = 0;
+			DegreeOfFreedom.at(FixNode*nDof + iDir) = 0;
 		}
 	}
 	for (int idisp = 0; idisp < nDisp; idisp++)
@@ -489,7 +494,7 @@ void FemMain::ComputeDOF()
 		for (int inode = 0; inode < nDispNode; inode++)
 		{
 			DispNode = Disp[idisp].at(inode);
-			DegreeOfFreedom->at(DispNode*nDof + iDir) = 0;
+			DegreeOfFreedom.at(DispNode*nDof + iDir) = 0;
 		}
 	}
 	for (int iinter = 0; iinter < nInter; iinter++)
@@ -502,20 +507,20 @@ void FemMain::ComputeDOF()
 			InterNode = Local.at(inode);
 			for (int iDof = 0; iDof < nDof; iDof++)
 			{
-				DegreeOfFreedom->at(InterNode*nDof + iDof) = 0;
+				DegreeOfFreedom.at(InterNode*nDof + iDof) = 0;
 			}
 		}
 	}
 	TotalDOF = 0;
 	for (int idof = 0; idof < nDof*nNode; idof++)
 	{
-		if (DegreeOfFreedom->at(idof))
+		if (DegreeOfFreedom.at(idof))
 		{
 			TotalDOF++;
-			DegreeOfFreedom->at(idof) = TotalDOF;
+			DegreeOfFreedom.at(idof) = TotalDOF;
 		}
 	}
-	DegreeOfFreedom->Print();
+	DegreeOfFreedom.Print();
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();
@@ -527,7 +532,7 @@ void FemMain::ComputeDOF()
 			Elems = Groups[igroup].GetElement(**Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				Elems[ielem]->FillDof(*DegreeOfFreedom);
+				Elems[ielem]->FillDof(DegreeOfFreedom);
 			}
 		}
 	}
@@ -535,13 +540,13 @@ void FemMain::ComputeDOF()
 
 void FemMain::InitSolve()
 {
-	Stiff = new FloatMatrix(TotalDOF, TotalDOF);
-	ResultZero = new FloatArray(TotalDOF);
-	ExternalForce = new FloatArray(TotalDOF);
-	InitialStain = new FloatArray(TotalDOF);
-	InitialDispLoad = new FloatArray(TotalDOF);
-	TotalLoad = new FloatArray(TotalDOF);
-	InteractLoad = new FloatArray(TotalDOF);
+	Stiff.SetSize(TotalDOF, TotalDOF);
+	ResultZero .SetSize(TotalDOF);
+	ExternalForce .SetSize(TotalDOF);
+	InitialStain .SetSize(TotalDOF);
+	InitialDispLoad .SetSize(TotalDOF);
+	TotalLoad.SetSize(TotalDOF);
+	InteractLoad.SetSize(TotalDOF);
 	int nRow, nCol, NonZero;
 	IntArray *RowIdx, *ColIdx,*CNonZero;
 	RowIdx = new IntArray(TotalDOF+1);
@@ -650,8 +655,6 @@ void FemMain::ComputeElementStiff()
 
 void FemMain::AssembleStiff()
 {
-	Stiff = new FloatMatrix(TotalDOF, TotalDOF);
-	
 	int iedof, jedof;
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
@@ -676,7 +679,7 @@ void FemMain::AssembleStiff()
 						jedof = Dof.at(jdof);
 						if (iedof != 0 && jedof != 0)
 						{
-							Stiff->at(iedof - 1, jedof - 1) = EStiff.at(idof, jdof);
+							Stiff.at(iedof - 1, jedof - 1) += EStiff.at(idof, jdof);
 						}
 					}
 				}
@@ -684,17 +687,11 @@ void FemMain::AssembleStiff()
 
 		}
 	}
-	Stiff->Print();
+	Stiff.Print();
 }
 
 void FemMain::ApplyLoad()
 {
-	TotalLoad = new FloatArray(TotalDOF);
-	ExternalForce = new FloatArray(TotalDOF);
-	InitialStain = new FloatArray(TotalDOF);
-	InteractLoad = new FloatArray(TotalDOF);
-	InitialDispLoad = new FloatArray(TotalDOF);
-
 	for (int iface = 0; iface < nFace; iface++)
 	{
 		int nEle = 0, nNode = 0, Dir = 0;
@@ -718,7 +715,7 @@ void FemMain::ApplyLoad()
 			double Length;
 			FloatArray *PVal, *Normal, *Shape, *GaussCoor, *TELoad, *ELoad;
 			PVal = new FloatArray(2);
-			Normal = new FloatArray(2);
+			Normal = new FloatArray(3);
 			Shape = new FloatArray(2);
 			ELoad = new FloatArray(2);
 			TELoad = new FloatArray(2);
@@ -743,8 +740,10 @@ void FemMain::ApplyLoad()
 				Length = sqrt(pow(Coor->at(0, 0) - Coor->at(1, 0), 2) +
 					pow(Coor->at(0, 1) - Coor->at(1, 1), 2));
 				Normal->at(0) = (Coor->at(0, 0) - Coor->at(1, 0)) / Length;
-				Normal->at(2) = (Coor->at(0, 1) - Coor->at(1, 1)) / Length;
-
+				Normal->at(1) = (Coor->at(0, 1) - Coor->at(1, 1)) / Length;
+				FloatArray Descartes(3);
+				Descartes.at(2) = 1;
+				*Normal = Normal->Cross(Descartes);
 				double ksi, weight;
 				for (int iksi = 0; iksi < 2; iksi++)
 				{
@@ -764,9 +763,9 @@ void FemMain::ApplyLoad()
 					int NodeIdx = ENode->at(inode);
 					for (int idof = 0; idof < nDof; idof++)
 					{
-						if (DegreeOfFreedom->at(NodeIdx * 2 + idof) != 0)
+						if (DegreeOfFreedom.at(NodeIdx * 2 + idof) != 0)
 						{
-							ExternalForce->at(DegreeOfFreedom->at(NodeIdx * 2 + idof) - 1) -= ELoad->at(idof)*Normal->at(idof);
+							ExternalForce.at(DegreeOfFreedom.at(NodeIdx * 2 + idof) - 1) -= ELoad->at(idof)*Normal->at(idof);
 						}
 					}
 				}
@@ -784,9 +783,9 @@ void FemMain::ApplyLoad()
 		Dir = Cons[iCon].GetDir();
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			if (DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) != 0)
+			if (DegreeOfFreedom.at(Nodes.at(inode)*nDof + Dir) != 0)
 			{
-				ExternalForce->at(DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir)-1) += Values.at(inode);
+				ExternalForce.at(DegreeOfFreedom.at(Nodes.at(inode)*nDof + Dir)-1) += Values.at(inode);
 			}
 		}
 	}
@@ -847,9 +846,9 @@ void FemMain::ApplyLoad()
 					}
 					for (int inode = 0; inode < Type; inode++)
 					{
-						if (DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) != 0)
+						if (DegreeOfFreedom.at(Nodes.at(inode)*nDof + Dir) != 0)
 						{
-							ExternalForce->at(DegreeOfFreedom->at(Nodes.at(inode)*nDof + Dir) - 1) += TLoad.at(inode);
+							ExternalForce.at(DegreeOfFreedom.at(Nodes.at(inode)*nDof + Dir) - 1) += TLoad.at(inode);
 						}
 					}
 				}
@@ -880,7 +879,7 @@ bool FemMain::ConvergeCheck()
 			Elem = Groups[igroup].GetElement(**Elem);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				Elem[ielem]->SetResult(*ResultZero);
+				Elem[ielem]->SetResult(ResultZero);
 			}
 		}
 	}

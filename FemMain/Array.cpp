@@ -142,6 +142,27 @@ IntArray IntArray::Copy(const IntArray & I)const
 	}
 	return Temp;
 }
+IntArray IntArray::Cross(const IntArray &I)const
+{
+	IntArray T(size);
+	IntMatrix M(size, size);
+	M.at(1, 0) = Values[0];
+	M.at(1, 1) = Values[1];
+	M.at(1, 2) = Values[2];
+	M.at(2, 0) = I.Values[0];
+	M.at(2, 1) = I.Values[1];
+	M.at(2, 2) = I.Values[2];
+	M.at(0, 0) = 1;
+	M.at(0, 1) = M.at(0, 2) = 0;
+	T.at(0) = M.Determinant();
+	M.at(0, 1) = 1;
+	M.at(0, 0) = M.at(0, 2) = 0;
+	T.at(1) = M.Determinant();
+	M.at(0, 2) = 1;
+	M.at(0, 0) = M.at(0, 1) = 0;
+	T.at(2) = M.Determinant();
+	return T;
+}
 // 获取数组大小
 int IntArray::GetSize()
 {
@@ -325,7 +346,35 @@ FloatArray FloatArray::Copy(const FloatArray & F)const
 		Temp.Values[i] = F.Values[i];
 	}
 	return Temp;
+
 }
+
+FloatArray FloatArray::Cross(FloatArray &F)const
+{
+	FloatArray T(size);
+	FloatMatrix M(size, size);
+	M.at(1, 0) = Values[0];
+	M.at(1, 1) = Values[1];
+	M.at(1, 2) = Values[2];
+	M.at(2, 0) = F.Values[0];
+	M.at(2, 1) = F.Values[1];
+	M.at(2, 2) = F.Values[2];
+	M.Print();
+	M.at(0, 0) = 1;
+	M.at(0, 1) = M.at(0, 2) = 0;
+	T.at(0) = M.Determinant();
+	M.Print();
+	M.at(0, 1) = 1;
+	M.at(0, 0) = M.at(0, 2) = 0;
+	M.Print();
+	T.at(1) = M.Determinant();
+	M.at(0, 2) = 1;
+	M.at(0, 0) = M.at(0, 1) = 0;
+	M.Print();
+	T.at(2) = M.Determinant();
+	return T;
+}
+
 FloatArray::FloatArray(const FloatArray & F)
 {
 	size = F.size;
@@ -421,12 +470,56 @@ int & IntMatrix::at(int i, int j)
 {
 	return Values[i*n + j];
 }
+
+int IntMatrix::Determinant()
+{
+	int Det = 0;
+	if (this->m == 1)
+	{
+		return this->at(0, 0);
+	}
+	else
+	{
+		FloatMatrix *T;
+		T = new FloatMatrix(this->m - 1, this->n - 1);
+		for (int i = 0; i < m; i++)
+		{
+			for (int j = 0; j < m; j++)
+			{
+				for (int k = 0; k < m; k++)
+				{
+					if (j < i && k < i)
+					{
+						T->at(j, k) = this->at(j, k);
+					}
+					if (j>i && k < i)
+					{
+						T->at(j - 1, k) = this->at(j, k);
+					}
+					if (j<i && k>i)
+					{
+						T->at(j, k - 1) = this->at(j, k);
+					}
+					if (j>i && k > i)
+					{
+						T->at(j - 1, k - 1) = this->at(j, k);
+					}
+				}
+			}
+
+			Det += this->at(i, 0)* pow(-1, m)*T->Determinant();
+		}
+		return Det;
+	}
+
+}
+
 IntMatrix IntMatrix::operator + (const IntMatrix & I)const
 {
 	IntMatrix T;
 	T.m = m;
 	T.n = n;
-	T.Values = new int[m + n];
+	T.Values = new int[m * n];
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -440,7 +533,7 @@ IntMatrix & IntMatrix::operator=(const IntMatrix & I)
 {
 	m = I.m;
 	n = I.n;
-	Values = new int[m + n];
+	Values = new int[m * n];
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -455,7 +548,7 @@ IntMatrix IntMatrix::operator-(const IntMatrix & I)const
 	IntMatrix T;
 	T.m = m;
 	T.n = n;
-	T.Values = new int[m + n];
+	T.Values = new int[m * n];
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -628,7 +721,7 @@ double FloatMatrix::Determinant()
 				}
 			}
 
-			Det += this->at(i, 0)* pow(-1, m)*T->Determinant();
+			Det += this->at(i, 0)* pow(-1, i)*T->Determinant();
 		}
 		return Det;
 	}
@@ -677,7 +770,7 @@ FloatMatrix FloatMatrix::operator + (const FloatMatrix & I)const
 	FloatMatrix T;
 	T.m = m;
 	T.n = n;
-	T.Values = new double[m + n];
+	T.Values = new double[m * n]();
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -691,7 +784,7 @@ FloatMatrix &FloatMatrix::operator = (const FloatMatrix & I)
 {
 	m = I.m;
 	n = I.n;
-	Values = new double[m + n];
+	Values = new double[m * n]();
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -706,7 +799,7 @@ FloatMatrix FloatMatrix::operator - (const FloatMatrix & I) const
 	FloatMatrix T;
 	T.m = m;
 	T.n = n;
-	T.Values = new double[m + n];
+	T.Values = new double[m * n]();
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)

@@ -3,8 +3,6 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
-
-
 using namespace std;
 class Time
 {
@@ -41,6 +39,7 @@ public:
 	// 数组复制
 	IntArray Copy(const IntArray & I)const;
 	IntArray(const IntArray & I);
+	IntArray Cross(const IntArray &I)const;
 	// 获取数组大小
 	int GetSize();
 	// 打印变量内容
@@ -75,6 +74,7 @@ public:
 	FloatArray Times(double Scalar)const;
 	// 点乘
 	double Dot(FloatArray * );
+	FloatArray Cross(FloatArray &F)const;
 	// 清空
 	int Clear();
 	// 数组相加
@@ -145,7 +145,7 @@ public:
 	IntMatrix(const IntMatrix &I);
 	// 返回第m行n列元素
 	int & at(int i, int j);
-
+	int Determinant();
 	IntMatrix  operator+(const IntMatrix & I)const;
 	IntMatrix & operator=(const IntMatrix & I);
 	IntMatrix  operator-(const IntMatrix & I)const;
