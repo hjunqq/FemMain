@@ -88,7 +88,7 @@ public:
 	// 组装本构矩阵
 	virtual FloatMatrix  ComputeConstitutiveMatrix();
 	// 计算高斯点应变
-	virtual FloatArray  ComputeStrain(GaussPoint * B);
+	virtual FloatArray  ComputeStress();
 	// 计算B矩阵
 	virtual FloatMatrix  ComputeBMarix(GaussPoint * B);
 	// 打印单元结果
@@ -131,6 +131,7 @@ public:
 	FloatMatrix  ComputeJacobi(GaussPoint & B);
 	FloatMatrix  ComputeBMarix(int inode);
 	FloatMatrix  ComputeConstitutiveMatrix();
+	FloatArray  ComputeStress();
 };
 class Line :
 	public Element

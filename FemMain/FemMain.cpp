@@ -24,10 +24,10 @@ int main(int argc,char**argv)
 	string text;
 	stringstream stream;
 	ifstream inp("1.inp");
-	streambuf* coutBuf = cout.rdbuf();
-	ofstream of("out.txt");
-	streambuf* fileBuf = of.rdbuf();
-	cout.rdbuf(fileBuf);
+	//streambuf* coutBuf = cout.rdbuf();
+	//ofstream of("out.txt");
+	//streambuf* fileBuf = of.rdbuf();
+	//cout.rdbuf(fileBuf);
 	getline(inp, text);
 
 	getline(inp, text);
@@ -55,10 +55,12 @@ int main(int argc,char**argv)
 
 		Fem1.ApplyLoad();
 		Fem1.Solve();
+		Fem1.ComputeElementStress();
+		Fem1.GIDOutResult();
 	}
-	of.flush();
-	of.close();
-	cout.rdbuf(coutBuf);
+	//of.flush();
+	//of.close();
+	//cout.rdbuf(coutBuf);
 	return 0;
 }
 void FemMain::ShowTime()
@@ -884,4 +886,30 @@ bool FemMain::ConvergeCheck()
 		}
 	}
 	return true;
+}
+
+void FemMain::GIDOutResult()
+{
+
+}
+
+void FemMain::ComputeElementStress()
+{
+	for (int igroup = 0; igroup < nGroup; igroup++)
+	{
+		int Type = Groups[igroup].GetType();
+		int nEle = Groups[igroup].GetnElements();
+		if (Type == 4)
+		{
+			Quadr **Elems;
+			Elems = new Quadr *[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
+			for (int ielem = 0; ielem < nEle; ielem++)
+			{
+				Elems[ielem]->SetResult(ResultZero);
+				Elems[ielem]->ComputeStress();
+			}
+			
+		}
+	}
 }

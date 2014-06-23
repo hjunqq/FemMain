@@ -43,7 +43,7 @@ FloatMatrix Element::ComputeConstitutiveMatrix()
 }
 
 // 计算高斯点应变
-FloatArray  Element::ComputeStrain(GaussPoint * B)
+FloatArray  Element::ComputeStress()
 {
 	return Strain;
 }
@@ -458,39 +458,16 @@ FloatMatrix  Quadr::ComputeStiff()
 	}
 	cout << "**********************************************" << endl;
 	Stiff.Print();
-	/*for (int i = 0; i < 3; i++)
-	{
-		GaussCoor->at(0) = Gauss3[i];
-		W1 = Weight3[i];
-		for (int j = 0; j < 3; j++)
-		{
-			GaussCoor->at(1) = Gauss3[j];
-			B->Init(0, GaussCoor);
-			ComputeJacobi(B);
-			BMatrix = ComputeBMarix();
-			DMatrix = ComputeConstitutiveMatrix();
-			for (int inode = 0; inode < 4; inode++)
-			{
-				for (int jnode = 0; jnode < 4; jnode++)
-				{
-					BT = &BMatrix[inode]->Trans();
-					DT = &BT->Mult(*DMatrix);
-					G = &DT->Mult(*BMatrix[jnode]);
-					W2 = Weight3[j];
-					W2 = W1*W2*Det;
-					G = &G->Mult(W2);
-					Stiff->at(2*inode, 2*jnode) += G->at(0, 0);
-					Stiff->at(2*inode+1, 2*jnode) += G->at(1, 0);
-					Stiff->at(2*inode, 2*jnode+1) += G->at(0, 1);
-					Stiff->at(2*inode+1, 2*jnode+1) += G->at(1, 1);
-				}
-			}
-		}
-	}*/
-	//Stiff->Print();
 	return Stiff;
 }
+FloatArray Quadr::ComputeStress()
+{
+	Strain.Clear();
+	for (int inode = 0; inode < 4; inode++)
+	{
 
+	}
+}
 Quadr::~Quadr()
 {
 }

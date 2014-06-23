@@ -80,6 +80,7 @@ public:
 	int GetStep();
 	void ReadFiles();
     void GIDOutMesh();
+	void GIDOutResult();
 	void ComputeDOF();
 	void InitSolve();
 	void ComputeElementStiff();
@@ -88,4 +89,5 @@ public:
 	void ApplyInitial();
 	void Solve();
 	bool ConvergeCheck();
+	void ComputeElementStress();
 };

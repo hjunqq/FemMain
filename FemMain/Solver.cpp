@@ -53,7 +53,7 @@ bool LUSolve::Check(FloatArray &B, FloatArray &X)
 	X.Print();
 	X =A.Mult(X);
 	X.Print();
-	n = m; k = 1;
+	k = m; n = 1;
 	lda = max(1, m); ldb = max(1, k); ldc = max(1, m);
 	if (Left == NULL)
 	{
@@ -70,7 +70,6 @@ bool LUSolve::Check(FloatArray &B, FloatArray &X)
 			Value[i*m + j] = A.at(i, j);
 		}
 	}
-	A.Print();
 	dgemm(&trana, &trana, &m, &n, &k, &alpha, Value, &lda, Right, &ldb, &beta, Left, &ldc);
 	Error = 0;
 	for (int i = 0; i < m; i++)
