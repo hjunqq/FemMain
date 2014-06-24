@@ -480,8 +480,8 @@ int IntMatrix::Determinant()
 	}
 	else
 	{
-		FloatMatrix *T;
-		T = new FloatMatrix(this->m - 1, this->n - 1);
+		IntMatrix *T;
+		T = new IntMatrix(this->m - 1, this->n - 1);
 		for (int i = 0; i < m; i++)
 		{
 			for (int j = 0; j < m; j++)
@@ -620,7 +620,7 @@ FloatArray FloatMatrix::Mult(FloatArray & F)const
 	{
 		for (int j = 0; j < n; j++)
 		{
-			Temp.at(i) += F.at(i) * Values[i*n + j];
+			Temp.at(i) += F.at(j) * Values[i*n + j];
 		}
 	}
 	return Temp;

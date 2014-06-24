@@ -90,4 +90,5 @@ public:
 	void Solve();
 	bool ConvergeCheck();
 	void ComputeElementStress();
+	void CountElement();
 };

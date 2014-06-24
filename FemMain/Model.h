@@ -8,6 +8,8 @@ const double Gauss3[] = { -0.774596669241483, 0.0, 0.774596669241483 };
 const double Weight3[] = { 0.555555555555556, 0.888888888888889, 0.555555555555556 };
 const double Gauss2[] = { -0.5773502692, 0.5773502692 };
 const double Weight2[] = { 1.0, 1.0};
+const double P4ksicor[] = { -0.577350269, 0.577350269, 0.577350269, -0.577350269 };
+const double P4etacor[] = { -0.577350269, -0.577350269, 0.577350269, 0.577350269 };
 
 class Node
 {
@@ -16,6 +18,7 @@ public:
 	virtual ~Node();
 private:
 	int Index;
+	int Count;
 	FloatArray Coordinates;
 	FloatArray Displacement;
 	FloatArray PrincipleStrain;
@@ -26,6 +29,8 @@ public:
 	void Init(int Index, FloatArray & Coordinate);
 	// 打印节点信息
 	void Print();
+	void ResetCount();
+	void AddCount();
 	// 获得节点坐标
 	double GetCoordinate(int i);
 	// 获得节点坐标
@@ -72,13 +77,19 @@ protected:
 	FloatMatrix InvJacobi;
 	FloatMatrix Stiff;
 	FloatArray Strain;
+	FloatArray Stress;
 	FloatMatrix BMatrix;
+	FloatMatrix BMatrixBig;
 	FloatMatrix DMatrix;
 	IntArray DegreeOfFreedom;
 	FloatArray Displacement;
 	FloatMatrix ConstitutiveMatrix;
 	int nGaussPoint;
-	GaussPoint *GaussPointArray=NULL;
+	GaussPoint *GaussPointArray = NULL;
+	FloatArray *GaussStrain = NULL;
+	FloatArray *GaussStress = NULL;
+	FloatArray *NodeStrain = NULL;
+	FloatArray *NodeStress = NULL;
 public:
 	void Init(int nNodes, int mat, int Index, int Group, int Dof, IntArray *Node);
 	// 计算J
@@ -115,6 +126,8 @@ public:
 	IntArray GetDof();
 	FloatMatrix GetStiff();
 	FloatArray GetShape();
+	FloatArray GetStrain(int inode);
+	FloatArray GetStress(int inode);
 	double GetDet();
 	virtual void Print();
 };
@@ -130,6 +143,7 @@ public:
 	FloatMatrix  ComputeStiff();
 	FloatMatrix  ComputeJacobi(GaussPoint & B);
 	FloatMatrix  ComputeBMarix(int inode);
+	FloatMatrix  ComputeBMatrix();
 	FloatMatrix  ComputeConstitutiveMatrix();
 	FloatArray  ComputeStress();
 };

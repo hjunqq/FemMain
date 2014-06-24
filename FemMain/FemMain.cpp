@@ -56,6 +56,8 @@ int main(int argc,char**argv)
 		Fem1.ApplyLoad();
 		Fem1.Solve();
 		Fem1.ComputeElementStress();
+		Fem1.CountElement();
+		Fem1.a
 		Fem1.GIDOutResult();
 	}
 	//of.flush();
@@ -909,7 +911,36 @@ void FemMain::ComputeElementStress()
 				Elems[ielem]->SetResult(ResultZero);
 				Elems[ielem]->ComputeStress();
 			}
-			
+		}
+	}
+}
+
+void FemMain::CountElement()
+{
+	for (int inode = 0; inode < nNode; inode++)
+	{
+		Nodes[inode].ResetCount();
+	}
+	for (int igroup = 0; igroup < nGroup; igroup++)
+	{
+		int Type = Groups[igroup].GetType();
+		int nEle = Groups[igroup].GetnElements();
+		if (Type == 4)
+		{
+			Quadr **Elems;
+			IntArray ENode(4);
+			int NodeIndex;
+			Elems = new Quadr *[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
+			for (int ielem = 0; ielem < nEle; ielem++)
+			{
+				ENode = Elems[ielem]->GetNodeArray();
+				for (int inode = 0; inode < Type; inode++)
+				{
+					NodeIndex = ENode.at(ielem);
+					Nodes[NodeIndex].AddCount();
+				}
+			}
 		}
 	}
 }

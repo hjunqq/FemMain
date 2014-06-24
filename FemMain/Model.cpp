@@ -115,14 +115,23 @@ void Element::SetCoor(FloatMatrix &Coor)
 
 void Element::SetResult(FloatArray & Result)
 {
-	for (int iDof = 0; iDof < Dof; iDof++)
+	for (int iDof = 0; iDof < Dof*nNodes; iDof++)
 	{
 		int DofIdx = DegreeOfFreedom.at(iDof);
 		if (DofIdx != 0)
 		{
-			Displacement.at(iDof - 1) = Result.at(DofIdx - 1);
+			Displacement.at(iDof) = Result.at(DofIdx - 1);
 		}
 	}
+}
+
+FloatArray Element::GetStrain(int inode)
+{
+	return NodeStrain[inode];
+}
+FloatArray Element::GetStress(int inode)
+{
+	return NodeStress[inode];
 }
 
 void Element::Print()
@@ -168,6 +177,7 @@ double Element::GetDet()
 Node::Node()
 {
 	Index = 0;
+	Count = 0;
 }
 
 
@@ -193,7 +203,14 @@ void Node::Print()
 	Coordinates.Print();
 }
 
-
+void Node::ResetCount()
+{
+	Count = 0;
+}
+void Node::AddCount()
+{
+	Count++;
+}
 // 获得节点坐标
 double Node::GetCoordinate(int i)
 {
@@ -347,13 +364,27 @@ Quadr::Quadr()
 	this->type = Quadrilateral;
 	this->nNodes = 4;
 	this->Nodes.SetSize(4);
+	nGaussPoint = 4;
 	Shape.SetSize(4);
 	DShape.SetSize(2, 4);
 	Jacobi.SetSize(2, 2);
 	DShapeX.SetSize(2, 4);
 	BMatrix.SetSize(3, 2);
+	BMatrixBig.SetSize(3, 8);
 	DMatrix.SetSize(3, 3);
 	Stiff.SetSize(8, 8);
+	Displacement.SetSize(8);
+	GaussStrain = new FloatArray[nGaussPoint];
+	GaussStress = new FloatArray[nGaussPoint];
+	NodeStrain = new FloatArray[nNodes];
+	NodeStress = new FloatArray[nNodes];
+	for (int i = 0; i < 4; i++)
+	{
+		GaussStrain[i].SetSize(3);
+		GaussStress[i].SetSize(3);
+		NodeStrain[i].SetSize(3);
+		NodeStress[i].SetSize(3);
+	}
 }
 
 FloatMatrix Quadr::ComputeJacobi(GaussPoint & B)
@@ -396,6 +427,18 @@ FloatMatrix Quadr::ComputeBMarix(int inode)
 	BMatrix.at(2, 1) = DShapeX.at(0, inode);
 
 	return BMatrix;
+}
+FloatMatrix Quadr::ComputeBMatrix()
+{
+	FloatMatrix BMatrixBig(3, 8);
+	for (int i = 0; i < 4; i++)
+	{
+		BMatrixBig.at(0, i*2+0) = DShapeX.at(0, i);
+		BMatrixBig.at(1, i*2+1) = DShapeX.at(1, i);
+		BMatrixBig.at(2, i*2+0) = DShapeX.at(1, i);
+		BMatrixBig.at(2, i*2+1) = DShapeX.at(0, i);
+	}
+	return BMatrixBig;
 }
 FloatMatrix  Quadr::ComputeConstitutiveMatrix()
 {
@@ -462,11 +505,73 @@ FloatMatrix  Quadr::ComputeStiff()
 }
 FloatArray Quadr::ComputeStress()
 {
+	const double a = 1 + sqrt(3) / 2, b = -1.0 / 2, c = 1 - sqrt(3) / 2;
+	FloatMatrix TransMatrix(4, 4);
+	TransMatrix.at(0, 0) = a;
+	TransMatrix.at(0, 1) = b;
+	TransMatrix.at(0, 2) = c;
+	TransMatrix.at(0, 3) = b;
+	TransMatrix.at(1, 0) = b;
+	TransMatrix.at(1, 1) = a;
+	TransMatrix.at(1, 2) = b;
+	TransMatrix.at(1, 3) = c;
+	TransMatrix.at(2, 0) = c;
+	TransMatrix.at(2, 1) = b;
+	TransMatrix.at(2, 2) = a;
+	TransMatrix.at(2, 3) = b;
+	TransMatrix.at(3, 0) = b;
+	TransMatrix.at(3, 1) = c;
+	TransMatrix.at(3, 2) = b;
+	TransMatrix.at(3, 3) = a;
 	Strain.Clear();
+	
+	GaussPoint B;
+	FloatArray Coor;
+	FloatArray TransTemp(4);
+	Coor.SetSize(2);
+
+	Coor.at(0) = 0;
+	Coor.at(1) = 0;
+	B.Init(0, Coor);
+	ComputeJacobi(B);
+	BMatrixBig = ComputeBMatrix();
+	BMatrixBig.Print();
+	Displacement.Print();
+	Strain = BMatrixBig.Mult(Displacement);
+	Stress = DMatrix.Mult(Strain);
+
 	for (int inode = 0; inode < 4; inode++)
 	{
-
+		Coor.at(0) = P4ksicor[inode];
+		Coor.at(1) = P4etacor[inode];
+		B.Init(0, Coor);
+		ComputeJacobi(B);
+		BMatrixBig = ComputeBMatrix();
+		GaussStrain[inode] = BMatrixBig.Mult(Displacement);
+		GaussStress[inode] = DMatrix.Mult(Strain);
 	}
+	for (int i = 0; i < 3; i++)
+	{
+		for (int j = 0; j < 4; j++)
+		{
+			TransTemp.at(j) = GaussStrain[j].at(0);
+		}
+		TransTemp = TransMatrix.Mult(TransTemp);
+		for (int j = 0; j < 4; j++)
+		{
+			NodeStrain[j].at(0) = TransTemp.at(j);
+		}
+		for (int j = 0; j < 4; j++)
+		{
+			TransTemp.at(j) = GaussStress[j].at(0);
+		}
+		TransTemp = TransMatrix.Mult(TransTemp);
+		for (int j = 0; j < 4; j++)
+		{
+			NodeStress[j].at(0) = TransTemp.at(j);
+		}
+	}
+	return NULL;
 }
 Quadr::~Quadr()
 {

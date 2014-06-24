@@ -50,9 +50,6 @@ int LUSolve::Solver(FloatArray &B, FloatArray &X)
 
 bool LUSolve::Check(FloatArray &B, FloatArray &X)
 {
-	X.Print();
-	X =A.Mult(X);
-	X.Print();
 	k = m; n = 1;
 	lda = max(1, m); ldb = max(1, k); ldc = max(1, m);
 	if (Left == NULL)
