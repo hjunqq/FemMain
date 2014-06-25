@@ -178,6 +178,9 @@ Node::Node()
 {
 	Index = 0;
 	Count = 0;
+	Displacement.SetSize(3);
+	Stress.SetSize(3);
+	Strain.SetSize(3);
 }
 
 
@@ -252,7 +255,7 @@ FloatArray Node::GetPriStess()
 
 
 // 获得应力
-FloatMatrix Node::GetStress()
+FloatArray Node::GetStress()
 {
 	return Stress;
 	//TODO: insert return statement here
@@ -260,12 +263,34 @@ FloatMatrix Node::GetStress()
 
 
 // 获得应变
-FloatMatrix Node::GetStrain()
+FloatArray Node::GetStrain()
 {
 	return Strain;
 	//TODO: insert return statement here
 }
 
+void Node::SetDisplacement(FloatArray &NodeDisplacement)
+{
+	for (int i = 0; i < NodeDisplacement.GetSize(); i++)
+	{
+		Displacement.at(i) = NodeDisplacement.at(i);
+	}
+}
+
+void Node::SetStress(FloatArray &NodeStress)
+{
+	for (int i = 0; i < NodeStress.GetSize(); i++)
+	{
+		Stress.at(i) += NodeStress.at(i) / Count;
+	}
+}
+void Node::SetStrain(FloatArray &NodeStrain)
+{
+	for (int i = 0; i < NodeStrain.GetSize(); i++)
+	{
+		Strain.at(i) += NodeStrain.at(i) / Count;
+	}
+}
 
 GaussPoint::GaussPoint()
 {
@@ -406,10 +431,10 @@ FloatMatrix Quadr::ComputeJacobi(GaussPoint & B)
 	DShape.at(0, 3) = 0.25*(1 - eta);
 	DShape.at(1, 3) = -0.25*(1 + ksi);
 
-	//DShape.Print();
-	//Coors->Print();
+	DShape.Print();
+	Coors.Print();
 	Jacobi = DShape.Mult(Coors);
-	//Jacobi.Print();
+	Jacobi.Print();
 	Det = Jacobi.Determinant();
 
 	InvJacobi = Jacobi.Inverse();

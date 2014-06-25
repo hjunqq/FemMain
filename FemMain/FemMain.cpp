@@ -24,10 +24,6 @@ int main(int argc,char**argv)
 	string text;
 	stringstream stream;
 	ifstream inp("1.inp");
-	//streambuf* coutBuf = cout.rdbuf();
-	//ofstream of("out.txt");
-	//streambuf* fileBuf = of.rdbuf();
-	//cout.rdbuf(fileBuf);
 	getline(inp, text);
 
 	getline(inp, text);
@@ -40,9 +36,8 @@ int main(int argc,char**argv)
 
 	Fem1.ReadFiles();
 	Fem2.ReadFiles();
-
+	Fem1.OpenGidFile(); 
 	Fem1.GIDOutMesh();
-
 	int nStep = Fem1.GetStep();
 	Fem1.ShowTime();
 	for (int istep = 0; istep < nStep; istep++)
@@ -57,12 +52,10 @@ int main(int argc,char**argv)
 		Fem1.Solve();
 		Fem1.ComputeElementStress();
 		Fem1.CountElement();
-		Fem1.a
-		Fem1.GIDOutResult();
+		Fem1.SendResultToNode();
+		Fem1.GIDOutResult(istep);
 	}
-	//of.flush();
-	//of.close();
-	//cout.rdbuf(coutBuf);
+	Fem1.CloseGidFile();
 	return 0;
 }
 void FemMain::ShowTime()
@@ -209,7 +202,7 @@ void FemMain::ReadFiles()
 	stream.str("");
 	loa.getline(str, MAXCHAR);
 	stream << str;
-	stream >> nTotalLoad >> nFace >> nConcentrate >> nVolumn;
+	stream >> nTotalLoad >> nFace >> nVolumn >> nConcentrate;
 	Faces = new Face[nFace]();
 	Cons = new Concentrate[nConcentrate]();
 	Vols = new Volumn[nVolumn]();
@@ -418,13 +411,18 @@ void FemMain::ReadFiles()
 	mat.close();
 	pre.close();
 }
-
+void FemMain :: OpenGidFile()
+{
+	string GidMeshFile, GidResultFile;
+	
+	GidMeshFile = workdir + ".flavia.msh";
+	GidResultFile = workdir + ".flavia.res";
+	GiD_OpenPostMeshFile(GidMeshFile.c_str(), GiD_PostAscii);
+	GiD_OpenPostResultFile(GidResultFile.c_str(), GiD_PostAscii);
+}
 void FemMain::GIDOutMesh()
 {
-	string GidMeshFile;
 	FloatArray *Coor;
-	GidMeshFile = workdir + ".flavia.msh";
-	GiD_OpenPostMeshFile(GidMeshFile.c_str(), GiD_PostAscii);
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int type,nEle;
@@ -890,9 +888,37 @@ bool FemMain::ConvergeCheck()
 	return true;
 }
 
-void FemMain::GIDOutResult()
+void FemMain::GIDOutResult(int istep)
 {
+	FloatArray Displacement, Stress, Strain;
+	GiD_BeginResult("Displacement", "Static", istep, GiD_Vector, GiD_OnNodes, NULL, NULL, 0, NULL);
+	for (int inode = 0; inode < nNode; inode++)
+	{
+		Displacement = Nodes[inode].GetDisplacement();
+		GiD_Write2DVector(inode + 1, Displacement.at(0), Displacement.at(1));
+	}
+	GiD_EndResult();
+	GiD_BeginResult("Strain", "Static", istep, GiD_Vector, GiD_OnNodes, NULL, NULL, 0, NULL);
+	for (int inode = 0; inode < nNode; inode++)
+	{
+		Strain = Nodes[inode].GetStrain();
+		GiD_Write2DVector(inode + 1, Strain.at(0), Strain.at(1));
+	}
+	GiD_EndResult();
+	GiD_BeginResult("Stress", "Static", istep, GiD_Vector, GiD_OnNodes, NULL, NULL, 0, NULL);
+	for (int inode = 0; inode < nNode; inode++)
+	{
+		Stress = Nodes[inode].GetStress();
+		GiD_Write2DVector(inode + 1, Stress.at(0), Stress.at(1));
+	}
+	GiD_EndResult();
 
+}
+
+void::FemMain::CloseGidFile()
+{
+	GiD_ClosePostMeshFile();
+	GiD_ClosePostResultFile();
 }
 
 void FemMain::ComputeElementStress()
@@ -937,10 +963,63 @@ void FemMain::CountElement()
 				ENode = Elems[ielem]->GetNodeArray();
 				for (int inode = 0; inode < Type; inode++)
 				{
-					NodeIndex = ENode.at(ielem);
+					NodeIndex = ENode.at(inode);
 					Nodes[NodeIndex].AddCount();
 				}
 			}
 		}
+	}
+}
+
+void FemMain::SendResultToNode()
+{
+	for (int igroup = 0; igroup < nGroup; igroup++)
+	{
+		int Type = Groups[igroup].GetType();
+		int nEle = Groups[igroup].GetnElements();
+		if (Type == 4)
+		{
+			Quadr **Elems;
+			IntArray ENode(4);
+			FloatArray NodeStress(3);
+			FloatArray NodeStrain(3);
+			int NodeIndex;
+			Elems = new Quadr *[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
+			
+			for (int ielem = 0; ielem < nEle; ielem++)
+			{
+				ENode = Elems[ielem]->GetNodeArray();
+				for (int inode = 0; inode < Type; inode++)
+				{
+					NodeIndex = ENode.at(inode);
+					NodeStrain = Elems[ielem]->GetStrain(inode);
+					NodeStress = Elems[ielem]->GetStress(inode);
+					cout << "NodeStrain" << setw(10) << NodeIndex;
+					NodeStrain.Print();
+					cout << "NodeStress"<<setw(10)<<NodeIndex; 
+					NodeStress.Print();
+					Nodes[NodeIndex].SetStrain(NodeStrain);
+					Nodes[NodeIndex].SetStress(NodeStress); 
+				}
+			}
+		}
+	}
+	FloatArray NodeDisplacement(nDim);
+	for (int inode = 0; inode < nNode; inode++)
+	{
+		NodeDisplacement.Clear();
+		for (int idim = 0; idim < nDim; idim++)
+		{
+			if (DegreeOfFreedom.at(inode * 2 + idim) == 0)
+			{
+				NodeDisplacement.at(idim) = 0;
+			}
+			else
+			{
+				NodeDisplacement.at(idim) = ResultZero.at(DegreeOfFreedom.at(inode * 2 + idim) - 1);
+			}
+		}
+		Nodes[inode].SetDisplacement(NodeDisplacement);
 	}
 }

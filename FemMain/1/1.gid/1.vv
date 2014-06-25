@@ -1,6 +1,6 @@
-BeginZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_1\1.flavia.vv
-   x -33.988361358642578 33.988361358642578
-   y 17.32050895690918 -17.32050895690918
+BeginZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\1\1.gid\1.vv
+   x -1.0235676765441895 2.1412456035614014
+   y 1.3823003768920898 -0.19781580567359924
    z -51.961524963378906 51.961524963378906
    e 17.32050895690918
    v 0 0 0
@@ -12,8 +12,8 @@ BeginZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_
    pfo 0
    pf 4
    pv 0
-   NowUse 2
-   DrawingType 3
+   NowUse 1
+   DrawingType 0
    LightVector 90 90 150 0
    OGLShadow(UseShadows) 0
    OGLShadow(RenderMode) RenderNice
@@ -29,20 +29,9 @@ BeginZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_
    OGLStereo(EyeDistance) 0.075
    OGLStereo(LeftEyeDistance) 1 0 0 1
    OGLStereo(RightEyeDistance) 0 1 1 1
-EndZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\3_1\1.flavia.vv
+EndZE C:\Users\huijun\Documents\Visual Studio 2013\Projects\FemMain\FemMain\1\1.gid\1.vv
 
 BeginMirror
    Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror
 EndMirror
-
-
-BeginPostState
-BeginSingleMesh
-  Num meshes: 0
-  Num sets: 0
-  Num cuts: 0
-EndSingleMesh
-  Post_Prefs_Vector_Size: 0 32 32 32
-  ResultView: {Id 40} {No results} {} {} {} {} 4 0
-EndPostState
 

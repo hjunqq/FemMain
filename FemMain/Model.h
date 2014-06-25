@@ -22,8 +22,8 @@ private:
 	FloatArray Coordinates;
 	FloatArray Displacement;
 	FloatArray PrincipleStrain;
-	FloatMatrix  Stress;
-	FloatMatrix Strain;
+	FloatArray  Stress;
+	FloatArray  Strain;
 public:
 	// 节点初始化
 	void Init(int Index, FloatArray & Coordinate);
@@ -40,9 +40,13 @@ public:
 	// 获得主应力
 	FloatArray  GetPriStess();
 	// 获得应力
-	FloatMatrix  GetStress();
+	FloatArray  GetStress();
 	// 获得应变
-	FloatMatrix  GetStrain();
+	FloatArray  GetStrain();
+
+	void SetDisplacement(FloatArray &NodeDisplacement);
+	void SetStress(FloatArray & NodeStress);
+	void SetStrain(FloatArray & NodeStrain);
 	Node & operator =(const Node & N);
 };
 

@@ -694,8 +694,7 @@ double FloatMatrix::Determinant()
 	}
 	else
 	{
-		FloatMatrix *T;
-		T = new FloatMatrix(this->m - 1, this->n - 1);
+		FloatMatrix T(this->m - 1, this->n - 1);
 		for (int i = 0; i < m; i++)
 		{
 			for (int j = 0; j < m; j++)
@@ -704,24 +703,24 @@ double FloatMatrix::Determinant()
 				{
 					if (j < i && k < i)
 					{
-						T->at(j, k) = this->at(j, k);
+						T.at(j, k) = this->at(j, k);
 					}
 					if (j>i && k < i)
 					{
-						T->at(j - 1, k) = this->at(j, k);
+						T.at(j - 1, k) = this->at(j, k);
 					}
 					if (j<i && k>i)
 					{
-						T->at(j, k - 1) = this->at(j, k);
+						T.at(j, k - 1) = this->at(j, k);
 					}
 					if (j>i && k > i)
 					{
-						T->at(j - 1, k - 1) = this->at(j, k);
+						T.at(j - 1, k - 1) = this->at(j, k);
 					}
 				}
 			}
 
-			Det += this->at(i, 0)* pow(-1, i)*T->Determinant();
+			Det += this->at(i, 0)* pow(-1, i)*T.Determinant();
 		}
 		return Det;
 	}

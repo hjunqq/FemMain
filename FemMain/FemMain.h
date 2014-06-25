@@ -28,7 +28,7 @@ private:
 	
 
 	string prob, text,workdir;
-	string GidResFile;
+	string GidResultFile;
 	char str[MAXCHAR];
 	int nNode;
 	int nElem;
@@ -79,8 +79,10 @@ public:
 	string & WorkDir();
 	int GetStep();
 	void ReadFiles();
+	void OpenGidFile();
     void GIDOutMesh();
-	void GIDOutResult();
+	void GIDOutResult(int istep);
+	void CloseGidFile();
 	void ComputeDOF();
 	void InitSolve();
 	void ComputeElementStiff();
@@ -91,4 +93,5 @@ public:
 	bool ConvergeCheck();
 	void ComputeElementStress();
 	void CountElement();
+	void SendResultToNode();
 };
