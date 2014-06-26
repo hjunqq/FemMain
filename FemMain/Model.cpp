@@ -125,6 +125,21 @@ void Element::SetResult(FloatArray & Result)
 	}
 }
 
+void Element::SetInitialDisplacement(FloatArray & InitialDisplacement)
+{
+	for (int inode = 0; inode < nNodes; inode++)
+	{
+		int NodeIdx = Nodes.at(inode);
+		for (int idof = 0; idof < Dof; idof++)
+		{
+			if (InitialDisplacement.at(NodeIdx*Dof + idof) != 0)
+			{
+				Displacement.at(inode*Dof + idof) = InitialDisplacement.at(NodeIdx*Dof + idof);
+			}
+		}
+	}
+}
+
 FloatArray Element::GetStrain(int inode)
 {
 	return NodeStrain[inode];
@@ -132,6 +147,15 @@ FloatArray Element::GetStrain(int inode)
 FloatArray Element::GetStress(int inode)
 {
 	return NodeStress[inode];
+}
+FloatArray Element::GetDisplacement(int inode)
+{
+	FloatArray Disp(Dof);
+	for (int iDof = 0; iDof < Dof; iDof++)
+	{
+		Disp.at(iDof) = Displacement.at(inode*Dof + iDof);
+	}
+	return Disp;
 }
 
 void Element::Print()
@@ -431,10 +455,10 @@ FloatMatrix Quadr::ComputeJacobi(GaussPoint & B)
 	DShape.at(0, 3) = 0.25*(1 - eta);
 	DShape.at(1, 3) = -0.25*(1 + ksi);
 
-	DShape.Print();
-	Coors.Print();
+	//DShape.Print();
+	//Coors.Print();
 	Jacobi = DShape.Mult(Coors);
-	Jacobi.Print();
+	//Jacobi.Print();
 	Det = Jacobi.Determinant();
 
 	InvJacobi = Jacobi.Inverse();
@@ -524,8 +548,8 @@ FloatMatrix  Quadr::ComputeStiff()
 			}
 		}
 	}
-	cout << "**********************************************" << endl;
-	Stiff.Print();
+	//cout << "**********************************************" << endl;
+	//Stiff.Print();
 	return Stiff;
 }
 FloatArray Quadr::ComputeStress()
@@ -560,8 +584,8 @@ FloatArray Quadr::ComputeStress()
 	B.Init(0, Coor);
 	ComputeJacobi(B);
 	BMatrixBig = ComputeBMatrix();
-	BMatrixBig.Print();
-	Displacement.Print();
+	//BMatrixBig.Print();
+	//Displacement.Print();
 	Strain = BMatrixBig.Mult(Displacement);
 	Stress = DMatrix.Mult(Strain);
 
@@ -574,26 +598,27 @@ FloatArray Quadr::ComputeStress()
 		BMatrixBig = ComputeBMatrix();
 		GaussStrain[inode] = BMatrixBig.Mult(Displacement);
 		GaussStress[inode] = DMatrix.Mult(Strain);
+		GaussStrain[inode].Print();
 	}
 	for (int i = 0; i < 3; i++)
 	{
 		for (int j = 0; j < 4; j++)
 		{
-			TransTemp.at(j) = GaussStrain[j].at(0);
+			TransTemp.at(j) = GaussStrain[j].at(i);
 		}
 		TransTemp = TransMatrix.Mult(TransTemp);
 		for (int j = 0; j < 4; j++)
 		{
-			NodeStrain[j].at(0) = TransTemp.at(j);
+			NodeStrain[j].at(i) = TransTemp.at(j);
 		}
 		for (int j = 0; j < 4; j++)
 		{
-			TransTemp.at(j) = GaussStress[j].at(0);
+			TransTemp.at(j) = GaussStress[j].at(i);
 		}
 		TransTemp = TransMatrix.Mult(TransTemp);
 		for (int j = 0; j < 4; j++)
 		{
-			NodeStress[j].at(0) = TransTemp.at(j);
+			NodeStress[j].at(i) = TransTemp.at(j);
 		}
 	}
 	return NULL;

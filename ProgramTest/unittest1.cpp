@@ -73,6 +73,16 @@ namespace ProgramTest
 			}
 			Assert::AreEqual(13.0, A.at(4, 1));
 		}
+		TEST_METHOD(TestMatrix)
+		{
+			IntMatrix A(2,2);
+			A.at(0, 0) = 1;
+			A.at(0, 1) = 2;
+			A.at(1, 0) = 3;
+			A.at(1, 1) = 4;
+			double det=A.Determinant();
+			Assert::AreEqual(-2.0, det);
+		}
 		/*TEST_METHOD(TestNode)
 		{
 			Node A;

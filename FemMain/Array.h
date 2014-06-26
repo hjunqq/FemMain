@@ -46,6 +46,7 @@ public:
 	void Print();
 	void Set(int Value);
 	void SetSize(int Size);
+	
 
 	IntArray operator+(const IntArray & I)const;
 	IntArray & operator=(const IntArray & I);
@@ -145,7 +146,7 @@ public:
 	IntMatrix(const IntMatrix &I);
 	// 返回第m行n列元素
 	int & at(int i, int j);
-	int Determinant();
+	double Determinant();
 	IntMatrix  operator+(const IntMatrix & I)const;
 	IntMatrix & operator=(const IntMatrix & I);
 	IntMatrix  operator-(const IntMatrix & I)const;

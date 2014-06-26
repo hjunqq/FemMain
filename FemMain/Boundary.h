@@ -44,6 +44,8 @@ public:
 	int at(int i);
 	double atValue(int i);
 	int GetDir();
+	IntArray GetNode();
+	FloatArray GetValue();
 };
 
 class Interact :

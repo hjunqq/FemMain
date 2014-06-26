@@ -359,18 +359,18 @@ FloatArray FloatArray::Cross(FloatArray &F)const
 	M.at(2, 0) = F.Values[0];
 	M.at(2, 1) = F.Values[1];
 	M.at(2, 2) = F.Values[2];
-	M.Print();
+	//M.Print();
 	M.at(0, 0) = 1;
 	M.at(0, 1) = M.at(0, 2) = 0;
 	T.at(0) = M.Determinant();
-	M.Print();
+	//M.Print();
 	M.at(0, 1) = 1;
 	M.at(0, 0) = M.at(0, 2) = 0;
-	M.Print();
+	//M.Print();
 	T.at(1) = M.Determinant();
 	M.at(0, 2) = 1;
 	M.at(0, 0) = M.at(0, 1) = 0;
-	M.Print();
+	//M.Print();
 	T.at(2) = M.Determinant();
 	return T;
 }
@@ -409,6 +409,12 @@ FloatArray & FloatArray::operator = (const FloatArray & I)
 FloatArray FloatArray::operator - (const FloatArray & I)const
 {
 	FloatArray T;
+	T.size = I.size;
+	T.Values = new double[T.size];
+	for (int i = 0; i < T.size; i++)
+	{
+		T.Values[i] = this->Values[i] - I.Values[i];
+	}
 	return T;
 }
 
@@ -471,43 +477,34 @@ int & IntMatrix::at(int i, int j)
 	return Values[i*n + j];
 }
 
-int IntMatrix::Determinant()
+double IntMatrix::Determinant()
 {
-	int Det = 0;
+	double Det = 0;
 	if (this->m == 1)
 	{
 		return this->at(0, 0);
 	}
 	else
 	{
-		IntMatrix *T;
-		T = new IntMatrix(this->m - 1, this->n - 1);
+		IntMatrix T(this->m - 1, this->n - 1);
 		for (int i = 0; i < m; i++)
 		{
 			for (int j = 0; j < m; j++)
 			{
-				for (int k = 0; k < m; k++)
+				for (int k = 1; k < m; k++)
 				{
-					if (j < i && k < i)
+					if (j<i )
 					{
-						T->at(j, k) = this->at(j, k);
+						T.at(j, k - 1) = this->at(j, k);
 					}
-					if (j>i && k < i)
+					if (j>i )
 					{
-						T->at(j - 1, k) = this->at(j, k);
-					}
-					if (j<i && k>i)
-					{
-						T->at(j, k - 1) = this->at(j, k);
-					}
-					if (j>i && k > i)
-					{
-						T->at(j - 1, k - 1) = this->at(j, k);
+						T.at(j - 1, k - 1) = this->at(j, k);
 					}
 				}
 			}
 
-			Det += this->at(i, 0)* pow(-1, m)*T->Determinant();
+			Det += this->at(i, 0)* pow(-1, i)*T.Determinant();
 		}
 		return Det;
 	}
@@ -699,23 +696,15 @@ double FloatMatrix::Determinant()
 		{
 			for (int j = 0; j < m; j++)
 			{
-				for (int k = 0; k < m; k++)
+				for (int k = 1; k < m; k++)
 				{
-					if (j < i && k < i)
+					if (j < i )
 					{
-						T.at(j, k) = this->at(j, k);
+						T.at(j, k-1) = this->at(j, k);
 					}
-					if (j>i && k < i)
+					if (j>i )
 					{
-						T.at(j - 1, k) = this->at(j, k);
-					}
-					if (j<i && k>i)
-					{
-						T.at(j, k - 1) = this->at(j, k);
-					}
-					if (j>i && k > i)
-					{
-						T.at(j - 1, k - 1) = this->at(j, k);
+						T.at(j - 1, k-1) = this->at(j, k);
 					}
 				}
 			}

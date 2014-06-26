@@ -70,6 +70,7 @@ private:
 	FloatArray InitialStain;
 	FloatArray InteractLoad;
 	FloatArray InitialDispLoad;
+	FloatArray IniDisplacement;
 	FloatArray TotalLoad;
 
 	LUSolve *LUSolver;
@@ -94,4 +95,6 @@ public:
 	void ComputeElementStress();
 	void CountElement();
 	void SendResultToNode();
+	IntArray GetInteractNode();
+	FloatArray GetInteractResult(IntArray & InteractNode);
 };

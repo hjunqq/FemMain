@@ -124,6 +124,7 @@ public:
 
 	void SetCoor(FloatMatrix & Coor);
 	void SetResult(FloatArray & Result);
+	void SetInitialDisplacement(FloatArray &InitialDisplacement);
 
 	int GetIndex();
 	void FillDof(IntArray & DegreeOfFreedom);
@@ -132,6 +133,7 @@ public:
 	FloatArray GetShape();
 	FloatArray GetStrain(int inode);
 	FloatArray GetStress(int inode);
+	FloatArray GetDisplacement(int inode);
 	double GetDet();
 	virtual void Print();
 };

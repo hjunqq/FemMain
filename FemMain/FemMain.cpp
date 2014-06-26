@@ -24,6 +24,9 @@ int main(int argc,char**argv)
 	string text;
 	stringstream stream;
 	ifstream inp("1.inp");
+	IntArray InteractNode;
+	FloatArray InteractValue;
+
 	getline(inp, text);
 
 	getline(inp, text);
@@ -37,25 +40,48 @@ int main(int argc,char**argv)
 	Fem1.ReadFiles();
 	Fem2.ReadFiles();
 	Fem1.OpenGidFile(); 
+	Fem2.OpenGidFile();
+
 	Fem1.GIDOutMesh();
+	Fem2.GIDOutMesh();
 	int nStep = Fem1.GetStep();
 	Fem1.ShowTime();
 	for (int istep = 0; istep < nStep; istep++)
 	{
 		Fem1.ComputeDOF();
+		Fem2.ComputeDOF();
+
 		Fem1.InitSolve();
+		Fem2.InitSolve();
+
 		Fem1.ComputeElementStiff();
+		Fem2.ComputeElementStiff();
 
 		Fem1.AssembleStiff();
+		Fem2.AssembleStiff();
 
 		Fem1.ApplyLoad();
+		Fem2.ApplyLoad();
+
 		Fem1.Solve();
+		Fem2.Solve();
+		InteractNode = Fem1.GetInteractNode();
+		InteractValue = Fem2.GetInteractResult(InteractNode);
+
 		Fem1.ComputeElementStress();
+		Fem2.ComputeElementStress();
+
 		Fem1.CountElement();
+		Fem2.CountElement();
+
 		Fem1.SendResultToNode();
+		Fem2.SendResultToNode();
+
 		Fem1.GIDOutResult(istep);
+		Fem2.GIDOutResult(istep);
 	}
 	Fem1.CloseGidFile();
+	Fem2.CloseGidFile();
 	return 0;
 }
 void FemMain::ShowTime()
@@ -349,6 +375,7 @@ void FemMain::ReadFiles()
 		stream.clear();
 		stream << str;
 		stream >> Dir >> nNode;
+		Dir--;
 		Node = new IntArray(nNode);
 		Value = new FloatArray(nNode);
 		pre.getline(str, MAXCHAR);
@@ -547,6 +574,7 @@ void FemMain::InitSolve()
 	ExternalForce .SetSize(TotalDOF);
 	InitialStain .SetSize(TotalDOF);
 	InitialDispLoad .SetSize(TotalDOF);
+	IniDisplacement.SetSize(nNode*nDof);
 	TotalLoad.SetSize(TotalDOF);
 	InteractLoad.SetSize(TotalDOF);
 	int nRow, nCol, NonZero;
@@ -617,7 +645,7 @@ void FemMain::InitSolve()
 			}
 		}
 	}
-	ColIdx->Print();
+	//ColIdx->Print();
 	
 }
 
@@ -689,7 +717,7 @@ void FemMain::AssembleStiff()
 
 		}
 	}
-	Stiff.Print();
+	//Stiff.Print();
 }
 
 void FemMain::ApplyLoad()
@@ -857,14 +885,113 @@ void FemMain::ApplyLoad()
 			}
 		}
 	}
+	for (int iDisp = 0; iDisp < nDisp; iDisp++)
+	{
+		FloatArray NodeDisplacement;
+		FloatMatrix A;
+		FloatMatrix LStiff,EStiff;
+		int iedof, jedof;
+		IntArray EDof;
+		int NodeIndex, iDir, nDispDof, nDispNode;
+		IntArray DispDof;
+		IntArray DispNode;
+
+		A.SetSize(TotalDOF, TotalDOF);
+		
+		DispDof = DegreeOfFreedom;
+		nDispDof = TotalDOF;
+		iDir = Disp[iDisp].GetDir();
+		nDispNode = Disp[iDisp].GetnNode();
+		
+		DispNode = Disp[iDisp].GetNode();
+		NodeDisplacement = Disp[iDisp].GetValue();
+
+		for (int inode = 0; inode < nDispNode; inode++)
+		{
+			NodeIndex = Disp[iDisp].at(inode);
+			nDispDof++;
+			DispDof.at(NodeIndex * 2 + iDir) = nDispDof;
+			IniDisplacement.at(NodeIndex * 2 + iDir) += NodeDisplacement.at(inode);
+		}
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					Elems[ielem]->FillDof(DispDof);
+				}
+			}
+		}
+		nDispDof -= TotalDOF;
+		LStiff.SetSize(TotalDOF, nDispDof);
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					EStiff = Elems[ielem]->GetStiff();
+					EDof = Elems[ielem]->GetDof();
+					for (int idof = 0; idof < Type*nDof; idof++)
+					{
+						iedof = EDof.at(idof);
+						for (int jdof = 0; jdof < Type*nDof; jdof++)
+						{
+							jedof = EDof.at(jdof);
+							if (iedof != 0 && jedof != 0)
+							{
+								if (jedof>TotalDOF && iedof <= TotalDOF)
+								{
+									LStiff.at(iedof - 1, jedof - 1 - TotalDOF) += EStiff.at(idof, jdof);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					Elems[ielem]->FillDof(DegreeOfFreedom);
+				}
+			}
+		}
+		InitialDispLoad = InitialDispLoad - LStiff.Mult(NodeDisplacement);
+	}
 }
 
 void FemMain::Solve()
 {
+	TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+	cout << "ExternForce";
+	ExternalForce.Print();
+	cout << "InitialDispLoad";
+	InitialDispLoad.Print();
+	ShowTime();
 	LUSolver = new LUSolve();
 	LUSolver->Decomposition(Stiff);
-	LUSolver->Solver(ExternalForce, ResultZero);
-	LUSolver->Check(ExternalForce, ResultZero);
+	LUSolver->Solver(TotalLoad, ResultZero);
+	LUSolver->Check(TotalLoad, ResultZero);
 }
 
 bool FemMain::ConvergeCheck()
@@ -923,6 +1050,22 @@ void::FemMain::CloseGidFile()
 
 void FemMain::ComputeElementStress()
 {
+	if (nDisp)
+	for (int igroup = 0; igroup < nGroup; igroup++)
+	{
+		int Type = Groups[igroup].GetType();
+		int nEle = Groups[igroup].GetnElements();
+		if (Type == 4)
+		{
+			Quadr **Elems;
+			Elems = new Quadr *[nEle];
+			Elems = Groups[igroup].GetElement(**Elems);
+			for (int ielem = 0; ielem < nEle; ielem++)
+			{
+				Elems[ielem]->SetInitialDisplacement(IniDisplacement);
+			}
+		}
+	}
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();
@@ -983,6 +1126,7 @@ void FemMain::SendResultToNode()
 			IntArray ENode(4);
 			FloatArray NodeStress(3);
 			FloatArray NodeStrain(3);
+			FloatArray Displacement(2);
 			int NodeIndex;
 			Elems = new Quadr *[nEle];
 			Elems = Groups[igroup].GetElement(**Elems);
@@ -995,31 +1139,46 @@ void FemMain::SendResultToNode()
 					NodeIndex = ENode.at(inode);
 					NodeStrain = Elems[ielem]->GetStrain(inode);
 					NodeStress = Elems[ielem]->GetStress(inode);
-					cout << "NodeStrain" << setw(10) << NodeIndex;
-					NodeStrain.Print();
-					cout << "NodeStress"<<setw(10)<<NodeIndex; 
-					NodeStress.Print();
+					Displacement = Elems[ielem]->GetDisplacement(inode);
+					//cout << "NodeStrain" << setw(10) << NodeIndex;
+					//NodeStrain.Print();
+					//cout << "NodeStress"<<setw(10)<<NodeIndex; 
+					//NodeStress.Print();
 					Nodes[NodeIndex].SetStrain(NodeStrain);
 					Nodes[NodeIndex].SetStress(NodeStress); 
+					Nodes[NodeIndex].SetDisplacement(Displacement);
 				}
 			}
 		}
 	}
-	FloatArray NodeDisplacement(nDim);
-	for (int inode = 0; inode < nNode; inode++)
+	//FloatArray NodeDisplacement(nDim);
+	//for (int inode = 0; inode < nNode; inode++)
+	//{
+	//	NodeDisplacement.Clear();
+	//	for (int idim = 0; idim < nDim; idim++)
+	//	{
+	//		if (DegreeOfFreedom.at(inode * 2 + idim) == 0)
+	//		{
+	//			NodeDisplacement.at(idim) = 0;
+	//		}
+	//		else
+	//		{
+	//			NodeDisplacement.at(idim) = ResultZero.at(DegreeOfFreedom.at(inode * 2 + idim) - 1);
+	//		}
+	//	}
+	//	
+	//}
+}
+
+IntArray FemMain::GetInteractNode()
+{
+	return Inters[0].GetRemote();
+}
+FloatArray FemMain::GetInteractResult(IntArray & InteractNode)
+{
+	int nInterNode = InteractNode.GetSize();
+	for (int inode = 0; inode < nInterNode; inode++)
 	{
-		NodeDisplacement.Clear();
-		for (int idim = 0; idim < nDim; idim++)
-		{
-			if (DegreeOfFreedom.at(inode * 2 + idim) == 0)
-			{
-				NodeDisplacement.at(idim) = 0;
-			}
-			else
-			{
-				NodeDisplacement.at(idim) = ResultZero.at(DegreeOfFreedom.at(inode * 2 + idim) - 1);
-			}
-		}
-		Nodes[inode].SetDisplacement(NodeDisplacement);
+		int NodeIdx
 	}
 }

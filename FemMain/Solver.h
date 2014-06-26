@@ -1,6 +1,7 @@
 #pragma once
 #include "Array.h"
 #include "mkl.h"
+#include <algorithm>
 class Solver
 {
 public:

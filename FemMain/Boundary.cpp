@@ -108,6 +108,16 @@ double Displace::atValue(int i)
 	return Values.at(i);
 }
 
+IntArray Displace::GetNode()
+{
+	return Node;
+}
+
+FloatArray Displace::GetValue()
+{
+	return Values;
+}
+
 
 int Displace::GetDir()
 {
