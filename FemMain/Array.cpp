@@ -296,6 +296,15 @@ double FloatArray::Dot(FloatArray * B)
 	return sum;
 }
 
+double FloatArray::Norm()
+{
+	double norm = 0.0;
+	for (int i = 0; i < size; i++)
+	{
+		norm += abs(Values[i]);
+	}
+	return norm;
+}
 
 // Çå¿Õ
 int FloatArray::Clear()
@@ -409,11 +418,21 @@ FloatArray & FloatArray::operator = (const FloatArray & I)
 FloatArray FloatArray::operator - (const FloatArray & I)const
 {
 	FloatArray T;
-	T.size = I.size;
-	T.Values = new double[T.size];
-	for (int i = 0; i < T.size; i++)
+	T.size = size;
+	T.Values = new double[size];
+	if (I.size > 0)
 	{
-		T.Values[i] = this->Values[i] - I.Values[i];
+		for (int i = 0; i < T.size; i++)
+		{
+			T.Values[i] = this->Values[i] - I.Values[i];
+		}
+	}
+	else
+	{
+		for (int i = 0; i < T.size; i++)
+		{
+			T.Values[i] = this->Values[i];
+		}
 	}
 	return T;
 }

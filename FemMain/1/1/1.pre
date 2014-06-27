@@ -5,7 +5,7 @@ dir,npoint   fix
 1 2 5 11 17 
 dir,npoint
 2 5 
-1 2 5 11 17    17        18        22        24        25 
+1 2 5 11 17
 dir npoint   disp
  1      1
  0e-5
@@ -13,4 +13,4 @@ dir npoint   disp
 npoint,InteractDomain   inter
 5 2
 16 19 21 23 25
-6      7      9      15     22 
+6 7 9 15 22 

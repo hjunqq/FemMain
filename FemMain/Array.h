@@ -75,6 +75,7 @@ public:
 	FloatArray Times(double Scalar)const;
 	// µã³Ë
 	double Dot(FloatArray * );
+	double Norm();
 	FloatArray Cross(FloatArray &F)const;
 	// Çå¿Õ
 	int Clear();

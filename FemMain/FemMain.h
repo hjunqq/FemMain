@@ -49,6 +49,7 @@ private:
 	
 	ofstream chk, res;
 	ifstream glb, cor, ele, grp, loa, mat, pre;
+	GiD_FILE FMesh, FRes;
 	time_t tNow;
 	struct tm tmLocal;
 	int Id, nPorcs;
