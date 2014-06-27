@@ -598,7 +598,7 @@ FloatArray Quadr::ComputeStress()
 		BMatrixBig = ComputeBMatrix();
 		GaussStrain[inode] = BMatrixBig.Mult(Displacement);
 		GaussStress[inode] = DMatrix.Mult(Strain);
-		GaussStrain[inode].Print();
+		//GaussStrain[inode].Print();
 	}
 	for (int i = 0; i < 3; i++)
 	{

@@ -73,7 +73,8 @@ int main(int argc,char**argv)
 		do
 		{
 			iiter++;
-			
+			Fem1.GIDOutResult(iiter*2);
+			Fem2.GIDOutResult(iiter*2);
 		
 			InteractNode = Fem1.GetInteractNode();
 			InteractValue = Fem2.GetInteractResult(InteractNode);
@@ -91,7 +92,7 @@ int main(int argc,char**argv)
 			{
 				Converge = true;
 			}
-
+			cout << "Error=" << setw(20) << InteractValueOld.Norm() << setw(10) << iiter << endl;
 			InteractValueOld = InteractValue;
 
 			Fem1.Solve();
@@ -106,11 +107,11 @@ int main(int argc,char**argv)
 			Fem1.SendResultToNode();
 			Fem2.SendResultToNode();
 
-			Fem1.GIDOutResult(iiter);
-			Fem2.GIDOutResult(iiter);
+			Fem1.GIDOutResult(iiter*2+1);
+			Fem2.GIDOutResult(iiter*2+1);
 			
 
-		} while (Converge==false && iiter<10);
+		} while (Converge==false && iiter<50);
 
 	}
 	Fem1.CloseGidFile();
@@ -1034,11 +1035,11 @@ void FemMain::ApplyLoad()
 void FemMain::Solve()
 {
 	TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
-	cout << "ExternForce";
-	ExternalForce.Print();
-	cout << "InteractLoad";
-	InteractLoad.Print();
-	ShowTime();
+	//cout << "ExternForce";
+	//ExternalForce.Print();
+	//cout << "InteractLoad";
+	//InteractLoad.Print();
+	//ShowTime();
 	LUSolver = new LUSolve();
 	LUSolver->Decomposition(Stiff);
 	LUSolver->Solver(TotalLoad, ResultZero);
@@ -1203,7 +1204,7 @@ FloatArray FemMain::GetInteractResult(IntArray & InteractNode)
 		int NodeIdx = InteractNode.at(inode);
 		for (int iDof = 0; iDof < nDof; iDof++)
 		{
-			int DofIdx = DegreeOfFreedom.at(inode * 2 + iDof);
+			int DofIdx = DegreeOfFreedom.at(NodeIdx * 2 + iDof);
 			InteractResult.at(inode * 2 + iDof) = ResultZero.at(DofIdx);
 		}
 	}
