@@ -67,6 +67,8 @@ int main(int argc,char**argv)
 		Fem2.Solve();
 		InteractNode = Fem1.GetInteractNode();
 		InteractValue = Fem2.GetInteractResult(InteractNode);
+		Fem1.SetInteractResult(InteractValue);
+
 
 		Fem1.ComputeElementStress();
 		Fem2.ComputeElementStress();
@@ -575,6 +577,7 @@ void FemMain::InitSolve()
 	InitialStain .SetSize(TotalDOF);
 	InitialDispLoad .SetSize(TotalDOF);
 	IniDisplacement.SetSize(nNode*nDof);
+	InterDisplace.SetSize(nNode*nDof);
 	TotalLoad.SetSize(TotalDOF);
 	InteractLoad.SetSize(TotalDOF);
 	int nRow, nCol, NonZero;
@@ -1151,23 +1154,6 @@ void FemMain::SendResultToNode()
 			}
 		}
 	}
-	//FloatArray NodeDisplacement(nDim);
-	//for (int inode = 0; inode < nNode; inode++)
-	//{
-	//	NodeDisplacement.Clear();
-	//	for (int idim = 0; idim < nDim; idim++)
-	//	{
-	//		if (DegreeOfFreedom.at(inode * 2 + idim) == 0)
-	//		{
-	//			NodeDisplacement.at(idim) = 0;
-	//		}
-	//		else
-	//		{
-	//			NodeDisplacement.at(idim) = ResultZero.at(DegreeOfFreedom.at(inode * 2 + idim) - 1);
-	//		}
-	//	}
-	//	
-	//}
 }
 
 IntArray FemMain::GetInteractNode()
@@ -1176,9 +1162,112 @@ IntArray FemMain::GetInteractNode()
 }
 FloatArray FemMain::GetInteractResult(IntArray & InteractNode)
 {
+	FloatArray InteractResult;
 	int nInterNode = InteractNode.GetSize();
+	InteractResult.SetSize(nInterNode*nDof);
 	for (int inode = 0; inode < nInterNode; inode++)
 	{
-		int NodeIdx
+		int NodeIdx = InteractNode.at(inode);
+		for (int iDof = 0; iDof < nDof; iDof++)
+		{
+			int DofIdx = DegreeOfFreedom.at(inode * 2 + iDof);
+			InteractResult.at(inode * 2 + iDof) = ResultZero.at(DofIdx);
+		}
 	}
+
+	return InteractResult;
+}
+void FemMain::SetInteractResult(FloatArray & InteractResult)
+{
+	IntArray LocalNode, RemoteNode;
+	LocalNode = Inters[0].GetLocal();
+	RemoteNode = Inters[0].GetRemote();
+
+	FloatMatrix A;
+	FloatMatrix IStiff, EStiff;
+	int iedof, jedof;
+	IntArray EDof;
+	int NodeIndex, nInterDof, nInterNode;
+	IntArray InterDof;
+
+	nInterNode = LocalNode.GetSize();
+	A.SetSize(TotalDOF, TotalDOF);
+	InterDof = DegreeOfFreedom;
+	nInterDof = TotalDOF;
+	for (int inode = 0; inode < nInterNode; inode++)
+	{
+		NodeIndex = LocalNode.at(inode);
+		for (int iDof = 0; iDof < nDof; iDof++)
+		{
+			nInterDof++;
+			InterDof.at(NodeIndex * 2 + iDof) = nInterDof;
+			InterDisplace.at(NodeIndex * 2 + iDof) += InteractResult.at(inode * 2 + iDof);
+		}
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					Elems[ielem]->FillDof(InterDof);
+				}
+			}
+		}
+		nInerDof
+	}
+		
+		nDispDof -= TotalDOF;
+		LStiff.SetSize(TotalDOF, nDispDof);
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					EStiff = Elems[ielem]->GetStiff();
+					EDof = Elems[ielem]->GetDof();
+					for (int idof = 0; idof < Type*nDof; idof++)
+					{
+						iedof = EDof.at(idof);
+						for (int jdof = 0; jdof < Type*nDof; jdof++)
+						{
+							jedof = EDof.at(jdof);
+							if (iedof != 0 && jedof != 0)
+							{
+								if (jedof>TotalDOF && iedof <= TotalDOF)
+								{
+									LStiff.at(iedof - 1, jedof - 1 - TotalDOF) += EStiff.at(idof, jdof);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		for (int igroup = 0; igroup < nGroup; igroup++)
+		{
+			int Type = Groups[igroup].GetType();
+			int nEle = Groups[igroup].GetnElements();
+			if (Type == 4)
+			{
+				Quadr **Elems;
+				Elems = new Quadr*[nEle];
+				Elems = Groups[igroup].GetElement(**Elems);
+				for (int ielem = 0; ielem < nEle; ielem++)
+				{
+					Elems[ielem]->FillDof(DegreeOfFreedom);
+				}
+			}
+		}
+		InitialDispLoad = InitialDispLoad - LStiff.Mult(NodeDisplacement);
 }

@@ -71,6 +71,7 @@ private:
 	FloatArray InteractLoad;
 	FloatArray InitialDispLoad;
 	FloatArray IniDisplacement;
+	FloatArray InterDisplace;
 	FloatArray TotalLoad;
 
 	LUSolve *LUSolver;
@@ -97,4 +98,5 @@ public:
 	void SendResultToNode();
 	IntArray GetInteractNode();
 	FloatArray GetInteractResult(IntArray & InteractNode);
+	void SetInteractResult(FloatArray &InteractResult);
 };
