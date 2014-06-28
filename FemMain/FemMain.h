@@ -4,11 +4,15 @@
 #pragma comment(lib,"GidLib\\x32\\zlib.lib")
 #pragma comment(lib,"GidLib\\x32\\hdf5.lib")
 #pragma comment(lib,"GidLib\\x32\\gidpost.lib")
+#pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\cxx.lib")
+#pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
 #endif
 #ifdef x64
 #pragma comment(lib,"GidLib\x64\zlib.lib")
 #pragma comment(lib,"GidLib\x64\hdf5.lib")
 #pragma comment(lib,"GidLib\x64\gidpost.lib")
+#pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\cxx.lib")
+#pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
 #endif
 #include "Array.h"
 #include "Model.h"
@@ -17,6 +21,7 @@
 #include "Material.h"
 #include "gidpost.h"
 #include "Solver.h"
+#include "mpi.h"
 
 #define MAXCHAR 200
 
@@ -53,7 +58,7 @@ private:
 	GiD_FILE FMesh, FRes;
 	time_t tNow;
 	struct tm tmLocal;
-	int Id, nPorcs;
+	int Id, nProces;
 	
 	Group *Groups;
 	Material *Mats;
@@ -102,4 +107,8 @@ public:
 	IntArray GetInteractNode();
 	FloatArray GetInteractResult(IntArray & InteractNode);
 	void SetInteractResult(FloatArray &InteractResult);
+
+	void GetSize(int & NProces);
+	void GetID(int &MyID);
+	void ExchangeData();
 };

@@ -19,9 +19,8 @@
 #include "FemMain.h"
 int main(int argc,char**argv)
 {
-	FemMain Fem1;
-	FemMain Fem2;
-	string text;
+	FemMain Fem;
+	string text1,text2;
 	stringstream stream;
 	ifstream inp("1.inp");
 	IntArray InteractNode;
@@ -29,77 +28,81 @@ int main(int argc,char**argv)
 	bool Converge;
 	double Error;
 	int MaxIter;
-
-	getline(inp, text);
-
-	getline(inp, text);
-	Fem1.WorkDir()=text;
-	getline(inp, text);
-	Fem2.WorkDir()=text;
+	int NProces, MyID;
+	MPI::Init(argc, argv);
+	NProces = MPI::COMM_WORLD.Get_size();
+	MyID = MPI::COMM_WORLD.Get_rank();
+	Fem.GetSize(NProces);
+	Fem.GetID(MyID);
+	getline(inp, text1);
+	getline(inp, text1);
+	getline(inp, text2);
+	if (MyID == 0)
+	{
+		Fem.WorkDir() = text1;
+	}
+	else if (MyID == 1)
+	{
+		Fem.WorkDir() = text2;
+	}
 	
 	inp.close();
-
+	MPI::COMM_WORLD.Barrier();
 	GiD_PostInit();
 
-	Fem1.ShowTime();
+	Fem.ShowTime();
 
-	Fem1.ReadFiles();
-	Fem2.ReadFiles();
-	Fem1.OpenGidFile(); 
-	Fem2.OpenGidFile();
+	Fem.ReadFiles();
 
-	Fem1.GIDOutMesh();
-	Fem2.GIDOutMesh();
-	int nStep = Fem1.GetStep();
+	Fem.OpenGidFile(); 
+
+
+	Fem.GIDOutMesh();
+
+	int nStep = Fem.GetStep();
 	int iiter = 0;
-	MaxIter = Fem1.GetMaxIter();
-	Fem1.ShowTime();
+	MaxIter = Fem.GetMaxIter();
+	Fem.ShowTime();
+	MPI::COMM_WORLD.Barrier();
+
 	for (int istep = 0; istep < nStep; istep++)
 	{
-		Fem1.ComputeDOF();
-		Fem2.ComputeDOF();
+		Fem.ComputeDOF();
 
-		Fem1.InitSolve();
-		Fem2.InitSolve();
+		Fem.InitSolve();
 
-		Fem1.ComputeElementStiff();
-		Fem2.ComputeElementStiff();
+		Fem.ComputeElementStiff();
 
-		Fem1.AssembleStiff();
-		Fem2.AssembleStiff();
 
-		Fem1.ApplyLoad();
-		Fem2.ApplyLoad();
+		Fem.AssembleStiff();
+	
+
+		Fem.ApplyLoad();
+
+		
+		Fem.Solve();
+
+		Fem.ComputeElementStress();
+
+
+		Fem.CountElement();
+
+
+		Fem.SendResultToNode();
+
+		Fem.GIDOutResult(iiter);
 		Converge = false;
-		Fem1.Solve();
-		Fem2.Solve();
-		Fem1.ComputeElementStress();
-		Fem2.ComputeElementStress();
-
-		Fem1.CountElement();
-		Fem2.CountElement();
-
-		Fem1.SendResultToNode();
-		Fem2.SendResultToNode();
-		Fem1.GIDOutResult(iiter);
-		Fem2.GIDOutResult(iiter);
 		do 
 		{
 			iiter++;
-		
-			InteractNode = Fem1.GetInteractNode();
-			InteractValue = Fem2.GetInteractResult(InteractNode);
-			Fem1.SetInteractResult(InteractValue);
 			
-			//cout << "Current Step ";
-			//InteractValue.Print();
+			Fem.ExchangeData();
+			InteractNode = Fem.GetInteractNode();
+			InteractValue = Fem.GetInteractResult(InteractNode);
+			Fem.SetInteractResult(InteractValue);
 
-			InteractNode = Fem2.GetInteractNode();
-			InteractValue = Fem1.GetInteractResult(InteractNode);
-			Fem2.SetInteractResult(InteractValue);
+			Fem.Solve();
 
-			Fem1.Solve();
-			Fem2.Solve();
 
 			//cout << "Last Step    ";
 			//InteractValueOld.Print();
@@ -116,24 +119,23 @@ int main(int argc,char**argv)
 			cout << "Error=" << setw(20) << Error << setw(10) << iiter << endl;
 			InteractValueOld = InteractValue;
 
-			Fem1.ComputeElementStress();
-			Fem2.ComputeElementStress();
+			Fem.ComputeElementStress();
 
-			Fem1.CountElement();
-			Fem2.CountElement();
+			Fem.CountElement();
 
-			Fem1.SendResultToNode();
-			Fem2.SendResultToNode();
-			Fem1.GIDOutResult(iiter);
-			Fem2.GIDOutResult(iiter);
+			Fem.SendResultToNode();
+
+			Fem.GIDOutResult(iiter);
+
 
 		} while (Converge == false && iiter<MaxIter);
 
 	}
-	Fem1.CloseGidFile();
-	Fem2.CloseGidFile();
+	Fem.CloseGidFile();
 
 	GiD_PostDone();
+	MPI::COMM_WORLD.Barrier();
+	MPI::Finalize();
 	return 0;
 }
 void FemMain::ShowTime()
@@ -1343,4 +1345,22 @@ void FemMain::SetInteractResult(FloatArray & InteractResult)
 		}
 	}
 	InteractLoad = InteractLoad - IStiff.Mult(InteractResult);
+}
+
+void FemMain::GetSize(int &NProces)
+{
+	nProces = NProces;
+}
+
+void FemMain::GetID(int &MyID)
+{
+	Id = MyID;
+}
+
+void FemMain::ExchangeData()
+{
+	IntArray InteractNode;
+	MPI::COMM_WORLD.Barrier();
+	InteractNode = GetInteractNode();
+	MPI::COMM_WORLD.Send(InteractNode.GetValue(),InteractNode.GetSize(),)
 }
