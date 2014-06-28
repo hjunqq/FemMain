@@ -169,6 +169,11 @@ int IntArray::GetSize()
 	return size;
 }
 
+int *IntArray::GetValue()
+{
+	return Values;
+}
+
 
 // 打印变量内容
 void IntArray::Print()
@@ -254,6 +259,10 @@ int FloatArray::GetSize()
 	return size;
 }
 
+double *FloatArray::GetValue()
+{
+	return Values;
+}
 
 // 打印数组
 void FloatArray::Print()

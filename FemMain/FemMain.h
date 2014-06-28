@@ -8,9 +8,9 @@
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
 #endif
 #ifdef x64
-#pragma comment(lib,"GidLib\x64\zlib.lib")
-#pragma comment(lib,"GidLib\x64\hdf5.lib")
-#pragma comment(lib,"GidLib\x64\gidpost.lib")
+#pragma comment(lib,"GidLib\\x64\\zlib.lib")
+#pragma comment(lib,"GidLib\\x64\\hdf5.lib")
+#pragma comment(lib,"GidLib\\x64\\gidpost.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\cxx.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
 #endif
@@ -81,6 +81,9 @@ private:
 	FloatArray InterDisplace;
 	FloatArray TotalLoad;
 
+	IntArray InteractNode;
+	FloatArray InteractValue;
+
 	LUSolve *LUSolver;
 
 public:
@@ -110,5 +113,5 @@ public:
 
 	void GetSize(int & NProces);
 	void GetID(int &MyID);
-	void ExchangeData();
+	FloatArray ExchangeData();
 };

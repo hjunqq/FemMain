@@ -96,23 +96,16 @@ int main(int argc,char**argv)
 		{
 			iiter++;
 			
-			Fem.ExchangeData();
-			InteractNode = Fem.GetInteractNode();
-			InteractValue = Fem.GetInteractResult(InteractNode);
+			InteractValue=Fem.ExchangeData();
 			Fem.SetInteractResult(InteractValue);
 
 			Fem.Solve();
 
-
-			//cout << "Last Step    ";
-			//InteractValueOld.Print();
-			//cout << "Current Step ";
-			//InteractValue.Print();
 			InteractValueOld = InteractValue-InteractValueOld;
 			//cout << "Error        ";
 			//InteractValueOld.Print();
 			Error = InteractValueOld.Norm() / abs(InteractValue.Mean());
-			if (Error < 1e-11)
+			if (Error < 1e-5)
 			{
 				Converge = true;
 			}
@@ -465,6 +458,7 @@ void FemMain::ReadFiles()
 		stream.clear();
 		stream << str;
 		stream >> nNode >> AdjDomain;
+		AdjDomain--;
 		Local = new IntArray(nNode);
 		Remote = new IntArray(nNode);
 		pre.getline(str, MAXCHAR);
@@ -1357,10 +1351,36 @@ void FemMain::GetID(int &MyID)
 	Id = MyID;
 }
 
-void FemMain::ExchangeData()
+FloatArray FemMain::ExchangeData()
 {
-	IntArray InteractNode;
+	int *RemoteNode;
+	double *Value;
 	MPI::COMM_WORLD.Barrier();
 	InteractNode = GetInteractNode();
-	MPI::COMM_WORLD.Send(InteractNode.GetValue(),InteractNode.GetSize(),)
+	int TagNode = 1,TagValue=2;
+	int AdjDomain = Inters[0].GetAdj();
+	int size = InteractNode.GetSize();
+	InteractValue.SetSize(size*nDof);
+
+	RemoteNode = new int[size]();
+	Value = new double[size*nDof]();
+	RemoteNode = InteractNode.GetValue();
+	cout << AdjDomain << endl;
+	MPI::COMM_WORLD.Send(InteractNode.GetValue(), size, MPI_INTEGER, AdjDomain, TagNode);
+	MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+	for (int i = 0; i < size; i++)
+	{
+		InteractNode.at(i) = RemoteNode[i];
+	}
+
+	InteractValue = GetInteractResult(InteractNode);
+
+	Value = InteractValue.GetValue();
+	MPI::COMM_WORLD.Send(InteractValue.GetValue(), size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+	MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+	for (int i = 0; i < size*nDof; i++)
+	{
+		InteractValue.at(i) = Value[i];
+	}
+	return InteractValue;
 }

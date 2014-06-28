@@ -46,7 +46,7 @@ public:
 	void Print();
 	void Set(int Value);
 	void SetSize(int Size);
-	
+	int *GetValue();
 
 	IntArray operator+(const IntArray & I)const;
 	IntArray & operator=(const IntArray & I);
@@ -88,6 +88,7 @@ public:
 	FloatArray Copy(const FloatArray & F)const;
 	FloatArray(const FloatArray & F);
 	void SetSize(int Size);
+	double * GetValue();
 	FloatArray  operator+(const FloatArray & I)const;
 	FloatArray & operator=(const FloatArray & I);
 	FloatArray  operator-(const FloatArray & I)const;
