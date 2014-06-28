@@ -173,7 +173,7 @@ int IntArray::GetSize()
 // 打印变量内容
 void IntArray::Print()
 {
-	cout << "The Values are:" << endl;
+	cout << "The Values are:" <<size<< endl;
 	for (int i = 0; i < size; i++)
 	{
 		cout << setw(10) << Values[i];
@@ -258,6 +258,7 @@ int FloatArray::GetSize()
 // 打印数组
 void FloatArray::Print()
 {
+	cout << "The Values are:    " << size << endl;
 	for (int i = 0; i < size; i++)
 	{
 		cout << setw(15) << Values[i] ;
@@ -301,9 +302,24 @@ double FloatArray::Norm()
 	double norm = 0.0;
 	for (int i = 0; i < size; i++)
 	{
-		norm += abs(Values[i]);
+		norm += pow((Values[i]),2);
 	}
+	norm = sqrt(norm);
 	return norm;
+}
+
+double FloatArray::Mean()
+{
+	double Mean = 0.0;
+	if (size > 0)
+	{
+		for (int i = 0; i < size; i++)
+		{
+			Mean += Values[i];
+		}
+		Mean = Mean / size;
+	}
+	return Mean;
 }
 
 // 清空

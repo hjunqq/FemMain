@@ -5,7 +5,7 @@ dir,npoint   fix
 16 19 21 23 25
 dir,npoint
 2 5 
-16 19 21 23 25
+16 19 21 23 25 17 18 22 24 25
 dir npoint   disp
  1      1
  0e-5

@@ -2,7 +2,7 @@ nloa,nface£¬nbody£¬ncent
 3 1 0 0
 face
 nele,nnode,dir,startcoor,endcoor,startval,endval  curve
-  4    2    1    4.0 0.0         1000     1000    1
+  4    2    1    1.0 0.0         1000     1000    1
 node1,node2,elem
 1 3 13
 3 6 14

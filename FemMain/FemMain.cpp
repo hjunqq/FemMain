@@ -27,6 +27,8 @@ int main(int argc,char**argv)
 	IntArray InteractNode;
 	FloatArray InteractValue,InteractValueOld;
 	bool Converge;
+	double Error;
+	int MaxIter;
 
 	getline(inp, text);
 
@@ -50,6 +52,7 @@ int main(int argc,char**argv)
 	Fem2.GIDOutMesh();
 	int nStep = Fem1.GetStep();
 	int iiter = 0;
+	MaxIter = Fem1.GetMaxIter();
 	Fem1.ShowTime();
 	for (int istep = 0; istep < nStep; istep++)
 	{
@@ -70,33 +73,48 @@ int main(int argc,char**argv)
 		Converge = false;
 		Fem1.Solve();
 		Fem2.Solve();
-		do
+		Fem1.ComputeElementStress();
+		Fem2.ComputeElementStress();
+
+		Fem1.CountElement();
+		Fem2.CountElement();
+
+		Fem1.SendResultToNode();
+		Fem2.SendResultToNode();
+		Fem1.GIDOutResult(iiter);
+		Fem2.GIDOutResult(iiter);
+		do 
 		{
 			iiter++;
-			Fem1.GIDOutResult(iiter*2);
-			Fem2.GIDOutResult(iiter*2);
 		
 			InteractNode = Fem1.GetInteractNode();
 			InteractValue = Fem2.GetInteractResult(InteractNode);
 			Fem1.SetInteractResult(InteractValue);
+			
+			//cout << "Current Step ";
+			//InteractValue.Print();
 
 			InteractNode = Fem2.GetInteractNode();
 			InteractValue = Fem1.GetInteractResult(InteractNode);
 			Fem2.SetInteractResult(InteractValue);
 
-			InteractValue.Print();
-			InteractValueOld.Print();
+			Fem1.Solve();
+			Fem2.Solve();
+
+			//cout << "Last Step    ";
+			//InteractValueOld.Print();
+			//cout << "Current Step ";
+			//InteractValue.Print();
 			InteractValueOld = InteractValue-InteractValueOld;
-			InteractValueOld.Print();
-			if (InteractValueOld.Norm() < 1e-11)
+			//cout << "Error        ";
+			//InteractValueOld.Print();
+			Error = InteractValueOld.Norm() / abs(InteractValue.Mean());
+			if (Error < 1e-11)
 			{
 				Converge = true;
 			}
-			cout << "Error=" << setw(20) << InteractValueOld.Norm() << setw(10) << iiter << endl;
+			cout << "Error=" << setw(20) << Error << setw(10) << iiter << endl;
 			InteractValueOld = InteractValue;
-
-			Fem1.Solve();
-			Fem2.Solve();
 
 			Fem1.ComputeElementStress();
 			Fem2.ComputeElementStress();
@@ -106,12 +124,10 @@ int main(int argc,char**argv)
 
 			Fem1.SendResultToNode();
 			Fem2.SendResultToNode();
+			Fem1.GIDOutResult(iiter);
+			Fem2.GIDOutResult(iiter);
 
-			Fem1.GIDOutResult(iiter*2+1);
-			Fem2.GIDOutResult(iiter*2+1);
-			
-
-		} while (Converge==false && iiter<50);
+		} while (Converge == false && iiter<MaxIter);
 
 	}
 	Fem1.CloseGidFile();
@@ -139,6 +155,10 @@ int FemMain::GetStep()
 {
 	return nStep;
 }
+int FemMain::GetMaxIter()
+{
+	return MaxIter;
+}
 void FemMain::ReadFiles()
 {
 	stringstream stream;
@@ -165,7 +185,7 @@ void FemMain::ReadFiles()
 	glb.getline(str, MAXCHAR);
 	glb.getline(str, MAXCHAR);
 	stream << str;
-	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof;
+	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof>>MaxIter;
 
 
 	Groups = new Group[nGroup];
@@ -482,7 +502,7 @@ void FemMain :: OpenGidFile()
 	GidResultFile = workdir + ".flavia.res";
 	FMesh = GiD_fOpenPostMeshFile(GidMeshFile.c_str(), GiD_PostAscii);
 	FRes=GiD_fOpenPostResultFile(GidResultFile.c_str(), GiD_PostAscii);
-                        }
+}
 void FemMain::GIDOutMesh()
 {
 	FloatArray *Coor;
@@ -585,6 +605,7 @@ void FemMain::ComputeDOF()
 			DegreeOfFreedom.at(idof) = TotalDOF;
 		}
 	}
+	cout << "DegreeOfFreedom      " ;
 	DegreeOfFreedom.Print();
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
@@ -1039,7 +1060,7 @@ void FemMain::Solve()
 	//ExternalForce.Print();
 	//cout << "InteractLoad";
 	//InteractLoad.Print();
-	//ShowTime();
+	ShowTime();
 	LUSolver = new LUSolve();
 	LUSolver->Decomposition(Stiff);
 	LUSolver->Solver(TotalLoad, ResultZero);
@@ -1197,18 +1218,18 @@ IntArray FemMain::GetInteractNode()
 FloatArray FemMain::GetInteractResult(IntArray & InteractNode)
 {
 	FloatArray InteractResult;
+	FloatArray NodeDisplacement;
 	int nInterNode = InteractNode.GetSize();
 	InteractResult.SetSize(nInterNode*nDof);
 	for (int inode = 0; inode < nInterNode; inode++)
 	{
 		int NodeIdx = InteractNode.at(inode);
+		NodeDisplacement = Nodes[NodeIdx].GetDisplacement();
 		for (int iDof = 0; iDof < nDof; iDof++)
 		{
-			int DofIdx = DegreeOfFreedom.at(NodeIdx * 2 + iDof);
-			InteractResult.at(inode * 2 + iDof) = ResultZero.at(DofIdx);
+			InteractResult.at(inode * 2 + iDof) = NodeDisplacement.at(iDof);
 		}
 	}
-
 	return InteractResult;
 }
 void FemMain::SetInteractResult(FloatArray & InteractResult)
@@ -1223,6 +1244,9 @@ void FemMain::SetInteractResult(FloatArray & InteractResult)
 	IntArray EDof;
 	int NodeIndex, nInterDof, nInterNode;
 	IntArray InterDof;
+
+	InterDisplace.Clear();
+	InteractLoad.Clear();
 
 	nInterNode = LocalNode.GetSize();
 	A.SetSize(TotalDOF, TotalDOF);
@@ -1301,6 +1325,8 @@ void FemMain::SetInteractResult(FloatArray & InteractResult)
 			}
 		}
 	}
+	//cout << "InterDisplace   ";
+	//InterDisplace.Print(); 
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();

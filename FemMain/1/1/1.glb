@@ -1,3 +1,3 @@
-ndim,npoint,ngroup,nelem,nmat,nstep ndof
-  2    25      2    16    1     1     2
+ndim,npoint,ngroup,nelem,nmat,nstep ndof maxiter
+  2    25      2    16    1     1     2     100
    

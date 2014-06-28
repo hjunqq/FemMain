@@ -37,6 +37,7 @@ private:
 	int nMat;
 	int nStep;
 	int nDof;
+	int MaxIter;
 	int TotalDOF;
 	int nTotalLoad;
 	int nFace;
@@ -81,6 +82,7 @@ public:
 	void ShowTime();
 	string & WorkDir();
 	int GetStep();
+	int GetMaxIter();
 	void ReadFiles();
 	void OpenGidFile();
     void GIDOutMesh();

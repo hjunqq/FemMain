@@ -76,6 +76,7 @@ public:
 	// µã³Ë
 	double Dot(FloatArray * );
 	double Norm();
+	double Mean();
 	FloatArray Cross(FloatArray &F)const;
 	// Çå¿Õ
 	int Clear();
