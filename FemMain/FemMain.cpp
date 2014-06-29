@@ -101,16 +101,9 @@ int main(int argc,char**argv)
 
 			Fem.Solve();
 
-			InteractValueOld = InteractValue-InteractValueOld;
-			//cout << "Error        ";
-			//InteractValueOld.Print();
-			Error = InteractValueOld.Norm() / abs(InteractValue.Mean());
-			if (Error < 1e-5)
-			{
-				Converge = true;
-			}
-			cout << "Error=" << setw(20) << Error << setw(10) << iiter << endl;
-			InteractValueOld = InteractValue;
+			Converge=Fem.ConvergeCheck();
+
+			cout << "Iter=    " << iiter << endl;
 
 			Fem.ComputeElementStress();
 
@@ -180,8 +173,9 @@ void FemMain::ReadFiles()
 	glb.getline(str, MAXCHAR);
 	glb.getline(str, MAXCHAR);
 	stream << str;
-	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof>>MaxIter;
+	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof >> MaxIter >> Tolerance;
 
+	cout << Tolerance << endl;
 
 	Groups = new Group[nGroup];
 	for (int igroup = 0; igroup < nGroup; igroup++)
@@ -1065,23 +1059,26 @@ void FemMain::Solve()
 
 bool FemMain::ConvergeCheck()
 {
-	int Type, nEle;
-	for (int igroup = 0; igroup < nGroup; igroup++)
+	InteractValueOld = InteractValue-InteractValueOld;
+	Error = InteractValueOld.Norm()/InteractValue.Mean();
+	Converge = false;
+	if (abs(Error) < 1e-11)
 	{
-		Type = Groups[igroup].GetType();
-		nEle = Groups[igroup].GetnElements();
-		if (Type == 4)
-		{
-			Quadr **Elem;
-			Elem = new Quadr*[nEle];
-			Elem = Groups[igroup].GetElement(**Elem);
-			for (int ielem = 0; ielem < nEle; ielem++)
-			{
-				Elem[ielem]->SetResult(ResultZero);
-			}
-		}
+		Converge = true;
 	}
-	return true;
+	int AdjDomain = Inters[0].GetAdj();
+	int TagCheck = 4;
+	bool AdjConverge = false;
+	MPI::COMM_WORLD.Send(&Converge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
+	MPI::COMM_WORLD.Recv(&AdjConverge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
+	
+	Converge = Converge && AdjConverge;
+
+	InteractValueOld = InteractValue;
+
+	cout << "Error=   " << setw(20) << Error << setw(20) << "Converge=   " << Converge << endl;
+
+	return Converge;
 }
 
 void FemMain::GIDOutResult(int istep)

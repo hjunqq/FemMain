@@ -52,6 +52,8 @@ private:
 	int nFix;
 	int nDisp;
 	int nInter;
+	double Error, Tolerance;
+	bool Converge;
 	
 	ofstream chk, res;
 	ifstream glb, cor, ele, grp, loa, mat, pre;
@@ -83,6 +85,7 @@ private:
 
 	IntArray InteractNode;
 	FloatArray InteractValue;
+	FloatArray InteractValueOld;
 
 	LUSolve *LUSolver;
 
