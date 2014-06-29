@@ -1,31 +1,34 @@
 FemMain
 =======
-采用的并行模式如下：
-do
-{
-	iiter++;
-	
-	//交换数据
-	InteractValue=Fem.ExchangeData();
-	
-	//将交换的数据放入迭代过程
-	Fem.SetInteractResult(InteractValue);
-	
-	//求解
-	Fem.Solve();
-	
-	//检查收敛性
-	Converge=Fem.ConvergeCheck();
-	cout << "Iter=    " << iiter << endl;
-	//后处理
-	Fem.ComputeElementStress();
-	Fem.CountElement();
-	Fem.SendResultToNode();
-	Fem.GIDOutResult(iiter);
-	
-}
+把Converge变量存储为一个含有两个元素的数组，
+Converge[0]存储的是本地的收敛条件
+Converge[1]存储的是远程的收敛条件
+do 
+		{
+			iiter++;
+			
+			InteractValue=Fem.ExchangeData();
+			Fem.SetInteractResult(InteractValue);
+			如果本地收敛，就不需要再迭代了。
+			if (Converge[0] == false)
+			{
+				Fem.Solve();
+			}
 
-//所有的进程达到收敛或者达到最大的迭代步之后退出迭代循环
-while (Converge == false && iiter<MaxIter);
+			Converge = Fem.ConvergeCheck();
 
-多个进程一直在迭代，知道所有的进程都达到收敛才退出迭代过程。
+			cout << "Iter=    " << iiter << endl;
+
+			Fem.ComputeElementStress();
+
+			Fem.CountElement();
+
+			Fem.SendResultToNode();
+
+			Fem.GIDOutResult(iiter);
+
+
+		} while (Converge[1] == false && iiter<MaxIter);
+
+多个进程一直在迭代，直到所有的进程都达到收敛才退出迭代过程。
+
