@@ -24,6 +24,9 @@
 #include "mpi.h"
 
 #define MAXCHAR 200
+#define TagNode   1
+#define TagValue  2
+#define TagCheck  4
 
 const string GroupName[4] = { " ", "Linear", " ", "Quadrilateral" };
 
@@ -53,7 +56,7 @@ private:
 	int nDisp;
 	int nInter;
 	double Error, Tolerance;
-	bool Converge;
+	bool * Converge;
 	
 	ofstream chk, res;
 	ifstream glb, cor, ele, grp, loa, mat, pre;
@@ -106,7 +109,7 @@ public:
 	void ApplyLoad();
 	void ApplyInitial();
 	void Solve();
-	bool ConvergeCheck();
+	bool *ConvergeCheck();
 	void ComputeElementStress();
 	void CountElement();
 	void SendResultToNode();

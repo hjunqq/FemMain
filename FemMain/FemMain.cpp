@@ -25,7 +25,7 @@ int main(int argc,char**argv)
 	ifstream inp("1.inp");
 	IntArray InteractNode;
 	FloatArray InteractValue,InteractValueOld;
-	bool Converge;
+	bool *Converge;
 	double Error;
 	int MaxIter;
 	int NProces, MyID;
@@ -91,17 +91,20 @@ int main(int argc,char**argv)
 		Fem.SendResultToNode();
 
 		Fem.GIDOutResult(iiter);
-		Converge = false;
+		Converge = new bool[2]();
+		Converge[0] = Converge[1] = false;
 		do 
 		{
 			iiter++;
 			
 			InteractValue=Fem.ExchangeData();
 			Fem.SetInteractResult(InteractValue);
+			if (Converge[0] == false)
+			{
+				Fem.Solve();
+			}
 
-			Fem.Solve();
-
-			Converge=Fem.ConvergeCheck();
+			Converge = Fem.ConvergeCheck();
 
 			cout << "Iter=    " << iiter << endl;
 
@@ -114,7 +117,7 @@ int main(int argc,char**argv)
 			Fem.GIDOutResult(iiter);
 
 
-		} while (Converge == false && iiter<MaxIter);
+		} while (Converge[1] == false && iiter<MaxIter);
 
 	}
 	Fem.CloseGidFile();
@@ -131,9 +134,9 @@ void FemMain::ShowTime()
 	cout << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon + 1 << "-" <<
 		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
 		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-	chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
-		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
+	//chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
+	//	tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
+	//	<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
 }
 string & FemMain::WorkDir()
 {
@@ -625,6 +628,7 @@ void FemMain::InitSolve()
 	InterDisplace.SetSize(nNode*nDof);
 	TotalLoad.SetSize(TotalDOF);
 	InteractLoad.SetSize(TotalDOF);
+	Converge = new bool[2];
 	int nRow, nCol, NonZero;
 	IntArray *RowIdx, *ColIdx,*CNonZero;
 	RowIdx = new IntArray(TotalDOF+1);
@@ -1057,26 +1061,28 @@ void FemMain::Solve()
 	LUSolver->Check(TotalLoad, ResultZero);
 }
 
-bool FemMain::ConvergeCheck()
+bool *FemMain::ConvergeCheck()
 {
 	InteractValueOld = InteractValue-InteractValueOld;
 	Error = InteractValueOld.Norm()/InteractValue.Mean();
-	Converge = false;
-	if (abs(Error) < 1e-11)
+	Converge[0] = false;
+	Converge[1] = false;
+	if (abs(Error) < Tolerance)
 	{
-		Converge = true;
+		Converge[0] = true;
 	}
 	int AdjDomain = Inters[0].GetAdj();
-	int TagCheck = 4;
+	
 	bool AdjConverge = false;
-	MPI::COMM_WORLD.Send(&Converge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
+	MPI::COMM_WORLD.Send(&Converge[0], 1, MPI_C_BOOL, AdjDomain, TagCheck);
 	MPI::COMM_WORLD.Recv(&AdjConverge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
 	
-	Converge = Converge && AdjConverge;
+	Converge[1] = Converge[0] && AdjConverge;
 
 	InteractValueOld = InteractValue;
 
-	cout << "Error=   " << setw(20) << Error << setw(20) << "Converge=   " << Converge << endl;
+	cout << "Error=   " << setw(20) << Error << setw(20) << "Converge[0]=   " << Converge[0] 
+		<<"Converge[1]=   " << Converge[1] << endl;
 
 	return Converge;
 }
@@ -1354,7 +1360,7 @@ FloatArray FemMain::ExchangeData()
 	double *Value;
 	MPI::COMM_WORLD.Barrier();
 	InteractNode = GetInteractNode();
-	int TagNode = 1,TagValue=2;
+	
 	int AdjDomain = Inters[0].GetAdj();
 	int size = InteractNode.GetSize();
 	InteractValue.SetSize(size*nDof);
