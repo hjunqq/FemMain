@@ -59,67 +59,12 @@ int main(int argc,char**argv)
 
 	Fem.GIDOutMesh();
 
-	int nStep = Fem.GetStep();
-	int iiter = 0;
-	MaxIter = Fem.GetMaxIter();
 	Fem.ShowTime();
 	MPI::COMM_WORLD.Barrier();
 
-	for (int istep = 0; istep < nStep; istep++)
-	{
-		Fem.ComputeDOF();
-
-		Fem.InitSolve();
-
-		Fem.ComputeElementStiff();
+	Fem.StaticSolve();
 
 
-		Fem.AssembleStiff();
-	
-
-		Fem.ApplyLoad();
-
-		
-		Fem.Solve();
-
-		Fem.ComputeElementStress();
-
-
-		Fem.CountElement();
-
-
-		Fem.SendResultToNode();
-
-		Fem.GIDOutResult(iiter);
-		Converge = new bool[2]();
-		Converge[0] = Converge[1] = false;
-		do 
-		{
-			iiter++;
-			
-			InteractValue=Fem.ExchangeData();
-			Fem.SetInteractResult(InteractValue);
-			if (Converge[0] == false)
-			{
-				Fem.Solve();
-			}
-
-			Converge = Fem.ConvergeCheck();
-
-			cout << "Iter=    " << iiter << endl;
-
-			Fem.ComputeElementStress();
-
-			Fem.CountElement();
-
-			Fem.SendResultToNode();
-
-			Fem.GIDOutResult(iiter);
-
-
-		} while (Converge[1] == false && iiter<MaxIter);
-
-	}
 	Fem.CloseGidFile();
 
 	GiD_PostDone();
@@ -134,9 +79,9 @@ void FemMain::ShowTime()
 	cout << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon + 1 << "-" <<
 		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
 		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
-	//chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
-	//	tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
-	//	<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
+	chk << "Current Time " << tmLocal.tm_year + 1900 << "-" << tmLocal.tm_mon << "-" <<
+		tmLocal.tm_mday << setw(4) << tmLocal.tm_hour << ":" << setfill('0') << setw(2) << tmLocal.tm_min << ":"
+		<< setfill('0') << setw(2) << tmLocal.tm_sec << setfill(' ') << endl;
 }
 string & FemMain::WorkDir()
 {
@@ -168,8 +113,8 @@ void FemMain::ReadFiles()
 		cout << "Input Files Fail" << endl;
 		ShowTime();
 	}
-	chk.open(workdir + ".chk");
-	res.open(workdir + ".res");
+
+	
 
 	stream.clear();
 	stream.str("");
@@ -769,7 +714,7 @@ void FemMain::AssembleStiff()
 
 		}
 	}
-	//Stiff.Print();
+	Stiff.Print();
 }
 
 void FemMain::ApplyLoad()
@@ -1046,7 +991,42 @@ void FemMain::ApplyLoad()
 		}
 	}
 }
+void FemMain::StaticSolve()
+{
+	int iiter = 0;
+	for (int istep = 0; istep < nStep; istep++)
+	{
+		ComputeDOF();
+		InitSolve();
+		ComputeElementStiff();
+		AssembleStiff();
+		ApplyLoad();
+		Solve();
+		ComputeElementStress();
+		CountElement();
+		SendResultToNode();
+		GIDOutResult(iiter);
+		do
+		{
+			iiter++;
+			cout << "Myid= " << Id;
+			InteractValue.Print();
+			InteractValue = ExchangeData();
+			InteractValue.Print();
+			SetInteractResult(InteractValue);
+			Solve();
+			ConvergeCheck();
+			cout << "Iter=    " << iiter << endl;
+			ComputeElementStress();
+			CountElement();
+			SendResultToNode();
+			GIDOutResult(iiter);
 
+		} while (Converge[1] == false && iiter < MaxIter);
+
+	}
+	
+}
 void FemMain::Solve()
 {
 	TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;

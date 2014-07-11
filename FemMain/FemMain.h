@@ -109,6 +109,7 @@ public:
 	void ApplyLoad();
 	void ApplyInitial();
 	void Solve();
+	void StaticSolve();
 	bool *ConvergeCheck();
 	void ComputeElementStress();
 	void CountElement();
