@@ -75,7 +75,7 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix Stiff;
+	FloatMatrix Stiff,Mass,Damp;
 	FloatArray ResultZero;
 	IntArray DegreeOfFreedom;
 	FloatArray ExternalForce;

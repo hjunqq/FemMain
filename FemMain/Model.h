@@ -79,7 +79,7 @@ protected:
 	FloatMatrix DShapeX;
 	FloatMatrix Jacobi;
 	FloatMatrix InvJacobi;
-	FloatMatrix Stiff;
+	FloatMatrix Stiff,Mass;
 	FloatArray Strain;
 	FloatArray Stress;
 	FloatMatrix BMatrix;
@@ -130,6 +130,7 @@ public:
 	void FillDof(IntArray & DegreeOfFreedom);
 	IntArray GetDof();
 	FloatMatrix GetStiff();
+	FloatMatrix GetMass();
 	FloatArray GetShape();
 	FloatArray GetStrain(int inode);
 	FloatArray GetStress(int inode);
@@ -152,6 +153,7 @@ public:
 	FloatMatrix  ComputeBMatrix();
 	FloatMatrix  ComputeConstitutiveMatrix();
 	FloatArray  ComputeStress();
+	FloatMatrix ComputeMassMatrix();
 };
 class Line :
 	public Element

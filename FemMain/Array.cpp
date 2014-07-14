@@ -289,6 +289,7 @@ FloatArray FloatArray::Times(double Scalar)const
 	return TArray;
 }
 
+
 void FloatArray::SetSize(int Size)
 {
 	size = Size;
@@ -712,6 +713,21 @@ FloatMatrix FloatMatrix::Minus(FloatMatrix & F)const
 	return Temp;
 }
 
+FloatMatrix FloatMatrix::Extend(int I)const
+{
+	FloatMatrix Temp(m*I, n*I);
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			for (int iext = 0; iext < I; iext++)
+			{
+				Temp.at(i * I+iext, j * I+iext) = Values[i*m + j];
+			}
+		}
+	}
+	return Temp;
+}
 
 void FloatMatrix::Print()
 {

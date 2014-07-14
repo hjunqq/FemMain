@@ -565,6 +565,7 @@ void FemMain::ComputeDOF()
 void FemMain::InitSolve()
 {
 	Stiff.SetSize(TotalDOF, TotalDOF);
+	Mass.SetSize(TotalDOF, TotalDOF);
 	ResultZero .SetSize(TotalDOF);
 	ExternalForce .SetSize(TotalDOF);
 	InitialStain .SetSize(TotalDOF);
@@ -675,6 +676,7 @@ void FemMain::ComputeElementStiff()
 				}
 				Elems[ielem]->SetCoor(*Coor);
 				Elems[ielem]->ComputeStiff();
+				Elems[ielem]->ComputeMassMatrix();
 			}
 		}
 	}
@@ -690,7 +692,7 @@ void FemMain::AssembleStiff()
 		if (Type == 4)
 		{
 			Quadr **Elems;
-			FloatMatrix EStiff(Type*nDof, Type*nDof);
+			FloatMatrix EStiff(Type*nDof, Type*nDof),EMass(Type*nDof,Type*nDof);
 			Elems = new Quadr*[nEle];
 			Elems = Groups[igroup].GetElement(**Elems);
 			IntArray Dof(Type*nDof);
@@ -698,6 +700,7 @@ void FemMain::AssembleStiff()
 			{
 				Dof = Elems[ielem]->GetDof();
 				EStiff = Elems[ielem]->GetStiff();
+				EMass = Elems[ielem]->GetMass();
 				for (int idof = 0; idof < Type*nDof; idof++)
 				{
 					iedof = Dof.at(idof);
@@ -707,6 +710,7 @@ void FemMain::AssembleStiff()
 						if (iedof != 0 && jedof != 0)
 						{
 							Stiff.at(iedof - 1, jedof - 1) += EStiff.at(idof, jdof);
+							Mass.at(iedof - 1, jedof - 1) += EMass.at(idof, jdof);
 						}
 					}
 				}
@@ -714,7 +718,10 @@ void FemMain::AssembleStiff()
 
 		}
 	}
+	cout << "StiffMatrix=:";
 	Stiff.Print();
+	cout << "MassMatrix=:";
+	Mass.Print();
 }
 
 void FemMain::ApplyLoad()
@@ -1006,24 +1013,26 @@ void FemMain::StaticSolve()
 		CountElement();
 		SendResultToNode();
 		GIDOutResult(iiter);
-		do
+		if (nProces>1)
 		{
-			iiter++;
-			cout << "Myid= " << Id;
-			InteractValue.Print();
-			InteractValue = ExchangeData();
-			InteractValue.Print();
-			SetInteractResult(InteractValue);
-			Solve();
-			ConvergeCheck();
-			cout << "Iter=    " << iiter << endl;
-			ComputeElementStress();
-			CountElement();
-			SendResultToNode();
-			GIDOutResult(iiter);
+			do
+			{
+				iiter++;
+				cout << "Myid= " << Id;
+				InteractValue.Print();
+				InteractValue = ExchangeData();
+				InteractValue.Print();
+				SetInteractResult(InteractValue);
+				Solve();
+				ConvergeCheck();
+				cout << "Iter=    " << iiter << endl;
+				ComputeElementStress();
+				CountElement();
+				SendResultToNode();
+				GIDOutResult(iiter);
 
-		} while (Converge[1] == false && iiter < MaxIter);
-
+			} while (Converge[1] == false && iiter < MaxIter);
+		}
 	}
 	
 }

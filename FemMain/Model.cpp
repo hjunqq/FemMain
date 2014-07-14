@@ -190,6 +190,10 @@ FloatMatrix Element::GetStiff()
 {
 	return Stiff;
 }
+FloatMatrix Element::GetMass()
+{
+	return Mass;
+}
 FloatArray Element::GetShape()
 {
 	return Shape;
@@ -422,6 +426,7 @@ Quadr::Quadr()
 	BMatrixBig.SetSize(3, 8);
 	DMatrix.SetSize(3, 3);
 	Stiff.SetSize(8, 8);
+	Mass.SetSize(8, 8);
 	Displacement.SetSize(8);
 	GaussStrain = new FloatArray[nGaussPoint];
 	GaussStress = new FloatArray[nGaussPoint];
@@ -611,7 +616,7 @@ FloatArray Quadr::ComputeStress()
 		{
 			NodeStrain[j].at(i) = TransTemp.at(j);
 		}
-		for (int j = 0; j < 4; j++)
+		for (int j = 0; j < 4; j++) 
 		{
 			TransTemp.at(j) = GaussStress[j].at(i);
 		}
@@ -623,6 +628,44 @@ FloatArray Quadr::ComputeStress()
 	}
 	return NULL;
 }
+
+FloatMatrix Quadr::ComputeMassMatrix()
+{
+	GaussPoint B;
+	FloatArray Coor;
+	FloatMatrix TNMass(4,4),TMass(8,8);
+	double W1,W2,Density;
+	Density = Mat.GetDensity();
+	Coor.SetSize(2);
+	for (int i = 0; i < 3; i++)
+	{
+		Coor.at(0) = Gauss3[i];
+		W1 = Weight3[i];
+		for (int j = 0; j < 3; j++)
+		{
+			Coor.at(1)= Gauss3[j];
+			W2 = Weight3[j];
+			B.Init(0, Coor);
+			ComputeJacobi(B);
+			for (int iSub = 0; iSub < 4; iSub++)
+			{
+				for (int jSub = 0; jSub < 4; jSub++)
+				{
+					TNMass.at(iSub, jSub) = Shape.at(iSub)*Shape.at(jSub);
+				}
+			}
+			W2 = W1*W2*Det*Density;
+			TNMass = TNMass.Mult(W2);
+			TNMass.Print();
+			TMass = TNMass.Extend(2);			
+			Mass = Mass + TMass;
+		}
+	}
+	Mass.Print();
+	return Mass;
+}
+
+
 Quadr::~Quadr()
 {
 }

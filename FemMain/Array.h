@@ -122,6 +122,7 @@ public:
 	// ¾ØÕóÏà¼õ
 	FloatMatrix Minus(FloatMatrix & F )const;
 	FloatMatrix Copy(FloatMatrix & F)const;
+	FloatMatrix Extend(int I)const;
 	void SetSize(int m, int n);
 	double Determinant();
 
