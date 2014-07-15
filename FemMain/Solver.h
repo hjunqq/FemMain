@@ -22,6 +22,8 @@ private:
 	double Error;
 public:
 	int Decomposition(FloatMatrix &A);
+	int Inverse();
+	void Mult(FloatArray &B);
 	int Solver(FloatArray &B, FloatArray &X);
 	bool Check(FloatArray &B, FloatArray &X);
 };

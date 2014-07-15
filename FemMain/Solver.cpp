@@ -27,6 +27,38 @@ int LUSolve::Decomposition(FloatMatrix &A)
 	info = LAPACKE_dgetrf(LAPACK_COL_MAJOR, m, m, Value, m, ipiv);
 	return info;
 }
+int LUSolve::Inverse()
+{
+	info = LAPACKE_dgetri(LAPACK_COL_MAJOR, m, Value, m, ipiv);
+	return info;
+}
+void LUSolve::Mult(FloatArray &B)
+{
+	k = m; n = 1;
+	lda = max(1, m); ldb = max(1, k); ldc = max(1, m);
+	if (Left == NULL)
+	{
+		Left = new double[m]();
+	}
+	for (int i = 0; i < m; i++)
+	{
+		Left[i] = 0;
+	}
+	if (Right == NULL)
+	{
+		Right = new double[m];
+	}
+	for (int i = 0; i < m; i++)
+	{
+		Right[i] = B.at(i);
+	}
+	trana = 'N', tranb = 'N';
+	dgemm(&trana, &trana, &m, &n, &k, &alpha, Value, &lda, Right, &ldb, &beta, Left, &ldc);
+	for (int i = 0; i < m; i++)
+	{
+		B.at(i) = Left[i];
+	}
+}
 int LUSolve::Solver(FloatArray &B, FloatArray &X)
 {
 	this->B = B;

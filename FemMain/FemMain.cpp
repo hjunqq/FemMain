@@ -4,7 +4,7 @@
 ///     All rights reserved.  
 ///  
 /// @file main.cpp
-/// @brief  对于平面四边形单元求解
+/// @brief  对于平面四边形单元静力求解，模态计算
 ///  
 ///（本文件实现的功能的详述）  
 ///  
@@ -62,7 +62,7 @@ int main(int argc,char**argv)
 	Fem.ShowTime();
 	MPI::COMM_WORLD.Barrier();
 
-	Fem.StaticSolve();
+	Fem.GloableSolve();
 
 
 	Fem.CloseGidFile();
@@ -122,7 +122,11 @@ void FemMain::ReadFiles()
 	glb.getline(str, MAXCHAR);
 	stream << str;
 	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof >> MaxIter >> Tolerance;
-
+	glb.getline(str, MAXCHAR);
+	stream.clear();
+	stream.str("");
+	stream << str;
+	stream >> SolveType >> ProblemType;
 	cout << Tolerance << endl;
 
 	Groups = new Group[nGroup];
@@ -574,6 +578,7 @@ void FemMain::InitSolve()
 	InterDisplace.SetSize(nNode*nDof);
 	TotalLoad.SetSize(TotalDOF);
 	InteractLoad.SetSize(TotalDOF);
+	Eigenvalues.SetSize(MaxIter);
 	Converge = new bool[2];
 	int nRow, nCol, NonZero;
 	IntArray *RowIdx, *ColIdx,*CNonZero;
@@ -997,6 +1002,53 @@ void FemMain::ApplyLoad()
 			}
 		}
 	}
+}
+void FemMain::GloableSolve()
+{
+	switch (ProblemType)
+	{
+	case Static:
+		StaticSolve();
+	case Model:
+		ModelSolve();
+	}
+}
+void FemMain::ModelSolve()
+{
+	ResultFirst.SetSize(TotalDOF);
+	ResultZero.Set(1);
+	LUSolver = new LUSolve();
+	FloatArray Error(TotalDOF);
+	double ErrorSum,ValueSum;
+	LUSolver->Decomposition(Stiff);
+	LUSolver->Inverse();
+	for (int iStep = 0; iStep < nStep; iStep++)
+	{
+		LUSolver->Mult(ResultZero);
+		Eigenvalues.at(iStep) = ResultZero.at(iStep);
+		ResultZero = ResultZero.Times(1 / Eigenvalues.at(iStep));
+		do
+		{
+			ResultFirst = ResultZero;
+			LUSolver->Mult(ResultZero);
+			Error = ResultZero - ResultFirst;
+			ErrorSum = 0;
+			ValueSum = 0;
+			for (int i = 0; i < TotalDOF; i++)
+			{
+				ErrorSum += pow(Error.at(i), 2);
+				ValueSum += pow(ResultZero.at(i), 2);
+			}
+			ErrorSum = ErrorSum / TotalDOF;
+		} while (ErrorSum > Tolerance);
+		ResultZero.Print();
+		ComputeElementStress();
+		CountElement();
+		SendResultToNode();
+		GIDOutResult(iStep);
+	}
+	
+
 }
 void FemMain::StaticSolve()
 {

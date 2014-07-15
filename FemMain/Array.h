@@ -87,6 +87,7 @@ public:
 	// Êý×é¸´ÖÆ
 	FloatArray Copy(const FloatArray & F)const;
 	FloatArray(const FloatArray & F);
+	void Set(double n);
 	void SetSize(int Size);
 	double * GetValue();
 	FloatArray  operator+(const FloatArray & I)const;

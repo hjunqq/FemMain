@@ -289,6 +289,13 @@ FloatArray FloatArray::Times(double Scalar)const
 	return TArray;
 }
 
+void FloatArray::Set(double n)
+{
+	for (int i = 0; i < size; i++)
+	{
+		Values[i] = n;
+	}
+}
 
 void FloatArray::SetSize(int Size)
 {

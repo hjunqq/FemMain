@@ -27,6 +27,10 @@
 #define TagNode   1
 #define TagValue  2
 #define TagCheck  4
+#define Static	  0
+#define Model	  1
+#define Explicit  0
+#define Implicit  1
 
 const string GroupName[4] = { " ", "Linear", " ", "Quadrilateral" };
 
@@ -57,6 +61,8 @@ private:
 	int nInter;
 	double Error, Tolerance;
 	bool * Converge;
+	int SolveType;
+	int ProblemType;
 	
 	ofstream chk, res;
 	ifstream glb, cor, ele, grp, loa, mat, pre;
@@ -77,6 +83,7 @@ private:
 
 	FloatMatrix Stiff,Mass,Damp;
 	FloatArray ResultZero;
+	FloatArray ResultFirst;
 	IntArray DegreeOfFreedom;
 	FloatArray ExternalForce;
 	FloatArray InitialStain;
@@ -85,6 +92,7 @@ private:
 	FloatArray IniDisplacement;
 	FloatArray InterDisplace;
 	FloatArray TotalLoad;
+	FloatArray Eigenvalues;
 
 	IntArray InteractNode;
 	FloatArray InteractValue;
@@ -110,6 +118,8 @@ public:
 	void ApplyInitial();
 	void Solve();
 	void StaticSolve();
+	void ModelSolve();
+	void GloableSolve();
 	bool *ConvergeCheck();
 	void ComputeElementStress();
 	void CountElement();
