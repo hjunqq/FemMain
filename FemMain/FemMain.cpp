@@ -1096,10 +1096,16 @@ void FemMain::Solve()
 	//cout << "InteractLoad";
 	//InteractLoad.Print();
 	ShowTime();
-	LUSolver = new LUSolve();
-	LUSolver->Decomposition(Stiff);
-	LUSolver->Solver(TotalLoad, ResultZero);
-	LUSolver->Check(TotalLoad, ResultZero);
+	switch (SolveType)
+	{
+	case Explicit:
+		LUSolver = new LUSolve();
+		LUSolver->Decomposition(Stiff);
+		LUSolver->Solver(TotalLoad, ResultZero);
+		LUSolver->Check(TotalLoad, ResultZero);
+	case Implicit:
+
+	}
 }
 
 bool *FemMain::ConvergeCheck()

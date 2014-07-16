@@ -27,7 +27,10 @@ public:
 	int Solver(FloatArray &B, FloatArray &X);
 	bool Check(FloatArray &B, FloatArray &X);
 };
+class SOR
+{
 
+};
 class ElasticSolver :
 	public Solver
 {
