@@ -372,6 +372,12 @@ void Group::FillElement(Quadr *Q)
 	}
 }
 
+void Group::FillDampPara(double Alpha, double Beta)
+{
+	this->Alpha = Alpha;
+	this->Beta = Beta;
+}
+
 // 获取第i个单元
 Quadr ** Group::GetElement(Quadr & )
 {
@@ -403,7 +409,15 @@ int Group::GetMaterial()
 	return Material;
 }
 
+double Group::GetDampAlpha()
+{
+	return Alpha;
+}
 
+double Group::GetDampBeta()
+{
+	return Beta;
+}
 // 设置是否出现
 bool Group::IsAppear()
 {

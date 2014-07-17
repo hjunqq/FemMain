@@ -133,6 +133,7 @@ void FemMain::ReadFiles()
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Idx, Type, nElem, Mat, Dof;
+		double alpha, beta;
 		grp.getline(str, MAXCHAR);
 
 		stream.clear();
@@ -141,7 +142,13 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> Idx >> Type >> nElem >> Mat >> Dof;
 		Mat--;
+		stream.clear();
+		stream.str("");
+		grp.getline(str, MAXCHAR);
+		stream << str;
+		stream >> alpha >> beta;
 		Groups[igroup].Init(Idx, nElem, Type, Mat, Dof);
+		Groups[igroup].SetDamppara(alpah, beta);
 	}
 
 	Nodes = new Node[nNode];
@@ -727,6 +734,16 @@ void FemMain::AssembleStiff()
 	Stiff.Print();
 	cout << "MassMatrix=:";
 	Mass.Print();
+
+	if (Explicit == SolveType)
+	{
+		double Alpha, Beta;
+		Alpha = Groups[0].GetDampAlpha();
+		Beta = Groups[0].GetDampBeta();
+		Damp = Mass.Mult(Alpha) + Stiff.Mult(Beta);
+		cout << "DampMatrix=:";
+		Damp.Print();
+	}
 }
 
 void FemMain::ApplyLoad()

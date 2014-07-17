@@ -1,4 +1,8 @@
 group,type,gne,gmat dof
    1   4   2   1    2
+Alpha,Beta
+	1.1 0.00165
 group,type,gne,gmat dof
    2   4   2   1    2
+Alpha,Beta
+	1.1 0.00165

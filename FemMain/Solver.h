@@ -27,8 +27,22 @@ public:
 	int Solver(FloatArray &B, FloatArray &X);
 	bool Check(FloatArray &B, FloatArray &X);
 };
-class SOR
+class Newmark:
+	public Solver
 {
+private:
+	double dT;
+	double Alpha;
+	double Beta;
+	double a0, a1, a2, a3, a4, a5, a6, a7;
+	FloatMatrix A;
+	FloatArray X;
+	FloatArray B;
+	int *ipiv;
+	double Error;
+public:
+	int IntSolver(double Alpha, double Beta);
+	int SetStiffMatix(FloatMatrix &A);
 
 };
 class ElasticSolver :

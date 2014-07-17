@@ -79,7 +79,7 @@ protected:
 	FloatMatrix DShapeX;
 	FloatMatrix Jacobi;
 	FloatMatrix InvJacobi;
-	FloatMatrix Stiff,Mass;
+	FloatMatrix Stiff,Mass,Damp;
 	FloatArray Strain;
 	FloatArray Stress;
 	FloatMatrix BMatrix;
@@ -183,6 +183,7 @@ private:
 	IntArray *Elements;
 	int nElements;
 	int nDof;
+	double Alpha, Beta;
 	Quadr ** Quadrs; 
 public:
 	// 初始化
@@ -190,6 +191,7 @@ public:
 	// 填充单元
 	void FillElement(IntArray * ElementList);
 	void FillElement(Quadr * Quadrs);
+	void FillDampPara(double Alpha, double Beta);
 	// 获取第i个单元号
 	Quadr ** GetElement(Quadr &);
 	// 获取单元个数
@@ -198,6 +200,8 @@ public:
 	int GetMaterial();
 	int GetType();
 	int GetDof();
+	double GetDampAlpha();
+	double GetDampBeta();
 	// 设置是否出现
 	bool  IsAppear();
 };
