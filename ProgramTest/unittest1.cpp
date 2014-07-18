@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
-#include "../FemMain/Array.h"
-#include "../FemMain/Solver.h"
+#include "..\FemMain\Array.h"
+#include "..\FemMain\Solver.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 

@@ -170,15 +170,15 @@ void Sor::Compute(FloatArray &B)
 	for (int i = 0; i < m; i++)
 	{
 		axnn = axn = 0;
-		for (int j = 0; j < i - 1; j++)
+		for (int j = 0; j < i ; j++)
 		{
 			axnn += Value[i*m + j] * X2[j];
 		}
-		for (int j = 0; j < m; j++)
+		for (int j = i+1 ; j < m; j++)
 		{
 			axn += Value[i*m + j] * X1[j];
 		}
-		X2[i] = X1[i] + w*(B.at(i)-axnn-axn) / Value[i*m + i];
+		X2[i] = (1-w)*X1[i] + w*(B.at(i)-axnn-axn) / Value[i*m + i];
 	}
 }
 
