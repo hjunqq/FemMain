@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CppUnitTest.h"
 #include "../FemMain/Array.h"
+#include "../FemMain/Solver.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -128,6 +129,27 @@ namespace ProgramTest
 			B = *A;
 			Assert::AreEqual(1, B.GetNode(2));*/
 		//}
+	};
+	TEST_CLASS(SolveTest)
+	{
+	public:
+		TEST_METHOD(SorSolve)
+		{
+			FloatMatrix A(4,4);
+			FloatArray B(4),X(4);
+			for (int i = 0; i < 4; i++)
+			{
+				for (int j = 0; j < 4; j++)
+				{
+					A.at(i, j) = -1;
+				}
+				A.at(i, i) = 4;
+			}
+			B.Set(1);
+			Sor Soror;
+			Soror.Init(A);
+			Soror.Solve(B, X);
+		}
 	};
 	TEST_CLASS(TimeTest)
 	{

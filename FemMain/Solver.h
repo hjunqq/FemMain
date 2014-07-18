@@ -27,6 +27,22 @@ public:
 	int Solver(FloatArray &B, FloatArray &X);
 	bool Check(FloatArray &B, FloatArray &X);
 };
+class Sor
+{
+private:
+	int m;
+	double w,SpectralRadius;
+	double axnn, axn;
+	double *Value,*X1,*X2;
+	FloatMatrix A;
+	FloatArray V1,V2;
+	double Error,ErrorAverage;
+public:
+	void Init(FloatMatrix &A);
+	void MaxSpectralRadius();
+	void Compute(FloatArray &B);
+	void Solve(FloatArray &B,FloatArray &X);
+};
 class Newmark:
 	public Solver
 {

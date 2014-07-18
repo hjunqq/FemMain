@@ -123,6 +123,7 @@ void FemMain::ReadFiles()
 	stream << str;
 	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof >> MaxIter >> Tolerance;
 	glb.getline(str, MAXCHAR);
+	glb.getline(str, MAXCHAR);
 	stream.clear();
 	stream.str("");
 	stream << str;
@@ -145,10 +146,11 @@ void FemMain::ReadFiles()
 		stream.clear();
 		stream.str("");
 		grp.getline(str, MAXCHAR);
+		grp.getline(str, MAXCHAR);
 		stream << str;
 		stream >> alpha >> beta;
 		Groups[igroup].Init(Idx, nElem, Type, Mat, Dof);
-		Groups[igroup].SetDamppara(alpah, beta);
+		Groups[igroup].FillDampPara(alpha, beta);
 	}
 
 	Nodes = new Node[nNode];
@@ -1026,8 +1028,10 @@ void FemMain::GloableSolve()
 	{
 	case Static:
 		StaticSolve();
+		break;
 	case Model:
 		ModelSolve();
+		break;
 	}
 }
 void FemMain::ModelSolve()
@@ -1120,8 +1124,12 @@ void FemMain::Solve()
 		LUSolver->Decomposition(Stiff);
 		LUSolver->Solver(TotalLoad, ResultZero);
 		LUSolver->Check(TotalLoad, ResultZero);
+		break;
 	case Implicit:
-
+		Sor Soror;
+		Soror.Init(Stiff);
+		Soror.Solve(TotalLoad, ResultZero);
+		break;
 	}
 }
 
