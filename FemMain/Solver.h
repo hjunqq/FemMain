@@ -51,15 +51,14 @@ private:
 	double Alpha;
 	double Beta;
 	double a0, a1, a2, a3, a4, a5, a6, a7;
-	FloatMatrix A;
+	FloatMatrix StiffEffictive;
 	FloatArray X;
 	FloatArray B;
 	int *ipiv;
 	double Error;
 public:
-	int IntSolver(double Alpha, double Beta);
-	int SetStiffMatix(FloatMatrix &A);
-
+	void IntSolver(double dT);
+	void SetStiffMatix(FloatMatrix &Stiff, FloatMatrix &Mass,FloatMatrix &Damp);
 };
 class ElasticSolver :
 	public Solver

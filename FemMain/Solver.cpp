@@ -216,3 +216,22 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 		X.at(i) = X2[i];
 	}
 }
+
+void Newmark::IntSolver(double dT)
+{
+	Alpha = 0.25; Beta = 0.5;
+	a0 = 1 / (Alpha*dT*dT);
+	a1 = Beta / (Alpha*dT);
+	a2 = 1 / (Alpha*dT);
+	a3 = 1 / (2 * Alpha) - 1;
+	a4 = Beta / Alpha - 1;
+	a5 = dT / 2 * (Beta / Alpha - 2);
+	a6 = (1 - Beta)*dT;
+	a7 = Beta*dT;
+}
+
+void Newmark::SetStiffMatix(FloatMatrix &Stiff, FloatMatrix &Mass,FloatMatrix &Damp)
+{
+	StiffEffictive = Stiff + Mass.Mult(a0) + Damp.Mult(a1);
+
+}
