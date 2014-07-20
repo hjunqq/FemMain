@@ -230,8 +230,36 @@ void Newmark::IntSolver(double dT)
 	a7 = Beta*dT;
 }
 
-void Newmark::SetStiffMatix(FloatMatrix &Stiff, FloatMatrix &Mass,FloatMatrix &Damp)
+FloatMatrix & Newmark::EffictiveStiff(FloatMatrix &Stiff, FloatMatrix &Mass, FloatMatrix &Damp)
 {
 	StiffEffictive = Stiff + Mass.Mult(a0) + Damp.Mult(a1);
+	return StiffEffictive;
+}
 
+FloatArray &Newmark::EffictiveLoad(FloatArray &Load, FloatArray &ResultZero, FloatArray &ResultFirst, FloatArray &ResultSecond,
+	const FloatMatrix Mass,const FloatMatrix Damp)
+{
+	m1 = ResultZero.Times(a0);
+	m2 = ResultFirst.Times(a2);
+	m3 = ResultSecond.Times(a3);
+	c1 = ResultZero.Times(a1);
+	c2 = ResultFirst.Times(a4);
+	c3 = ResultSecond.Times(a5);
+	MassArray = m1 + m2 + m3;
+	DampArray = c1 + c2 + c3;
+	MassArray = Mass.Mult(MassArray);
+	DampArray = Damp.Mult(DampArray);
+	LoadEfficitive = Load + MassArray +DampArray ;
+	return LoadEfficitive;
+}
+void Newmark::SolvePorcess(const FloatArray ResultZero, const FloatArray LResultZero,
+	FloatArray &ResultFirst, const FloatArray LResultFirst,
+	FloatArray &ResultSecond, const FloatArray LResultSecond)
+{
+	Acc1 = ResultZero - LResultZero;
+	Acc1=Acc1.Times(a0);
+	Acc2 = ResultFirst.Times(a2);
+	Acc3 = ResultSecond.Times(a3);
+	ResultSecond = Acc1 - Acc2 - Acc3;
+	ResultFirst = LResultFirst + LResultSecond.Times(a6) + ResultSecond.Times(a7);
 }

@@ -127,7 +127,7 @@ void FemMain::ReadFiles()
 	stream.clear();
 	stream.str("");
 	stream << str;
-	stream >> SolveType >> ProblemType;
+	stream >> SolveType >> ProblemType>>dT;
 	cout << Tolerance << endl;
 
 	Groups = new Group[nGroup];
@@ -580,11 +580,17 @@ void FemMain::InitSolve()
 	Stiff.SetSize(TotalDOF, TotalDOF);
 	Mass.SetSize(TotalDOF, TotalDOF);
 	ResultZero .SetSize(TotalDOF);
+	LResultZero.SetSize(TotalDOF);
+	ResultFirst.SetSize(TotalDOF);
+	LResultFirst.SetSize(TotalDOF);
+	ResultSecond.SetSize(TotalDOF);
+	LResultSecond.SetSize(TotalDOF);
 	ExternalForce .SetSize(TotalDOF);
 	InitialStain .SetSize(TotalDOF);
 	InitialDispLoad .SetSize(TotalDOF);
 	IniDisplacement.SetSize(nNode*nDof);
 	InterDisplace.SetSize(nNode*nDof);
+	EffictiveLoad.SetSize(TotalDOF);
 	TotalLoad.SetSize(TotalDOF);
 	InteractLoad.SetSize(TotalDOF);
 	Eigenvalues.SetSize(MaxIter);
@@ -737,7 +743,7 @@ void FemMain::AssembleStiff()
 	cout << "MassMatrix=:";
 	Mass.Print();
 
-	if (Explicit == SolveType)
+	if (DynamicStatic == ProblemType)
 	{
 		double Alpha, Beta;
 		Alpha = Groups[0].GetDampAlpha();
@@ -1032,26 +1038,74 @@ void FemMain::GloableSolve()
 	case Model:
 		ModelSolve();
 		break;
+	case DynamicStatic:
+		DynamicStaticSolve();
 	}
+}
+void FemMain::DynamicStaticSolve()
+{
+	Newmark Newmarker;
+	Sor Sorer;
+	
+	Newmarker.IntSolver(dT);
+	int iiter = 0;
+	for (int istep = 0; istep < nStep; istep++)
+	{
+		ComputeDOF();
+		InitSolve();
+		ComputeElementStiff();
+		AssembleStiff();
+		ApplyLoad();
+		TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+		
+		EffictiveStiff = Newmarker.EffictiveStiff(Stiff, Mass, Damp);
+		EffictiveStiff.Print();
+
+		EffictiveLoad = TotalLoad;
+		do
+		{
+			iiter++;
+			EffictiveLoad = Newmarker.EffictiveLoad(EffictiveLoad, LResultZero, LResultFirst, LResultSecond, Mass, Damp);
+			cout << "EffictiveLoad=";
+			EffictiveLoad.Print();
+			Sorer.Init(EffictiveStiff);
+			Sorer.Solve(EffictiveLoad, ResultZero);
+			Newmarker.SolvePorcess(ResultZero, LResultZero, ResultFirst, LResultFirst, ResultSecond, LResultSecond);
+			LResultZero = ResultZero;
+			LResultFirst = ResultFirst;
+			LResultSecond = ResultSecond;
+			cout << "ResultZero=";
+			ResultZero.Print();
+			cout << "ResultFirst=";
+			ResultFirst.Print();
+			cout << "ResultSecond=";
+			ResultSecond.Print();
+			ComputeElementStress();
+			CountElement();
+			SendResultToNode();
+			GIDOutResult(iiter);
+		} while (iiter < MaxIter);
+	}
+
 }
 void FemMain::ModelSolve()
 {
 	ResultFirst.SetSize(TotalDOF);
 	ResultZero.Set(1);
-	LUSolver = new LUSolve();
+	LUSolve LUSolver;
 	FloatArray Error(TotalDOF);
 	double ErrorSum,ValueSum;
-	LUSolver->Decomposition(Stiff);
-	LUSolver->Inverse();
+	LUSolver.Decomposition(Stiff);
+	LUSolver.Inverse();
 	for (int iStep = 0; iStep < nStep; iStep++)
 	{
-		LUSolver->Mult(ResultZero);
+		LUSolver.Mult(ResultZero);
 		Eigenvalues.at(iStep) = ResultZero.at(iStep);
 		ResultZero = ResultZero.Times(1 / Eigenvalues.at(iStep));
 		do
 		{
 			ResultFirst = ResultZero;
-			LUSolver->Mult(ResultZero);
+			LUSolver.Mult(ResultZero);
 			Error = ResultZero - ResultFirst;
 			ErrorSum = 0;
 			ValueSum = 0;
@@ -1120,13 +1174,11 @@ void FemMain::Solve()
 	switch (SolveType)
 	{
 	case Explicit:
-		LUSolver = new LUSolve();
-		LUSolver->Decomposition(Stiff);
-		LUSolver->Solver(TotalLoad, ResultZero);
-		LUSolver->Check(TotalLoad, ResultZero);
+		LUSolver.Decomposition(Stiff);
+		LUSolver.Solver(TotalLoad, ResultZero);
+		LUSolver.Check(TotalLoad, ResultZero);
 		break;
 	case Implicit:
-		Sor Soror;
 		Soror.Init(Stiff);
 		Soror.Solve(TotalLoad, ResultZero);
 		break;

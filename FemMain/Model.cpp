@@ -670,12 +670,12 @@ FloatMatrix Quadr::ComputeMassMatrix()
 			}
 			W2 = W1*W2*Det*Density;
 			TNMass = TNMass.Mult(W2);
-			TNMass.Print();
+			//TNMass.Print();
 			TMass = TNMass.Extend(2);			
 			Mass = Mass + TMass;
 		}
 	}
-	Mass.Print();
+	//Mass.Print();
 	return Mass;
 }
 

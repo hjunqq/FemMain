@@ -1,8 +1,8 @@
 npre
-3 2 0 0 
+1 2 0 0 
 dir,npoint   fix
-1 3 
-1 4 7 
+1 6 
+1 4 7 3 6 9
 dir,npoint
 2 3
 1 2 3
@@ -14,3 +14,4 @@ npoint,InteractDomain   inter
 3 2
 3 6 9 2 5 8
 2 5 8 1 4 7 
+ 

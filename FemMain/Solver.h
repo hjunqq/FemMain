@@ -51,14 +51,24 @@ private:
 	double Alpha;
 	double Beta;
 	double a0, a1, a2, a3, a4, a5, a6, a7;
+	FloatArray m1, m2, m3;
+	FloatArray c1, c2, c3;
+	FloatArray MassArray, DampArray;
+	FloatArray Acc1, Acc2, Acc3;
 	FloatMatrix StiffEffictive;
+	FloatArray LoadEfficitive;
 	FloatArray X;
 	FloatArray B;
 	int *ipiv;
 	double Error;
 public:
 	void IntSolver(double dT);
-	void SetStiffMatix(FloatMatrix &Stiff, FloatMatrix &Mass,FloatMatrix &Damp);
+	FloatMatrix & EffictiveStiff(FloatMatrix &Stiff, FloatMatrix &Mass, FloatMatrix &Damp);
+	FloatArray & EffictiveLoad(FloatArray &Load, FloatArray &ResultZero, FloatArray &ResultFirst, FloatArray &ResultSecond,
+		const FloatMatrix Mass, const FloatMatrix Damp);
+	void SolvePorcess(const FloatArray ResultZero,const FloatArray LResultZero,
+		FloatArray &ResultFirst,const FloatArray LResultFirst,
+		FloatArray &ResultSecond,const FloatArray LResultSecond);
 };
 class ElasticSolver :
 	public Solver

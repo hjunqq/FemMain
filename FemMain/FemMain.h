@@ -29,6 +29,7 @@
 #define TagCheck  4
 #define Static	  0
 #define Model	  1
+#define DynamicStatic  2
 #define Explicit  0
 #define Implicit  1
 
@@ -63,7 +64,8 @@ private:
 	bool * Converge;
 	int SolveType;
 	int ProblemType;
-	
+	double dT;
+
 	ofstream chk, res;
 	ifstream glb, cor, ele, grp, loa, mat, pre;
 	GiD_FILE FMesh, FRes;
@@ -81,9 +83,10 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix Stiff,Mass,Damp;
-	FloatArray ResultZero;
-	FloatArray ResultFirst;
+	FloatMatrix Stiff,Mass,Damp,EffictiveStiff;
+	FloatArray ResultZero,LResultZero;
+	FloatArray ResultFirst,LResultFirst;
+	FloatArray ResultSecond,LResultSecond;
 	IntArray DegreeOfFreedom;
 	FloatArray ExternalForce;
 	FloatArray InitialStain;
@@ -92,13 +95,15 @@ private:
 	FloatArray IniDisplacement;
 	FloatArray InterDisplace;
 	FloatArray TotalLoad;
+	FloatArray EffictiveLoad;
 	FloatArray Eigenvalues;
 
 	IntArray InteractNode;
 	FloatArray InteractValue;
 	FloatArray InteractValueOld;
 
-	LUSolve *LUSolver;
+	LUSolve LUSolver;
+	Sor Soror;
 
 public:
 	void ShowTime();
@@ -119,6 +124,7 @@ public:
 	void Solve();
 	void StaticSolve();
 	void ModelSolve();
+	void DynamicStaticSolve();
 	void GloableSolve();
 	bool *ConvergeCheck();
 	void ComputeElementStress();
