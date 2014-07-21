@@ -121,7 +121,6 @@ public:
 	void AssembleStiff();
 	void ApplyLoad();
 	void ApplyInitial();
-	void Solve();
 	void StaticSolve();
 	void ModelSolve();
 	void DynamicStaticSolve();

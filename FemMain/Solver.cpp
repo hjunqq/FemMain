@@ -139,7 +139,10 @@ void Sor::MaxSpectralRadius()
 {
 	V1.SetSize(m);
 	V2.SetSize(m);
+	U1.SetSize(m);
+	U2.SetSize(m);
 	V1.Set(1);
+	U1.Set(1);
 	FloatMatrix D, LU,J;
 	D.SetSize(m, m);
 	LU = A;
@@ -157,15 +160,18 @@ void Sor::MaxSpectralRadius()
 	}
 	J = D.Mult(LU);
 	double OldSpectralRadius = 0, Error = 0;
+	int iiter = 0;
 	do
 	{
-		V2 = J.Mult(V1);
-		SpectralRadius = V2.at(0) / V1.at(0);
+		iiter++;
+		V1 = J.Mult(U1);
+		SpectralRadius = V1.MaxValue();
+		U1 = V1.Times(1 / SpectralRadius);
 		Error = abs(SpectralRadius - OldSpectralRadius);
-		OldSpectralRadius = SpectralRadius;
-	} while (Error > 10e-5);
+		OldSpectralRadius = SpectralRadius;		
+	} while (iiter<20 && Error > 10e-5);
 }
-void Sor::Compute(FloatArray &B)
+void Sor::Compute(FloatArray &B, FloatArray &X)
 {
 	for (int i = 0; i < m; i++)
 	{
@@ -179,6 +185,10 @@ void Sor::Compute(FloatArray &B)
 			axn += Value[i*m + j] * X1[j];
 		}
 		X2[i] = (1-w)*X1[i] + w*(B.at(i)-axnn-axn) / Value[i*m + i];
+	}
+	for (int i = 0; i < m; i++)
+	{
+		X.at(i) = X2[i];
 	}
 }
 
@@ -194,11 +204,13 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 	//{
 	//	ErrorAverage = 1;
 	//}
+	FloatArray T;
+	T.SetSize(m);
 	int iiter = 0;
 	do
 	{
 		iiter++;
-		Compute(B);
+		Compute(B,T);
 		Error = 0;
 		for (int i = 0; i < m; i++)
 		{
@@ -210,7 +222,7 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 		}
 		Error = Error / m;
 		cout << "iiter=       " << iiter << "    Error=      " << Error << endl;
-	} while (Error > 10e-5);
+	} while (iiter<200 && Error > 10e-11);
 	for (int i = 0; i < m; i++)
 	{
 		X.at(i) = X2[i];

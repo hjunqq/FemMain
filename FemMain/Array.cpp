@@ -264,6 +264,41 @@ double *FloatArray::GetValue()
 	return Values;
 }
 
+double FloatArray::MaxValue()
+{
+	double Max;
+	Max = Values[0];
+	if (size == 1)
+	{
+		return Max;
+	}
+	for (int i = 1; i < size; i++)
+	{
+		if (Max < Values[i])
+		{
+			Max = Values[i];
+		}
+	}
+	return Max;
+}
+double FloatArray::MinValue()
+{
+	double Min;
+	Min = Values[0];
+	if (size == 1)
+	{
+		return Min;
+	}
+	for (int i = 1; i < size; i++)
+	{
+		if (Min>Values[i])
+		{
+			Min = Values[i];
+		}
+	}
+	return Min;
+}
+
 // ´òÓ¡Êý×é
 void FloatArray::Print()
 {

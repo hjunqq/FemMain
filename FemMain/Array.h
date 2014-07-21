@@ -90,6 +90,8 @@ public:
 	void Set(double n);
 	void SetSize(int Size);
 	double * GetValue();
+	double  MaxValue();
+	double  MinValue();
 	FloatArray  operator+(const FloatArray & I)const;
 	FloatArray & operator=(const FloatArray & I);
 	FloatArray  operator-(const FloatArray & I)const;

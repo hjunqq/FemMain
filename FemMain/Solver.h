@@ -35,12 +35,12 @@ private:
 	double axnn, axn;
 	double *Value,*X1,*X2;
 	FloatMatrix A;
-	FloatArray V1,V2;
+	FloatArray V1,V2,U1,U2;
 	double Error,ErrorAverage;
 public:
 	void Init(FloatMatrix &A);
 	void MaxSpectralRadius();
-	void Compute(FloatArray &B);
+	void Compute(FloatArray &B,FloatArray &X);
 	void Solve(FloatArray &B,FloatArray &X);
 };
 class Newmark:

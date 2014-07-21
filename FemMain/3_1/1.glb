@@ -1,4 +1,4 @@
 ndim,npoint,ngroup,nelem,nmat,nstep ndof  maxiter   tolerance                  
   2    9      2      4    1     1     2      200      1e-11                    
 SolveType,ProblemType,dT   
-  1           2        0.02
+  1           2        0.005
