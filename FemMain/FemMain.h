@@ -30,6 +30,8 @@
 #define Static	  0
 #define Model	  1
 #define DynamicStatic  2
+#define MSor 0
+#define MLU  1
 #define Explicit  0
 #define Implicit  1
 
@@ -62,6 +64,7 @@ private:
 	int nInter;
 	double Error, Tolerance;
 	bool * Converge;
+	int SolveMethod;
 	int SolveType;
 	int ProblemType;
 	double dT;
@@ -83,7 +86,7 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix Stiff,Mass,Damp,EffictiveStiff;
+	FloatMatrix Stiff,Mass,Damp,EffictiveStiff,EffictiveMass;
 	FloatArray ResultZero,LResultZero;
 	FloatArray ResultFirst,LResultFirst;
 	FloatArray ResultSecond,LResultSecond;

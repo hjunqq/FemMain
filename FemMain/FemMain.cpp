@@ -127,7 +127,7 @@ void FemMain::ReadFiles()
 	stream.clear();
 	stream.str("");
 	stream << str;
-	stream >> SolveType >> ProblemType>>dT;
+	stream >> SolveMethod >> SolveType>>ProblemType>>dT;
 	cout << Tolerance << endl;
 
 	Groups = new Group[nGroup];
@@ -595,6 +595,8 @@ void FemMain::InitSolve()
 	InteractLoad.SetSize(TotalDOF);
 	Eigenvalues.SetSize(MaxIter);
 	Converge = new bool[2];
+	Converge[0] = false;
+	Converge[1] = false;
 	int nRow, nCol, NonZero;
 	IntArray *RowIdx, *ColIdx,*CNonZero;
 	RowIdx = new IntArray(TotalDOF+1);
@@ -1040,85 +1042,160 @@ void FemMain::GloableSolve()
 		break;
 	case DynamicStatic:
 		DynamicStaticSolve();
+		break;
 	}
 }
 void FemMain::DynamicStaticSolve()
 {
 	Newmark Newmarker;
 	Sor Sorer;
-	
-	
-	Newmarker.IntSolver(dT);
+	CentralDifference CDiff;
 	int iiter = 0;
-	for (int istep = 0; istep < nStep; istep++)
+	switch (SolveType)
 	{
-		ComputeDOF();
-		InitSolve();
-		ComputeElementStiff();
-		AssembleStiff();
-		ApplyLoad();
-		TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
-		
-		EffictiveStiff = Newmarker.EffictiveStiff(Stiff, Mass, Damp);
-		EffictiveStiff.Print();
-		switch (SolveType)
+	case Explicit:
+		CDiff.Init(dT, TotalDOF);
+		for (int istep = 0; istep < nStep; istep++)
 		{
-		case Explicit:
-			Sorer.Init(EffictiveStiff);
-			break;
-		case Implicit:
-			LUSolver.Decomposition(EffictiveStiff);
-			break;
-		}
-		do
-		{
-			iiter++;
-
-			if (nProces > 1)
-			{
-				cout << "MyID=  " << Id;
-			}
-			//InteractValue.Print();
-			InteractValue = ExchangeData();
-			//InteractValue.Print();
-			SetInteractResult(InteractValue);
-
-			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
-			ShowTime();
-			EffictiveLoad = Newmarker.EffictiveLoad(TotalLoad, LResultZero, LResultFirst, LResultSecond, Mass, Damp);
-			//cout << "EffictiveLoad=";
-			//EffictiveLoad.Print();
+			ComputeDOF();
+			InitSolve();
+			ComputeElementStiff();
+			AssembleStiff();
+			ApplyLoad();
 			
-			switch (SolveType)
+
+			EffictiveMass=CDiff.EffictiveMass(Mass, Damp);
+			
+			switch (SolveMethod)
 			{
-			case Explicit:
-				Sorer.Solve(EffictiveLoad, ResultZero);
+			case MSor:
+				Sorer.Init(EffictiveMass);
 				break;
-			case Implicit:
-				LUSolver.Solver(EffictiveLoad, ResultZero);
+			case MLU:
+				LUSolver.Decomposition(EffictiveMass);
 				break;
 			}
+			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+			switch (SolveMethod)
+			{
+			case MSor:
+				Sorer.Solve(TotalLoad, ResultSecond);
+				break;
+			case MLU:
+				LUSolver.Solver(TotalLoad, ResultSecond);
+				break;
+			}
+			CDiff.Init(ResultSecond);
+			do
+			{
+				iiter++;
+				if (nProces > 1)
+				{
+					cout << "MyID=   " << Id;
+					InteractValue = ExchangeData();
+					SetInteractResult(InteractValue);
+				}
+				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+				EffictiveLoad = CDiff.EffictiveLoad(TotalLoad, Stiff, Mass, Damp,
+					ResultZero, LResultZero);
+				switch (SolveMethod)
+				{
+				case MSor:
+					Sorer.Solve(EffictiveLoad, ResultZero);
+					break;
+				case MLU:
+					LUSolver.Solver(EffictiveLoad, ResultZero);
+					break;
+				}
+				CDiff.SolvePorcess(ResultZero, LResultZero, ResultFirst, ResultSecond);
+				if (nProces > 1)
+				{
+					ConvergeCheck();
+				}
+				cout << "Iter=    " << iiter << endl;
+				LResultZero = ResultZero;
+				LResultFirst = ResultFirst;
+				LResultSecond = ResultSecond;
+				ComputeElementStress();
+				CountElement();
+				SendResultToNode();
+				GIDOutResult(iiter);
+			} while (Converge[1] == false && iiter < MaxIter);
+		}
+		break;
+	case Implicit:
+		Newmarker.IntSolver(dT);
+		for (int istep = 0; istep < nStep; istep++)
+		{
+			ComputeDOF();
+			InitSolve();
+			ComputeElementStiff();
+			AssembleStiff();
+			ApplyLoad();
+			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 
-			Newmarker.SolvePorcess(ResultZero, LResultZero, ResultFirst, LResultFirst, ResultSecond, LResultSecond);
+			EffictiveStiff = Newmarker.EffictiveStiff(Stiff, Mass, Damp);
+			EffictiveStiff.Print();
+			switch (SolveMethod)
+			{
+			case MSor:
+				Sorer.Init(EffictiveStiff);
+				break;
+			case MLU:
+				LUSolver.Decomposition(EffictiveStiff);
+				break;
+			}
+			do
+			{
+				iiter++;
 
-			ConvergeCheck();
-			cout << "Iter=    " << iiter << endl;
-			LResultZero = ResultZero;
-			LResultFirst = ResultFirst;
-			LResultSecond = ResultSecond;
-			//cout << "ResultZero=";
-			//ResultZero.Print();
-			//cout << "ResultFirst=";
-			//ResultFirst.Print();
-			//cout << "ResultSecond=";
-			//ResultSecond.Print();
-			ComputeElementStress();
-			CountElement();
-			SendResultToNode();
-			GIDOutResult(iiter);
-		} while (Converge[1]==false && iiter < MaxIter);
+				if (nProces > 1)
+				{
+					cout << "MyID=  " << Id;
+				
+					//InteractValue.Print();
+					InteractValue = ExchangeData();
+					//InteractValue.Print();
+					SetInteractResult(InteractValue);
+				}
+				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+				ShowTime();
+				EffictiveLoad = Newmarker.EffictiveLoad(TotalLoad, LResultZero, LResultFirst, LResultSecond, Mass, Damp);
+				//cout << "EffictiveLoad=";
+				//EffictiveLoad.Print();
+
+				switch (SolveMethod)
+				{
+				case MSor:
+					Sorer.Solve(EffictiveLoad, ResultZero);
+					break;
+				case MLU:
+					LUSolver.Solver(EffictiveLoad, ResultZero);
+					break;
+				}
+
+				Newmarker.SolvePorcess(ResultZero, LResultZero, ResultFirst, LResultFirst, ResultSecond, LResultSecond);
+
+				ConvergeCheck();
+				cout << "Iter=    " << iiter << endl;
+				LResultZero = ResultZero;
+				LResultFirst = ResultFirst;
+				LResultSecond = ResultSecond;
+				//cout << "ResultZero=";
+				//ResultZero.Print();
+				//cout << "ResultFirst=";
+				//ResultFirst.Print();
+				//cout << "ResultSecond=";
+				//ResultSecond.Print();
+				ComputeElementStress();
+				CountElement();
+				SendResultToNode();
+				GIDOutResult(iiter);
+			} while (Converge[1] == false && iiter < MaxIter);
+		}
+		break;
 	}
-
+	
 }
 void FemMain::ModelSolve()
 {
@@ -1170,14 +1247,14 @@ void FemMain::StaticSolve()
 
 		TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 		ShowTime();
-		switch (SolveType)
+		switch (SolveMethod)
 		{
-		case Explicit:
+		case MSor:
 			LUSolver.Decomposition(Stiff);
 			LUSolver.Solver(TotalLoad, ResultZero);
 			LUSolver.Check(TotalLoad, ResultZero);
 			break;
-		case Implicit:
+		case MLU:
 			Soror.Init(Stiff);
 			Soror.Solve(TotalLoad, ResultZero);
 			break;
@@ -1200,14 +1277,14 @@ void FemMain::StaticSolve()
 				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 
 				ShowTime();
-				switch (SolveType)
+				switch (SolveMethod)
 				{
-				case Explicit:
+				case MSor:
 					LUSolver.Decomposition(Stiff);
 					LUSolver.Solver(TotalLoad, ResultZero);
 					LUSolver.Check(TotalLoad, ResultZero);
 					break;
-				case Implicit:
+				case MLU:
 					Soror.Init(Stiff);
 					Soror.Solve(TotalLoad, ResultZero);
 					break;

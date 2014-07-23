@@ -78,4 +78,22 @@ private:
 	int MaxIterate;
 
 };
-
+class CentralDifference:
+	public Solver
+{
+private:
+	double dT;
+	double c0, c1, c2, c3;
+	FloatMatrix MassEffictive;
+	FloatArray LoadEffictive;
+	FloatArray LastDisplace,InitAcc;
+	FloatArray Acc, Velocity;
+public:
+	void Init(double dT, int TotDOF);
+	void Init(FloatArray &ResultSecond);
+	FloatMatrix & EffictiveMass(FloatMatrix & Mass, FloatMatrix & Damp);
+	FloatArray &EffictiveLoad(FloatArray &Load, FloatMatrix & Stiff, FloatMatrix &Mass,
+		FloatMatrix & Damp, FloatArray ResultZero, FloatArray LResultZero);
+	void SolvePorcess(const FloatArray ResultZero, const FloatArray LResultZero,
+		FloatArray &ResultFirst, FloatArray &ResultSecond);
+};

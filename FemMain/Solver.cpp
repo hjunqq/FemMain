@@ -222,7 +222,7 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 		}
 		Error = Error / m;
 		cout << "iiter=       " << iiter << "    Error=      " << Error << endl;
-	} while (iiter<200 && Error > 10e-11);
+	} while ( Error > 10e-11);
 	for (int i = 0; i < m; i++)
 	{
 		X.at(i) = X2[i];
@@ -274,4 +274,49 @@ void Newmark::SolvePorcess(const FloatArray ResultZero, const FloatArray LResult
 	Acc3 = ResultSecond.Times(a3);
 	ResultSecond = Acc1 - Acc2 - Acc3;
 	ResultFirst = LResultFirst + LResultSecond.Times(a6) + ResultSecond.Times(a7);
+}
+
+void CentralDifference::Init(double dT,  int TotDOF)
+{
+	this->dT = dT;
+	c0 = 1 / (dT*dT);
+	c1 = 1 / (2 * dT);
+	c2 = 2 * c0;
+	c3 = 1 / c2;
+	LastDisplace.SetSize(0);
+}
+void CentralDifference::Init(FloatArray &ResultSecond)
+{
+	InitAcc = ResultSecond;
+	LastDisplace = InitAcc.Times(c3);
+}
+FloatMatrix & CentralDifference::EffictiveMass(FloatMatrix & Mass, FloatMatrix & Damp)
+{
+	MassEffictive = Mass.Mult(c0) + Damp.Mult(c1);
+	return MassEffictive;
+}
+FloatArray & CentralDifference::EffictiveLoad(FloatArray &Load, FloatMatrix & Stiff, FloatMatrix &Mass,
+	FloatMatrix & Damp, FloatArray ResultZero, FloatArray LResultZero)
+{
+	FloatMatrix KM, M,C;
+	FloatArray at, lastat; 
+	LoadEffictive = Load;
+	KM = Mass.Mult(c2);
+	KM = Stiff - KM;
+	at = KM.Mult(ResultZero);
+	M = M.Mult(c0);
+	C = C.Mult(c1);
+	M = M - C;
+	lastat = M.Mult(LastDisplace);
+	LoadEffictive = LoadEffictive - at - lastat;
+	return LoadEffictive;
+}
+void CentralDifference::SolvePorcess(const FloatArray ResultZero, const FloatArray LResultZero,
+	FloatArray &ResultFirst,FloatArray &ResultSecond)
+{
+	Acc = LastDisplace - LResultZero.Times(2) - ResultZero;
+	ResultSecond = Acc.Times(c0);
+	Velocity = LastDisplace.Times(-1) + ResultZero;
+	ResultSecond = Velocity.Times(c1);
+	LastDisplace = LResultZero;
 }
