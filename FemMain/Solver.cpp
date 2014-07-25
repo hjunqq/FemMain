@@ -304,8 +304,8 @@ FloatArray & CentralDifference::EffictiveLoad(FloatArray &Load, FloatMatrix & St
 	KM = Mass.Mult(c2);
 	KM = Stiff - KM;
 	at = KM.Mult(ResultZero);
-	M = M.Mult(c0);
-	C = C.Mult(c1);
+	M = Mass.Mult(c0);
+	C = Damp.Mult(c1);
 	M = M - C;
 	lastat = M.Mult(LastDisplace);
 	LoadEffictive = LoadEffictive - at - lastat;

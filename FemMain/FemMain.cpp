@@ -1064,15 +1064,13 @@ void FemMain::DynamicStaticSolve()
 			ApplyLoad();
 			
 
-			EffictiveMass=CDiff.EffictiveMass(Mass, Damp);
-			
 			switch (SolveMethod)
 			{
 			case MSor:
-				Sorer.Init(EffictiveMass);
+				Sorer.Init(Mass);
 				break;
 			case MLU:
-				LUSolver.Decomposition(EffictiveMass);
+				LUSolver.Decomposition(Mass);
 				break;
 			}
 			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
@@ -1085,7 +1083,21 @@ void FemMain::DynamicStaticSolve()
 				LUSolver.Solver(TotalLoad, ResultSecond);
 				break;
 			}
+			//ResultSecond.Print();
 			CDiff.Init(ResultSecond);
+
+			EffictiveMass = CDiff.EffictiveMass(Mass, Damp);
+			switch (SolveMethod)
+			{
+			case MSor:
+				Sorer.Init(EffictiveMass);
+				break;
+			case MLU:
+				LUSolver.Decomposition(EffictiveMass);
+				break;
+			}
+
+			
 			do
 			{
 				iiter++;
@@ -1113,6 +1125,7 @@ void FemMain::DynamicStaticSolve()
 					ConvergeCheck();
 				}
 				cout << "Iter=    " << iiter << endl;
+				//ResultSecond.Print();
 				LResultZero = ResultZero;
 				LResultFirst = ResultFirst;
 				LResultSecond = ResultSecond;
