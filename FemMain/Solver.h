@@ -90,7 +90,7 @@ private:
 	FloatArray Acc, Velocity;
 public:
 	void Init(double dT, int TotDOF);
-	void Init(FloatArray &ResultSecond);
+	FloatArray & Init(FloatArray &ResultSecond);
 	FloatMatrix & EffictiveMass(FloatMatrix & Mass, FloatMatrix & Damp);
 	FloatArray &EffictiveLoad(FloatArray &Load, FloatMatrix & Stiff, FloatMatrix &Mass,
 		FloatMatrix & Damp, FloatArray ResultZero, FloatArray LResultZero);

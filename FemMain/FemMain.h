@@ -102,8 +102,8 @@ private:
 	FloatArray Eigenvalues;
 
 	IntArray InteractNode;
-	FloatArray InteractValue;
-	FloatArray InteractValueOld;
+	FloatArray *InteractValue;
+	FloatArray *InteractValueOld;
 
 	LUSolve LUSolver;
 	Sor Soror;
@@ -132,11 +132,11 @@ public:
 	void ComputeElementStress();
 	void CountElement();
 	void SendResultToNode();
-	IntArray GetInteractNode();
+	IntArray GetInteractNode(int iinter);
 	FloatArray GetInteractResult(IntArray & InteractNode);
-	void SetInteractResult(FloatArray &InteractResult);
+	void SetInteractResult(FloatArray * InteractResult);
 
 	void GetSize(int & NProces);
 	void GetID(int &MyID);
-	FloatArray ExchangeData();
+	FloatArray * ExchangeData();
 };

@@ -285,14 +285,15 @@ void CentralDifference::Init(double dT,  int TotDOF)
 	c3 = 1 / c2;
 	LastDisplace.SetSize(0);
 }
-void CentralDifference::Init(FloatArray &ResultSecond)
+FloatArray & CentralDifference::Init(FloatArray &ResultSecond)
 {
 	InitAcc = ResultSecond;
 	LastDisplace = InitAcc.Times(c3);
+	return LastDisplace;
 }
 FloatMatrix & CentralDifference::EffictiveMass(FloatMatrix & Mass, FloatMatrix & Damp)
 {
-	MassEffictive = Mass.Mult(c0) + Damp.Mult(c1);
+	MassEffictive = Mass.Mult(c0)+Damp.Mult(c1);
 	return MassEffictive;
 }
 FloatArray & CentralDifference::EffictiveLoad(FloatArray &Load, FloatMatrix & Stiff, FloatMatrix &Mass,
@@ -304,10 +305,19 @@ FloatArray & CentralDifference::EffictiveLoad(FloatArray &Load, FloatMatrix & St
 	KM = Mass.Mult(c2);
 	KM = Stiff - KM;
 	at = KM.Mult(ResultZero);
+	
 	M = Mass.Mult(c0);
 	C = Damp.Mult(c1);
 	M = M - C;
-	lastat = M.Mult(LastDisplace);
+	lastat = M.Mult(LResultZero);
+	//cout << endl;
+	//cout << endl;
+	//cout << "Load        ";
+	//LoadEffictive.Print();
+	//cout << "at          ";
+	//at.Print();
+	//cout << "LastAt      ";
+	//lastat.Print();
 	LoadEffictive = LoadEffictive - at - lastat;
 	return LoadEffictive;
 }
@@ -318,5 +328,5 @@ void CentralDifference::SolvePorcess(const FloatArray ResultZero, const FloatArr
 	ResultSecond = Acc.Times(c0);
 	Velocity = LastDisplace.Times(-1) + ResultZero;
 	ResultSecond = Velocity.Times(c1);
-	LastDisplace = LResultZero;
+	
 }
