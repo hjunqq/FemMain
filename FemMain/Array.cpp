@@ -334,6 +334,11 @@ void FloatArray::Set(double n)
 
 void FloatArray::SetSize(int Size)
 {
+	
+	if (size > 0)
+	{
+		delete[] Values;
+	}
 	size = Size;
 	Values = new double[size]();
 }

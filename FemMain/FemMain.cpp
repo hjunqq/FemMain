@@ -23,11 +23,11 @@ int main(int argc,char**argv)
 	string text1,text2;
 	stringstream stream;
 	ifstream inp("1.inp");
-	IntArray InteractNode;
-	FloatArray InteractValue,InteractValueOld;
+	int nProb;
+
 	bool *Converge;
 	double Error;
-	int MaxIter;
+
 	int NProces, MyID;
 	MPI::Init(argc, argv);
 	NProces = MPI::COMM_WORLD.Get_size();
@@ -36,16 +36,27 @@ int main(int argc,char**argv)
 	Fem.GetID(MyID);
 	getline(inp, text1);
 	getline(inp, text1);
-	getline(inp, text2);
-	if (MyID == 0)
+	stream << text1;
+	stream >> nProb;
+	for (int iProb = 0; iProb < nProb; iProb++)
 	{
-		Fem.WorkDir() = text1;
+		getline(inp, text1);
+		if (MyID == iProb)
+		{
+			Fem.WorkDir() = text1;
+		}
 	}
-	else if (MyID == 1)
-	{
-		Fem.WorkDir() = text2;
-	}
-	
+	//getline(inp, text1);
+	//getline(inp, text2);
+	//if (MyID == 0)
+	//{
+	//	Fem.WorkDir() = text1;
+	//}
+	//else if (MyID == 1)
+	//{
+	//	Fem.WorkDir() = text2;
+	//}
+	//
 	inp.close();
 	MPI::COMM_WORLD.Barrier();
 	GiD_PostInit();
@@ -110,7 +121,7 @@ void FemMain::ReadFiles()
 
 	if (glb.fail() || cor.fail() || ele.fail() || grp.fail() || loa.fail() || mat.fail() || pre.fail())
 	{
-		cout << "Input Files Fail" << endl;
+		cout << "Input Files Fail" <<setw(10)<<Id<< endl;
 		ShowTime();
 	}
 
@@ -171,10 +182,10 @@ void FemMain::ReadFiles()
 		}
 		Nodes[inode].Init(Idx, *Coors);
 	}
-	for (int inode = 0; inode < nNode; inode++)
-	{
-		Nodes[inode].Print();
-	}
+	//for (int inode = 0; inode < nNode; inode++)
+	//{
+	//	Nodes[inode].Print();
+	//}
 
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
@@ -201,10 +212,10 @@ void FemMain::ReadFiles()
 				}
 				Quadrs[ielem].Init(4, Mat, Idx, igroup,Dof, &Nodes);
 			}
-			for (int ielem = 0; ielem < nElem; ielem++)
-			{
-				Quadrs[ielem].Print();
-			}
+			//for (int ielem = 0; ielem < nElem; ielem++)
+			//{
+			//	Quadrs[ielem].Print();
+			//}
 			Groups[igroup].FillElement(Quadrs);
 		}
 	}
@@ -556,8 +567,8 @@ void FemMain::ComputeDOF()
 			DegreeOfFreedom.at(idof) = TotalDOF;
 		}
 	}
-	cout << "DegreeOfFreedom      " ;
-	DegreeOfFreedom.Print();
+	//cout << "DegreeOfFreedom      " ;
+	//DegreeOfFreedom.Print();
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();
@@ -596,6 +607,13 @@ void FemMain::InitSolve()
 
 	InteractValue = new FloatArray[nInter];
 	InteractValueOld = new FloatArray[nInter];
+	for (int iinter = 0; iinter < nInter; iinter++)
+	{
+		InteractNode = GetInteractNode(iinter);
+		int size = InteractNode.GetSize();
+		InteractValue[iinter].SetSize(size*nDof);
+		InteractValueOld[iinter].SetSize(size*nDof);
+	}
 
 	Eigenvalues.SetSize(MaxIter);
 	Converge = new bool[2];
@@ -1105,17 +1123,36 @@ void FemMain::DynamicStaticSolve()
 			do
 			{
 				iiter++;
+
+				//TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+				//EffictiveLoad = CDiff.EffictiveLoad(TotalLoad, Stiff, Mass, Damp,
+				//	ResultZero, LResultZero);
+				//switch (SolveMethod)
+				//{
+				//case MSor:
+				//	Sorer.Solve(EffictiveLoad, ResultZero);
+				//	break;
+				//case MLU:
+				//	LUSolver.Solver(EffictiveLoad, ResultZero);
+				//	break;
+				//}
+				//CDiff.SolvePorcess(ResultZero, LResultZero, ResultFirst, ResultSecond);
+				//ComputeElementStress();
+				//CountElement();
+				//SendResultToNode();
+
 				if (nProces > 1)
 				{
-					cout << "MyID=   " << Id;
+					cout << "MyID=   " << Id<<endl;
 					InteractValue = ExchangeData();
+					//InteractValue[0].Print();
 					SetInteractResult(InteractValue);
 				}
 				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 				EffictiveLoad = CDiff.EffictiveLoad(TotalLoad, Stiff, Mass, Damp,
 					ResultZero, LResultZero);
-				//cout << "ResultZero";
-				//ResultZero.Print();
+				cout << "ResultZero    "<<setw(10)<<Id<<setw(10)<<iiter;
+				ResultZero.Print();
 				//cout << "LResultZero";
 				//LResultZero.Print();
 				LResultZero = ResultZero;
@@ -1135,7 +1172,7 @@ void FemMain::DynamicStaticSolve()
 				{
 					ConvergeCheck();
 				}
-				cout << "Iter=    " << iiter << endl;
+				//cout << "Iter=    " << iiter << endl;
 				//ResultSecond.Print();
 				
 				LResultFirst = ResultFirst;
@@ -1144,6 +1181,8 @@ void FemMain::DynamicStaticSolve()
 				CountElement();
 				SendResultToNode();
 				GIDOutResult(iiter);
+				
+				
 			} while (Converge[1] == false && iiter < MaxIter);
 		}
 		break;
@@ -1159,7 +1198,7 @@ void FemMain::DynamicStaticSolve()
 			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 
 			EffictiveStiff = Newmarker.EffictiveStiff(Stiff, Mass, Damp);
-			EffictiveStiff.Print();
+			//EffictiveStiff.Print();
 			switch (SolveMethod)
 			{
 			case MSor:
@@ -1243,7 +1282,7 @@ void FemMain::ModelSolve()
 			}
 			ErrorSum = ErrorSum / TotalDOF;
 		} while (ErrorSum > Tolerance);
-		ResultZero.Print();
+		//ResultZero.Print();
 		ComputeElementStress();
 		CountElement();
 		SendResultToNode();
@@ -1322,10 +1361,26 @@ void FemMain::StaticSolve()
 
 bool *FemMain::ConvergeCheck()
 {
+	Error = 0;
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
+		//if (Id == 0)
+		//{
+			//InteractValueOld[iinter].Print();
+		//cout << setw(10) << Id<<setw(10)<<iinter;
+		//	InteractValue[iinter].Print();
+		//}
 		InteractValueOld[iinter] = InteractValue[iinter] - InteractValueOld[iinter];
-		Error = InteractValueOld[iinter].Norm() / InteractValue[iinter].Mean();
+		double Mean = InteractValue[iinter].Mean();
+		if (Mean == 0)
+		{
+			Error += 1;
+		}
+		else if (Mean !=0)
+		{
+			Error += InteractValueOld[iinter].Norm() / Mean;
+		}
+		InteractValueOld[iinter] = InteractValue[iinter];
 	}
 	Converge[0] = false;
 	Converge[1] = false;
@@ -1341,10 +1396,6 @@ bool *FemMain::ConvergeCheck()
 		MPI::COMM_WORLD.Send(&Converge[0], 1, MPI_C_BOOL, AdjDomain, TagCheck);
 		MPI::COMM_WORLD.Recv(&AdjConverge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
 		Converge[1] = Converge[1] && AdjConverge;
-	}
-	for (int iinter = 0; iinter < nInter; iinter++)
-	{
-		InteractValueOld[iinter] = InteractValue[iinter];
 	}
 
 	cout << "Error=   " << setw(20) << Error << setw(20) << "Converge[0]=   " << Converge[0] 
@@ -1510,7 +1561,6 @@ void FemMain::SetInteractResult(FloatArray * InteractResult)
 
 	InterDisplace.Clear();
 	InteractLoad.Clear();
-
 	
 	A.SetSize(TotalDOF, TotalDOF);
 	InterDof = DegreeOfFreedom;
@@ -1520,16 +1570,6 @@ void FemMain::SetInteractResult(FloatArray * InteractResult)
 		LocalNode = Inters[iinter].GetLocal();
 		RemoteNode = Inters[iinter].GetRemote();
 		nInterNode = LocalNode.GetSize();
-		for (int inode = 0; inode < nInterNode; inode++)
-		{
-			NodeIndex = LocalNode.at(inode);
-			for (int iDof = 0; iDof < nDof; iDof++)
-			{
-				nInterDof++;
-				InterDof.at(NodeIndex * 2 + iDof) = nInterDof;
-				InterDisplace.at(NodeIndex * 2 + iDof) += InteractResult[iinter].at(inode * 2 + iDof);
-			}
-		}
 		for (int inode = 0; inode < nInterNode; inode++)
 		{
 			NodeIndex = LocalNode.at(inode);
@@ -1622,10 +1662,14 @@ void FemMain::SetInteractResult(FloatArray * InteractResult)
 			}
 		}
 	}
+	FloatArray iInteractResult;
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
-		InteractLoad = InteractLoad - IStiff.Mult(InteractResult[iinter]);
+		iInteractResult = InteractResult[iinter];
+		InteractLoad = InteractLoad - IStiff.Mult(iInteractResult);
 	}
+	//cout << "InteractLoad" << endl;
+	//InteractLoad.Print();
 }
 
 void FemMain::GetSize(int &NProces)
@@ -1643,37 +1687,35 @@ FloatArray * FemMain::ExchangeData()
 	int *RemoteNode;
 	double *Value;
 	MPI::COMM_WORLD.Barrier();
-	InteractValue = new FloatArray[nInter];
-
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
 		InteractNode = GetInteractNode(iinter);
 		int AdjDomain = Inters[iinter].GetAdj();
 		int size = InteractNode.GetSize();
-		InteractValue[iinter].SetSize(size*nDof);
-		InteractValueOld[iinter].SetSize(size*nDof);
 
 		RemoteNode = new int[size]();
 		Value = new double[size*nDof]();
 		RemoteNode = InteractNode.GetValue();
 		cout << AdjDomain << endl;
-		MPI::COMM_WORLD.Send(InteractNode.GetValue(), size, MPI_INTEGER, AdjDomain, TagNode);
+		MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		for (int i = 0; i < size; i++)
 		{
 			InteractNode.at(i) = RemoteNode[i];
 		}
-
+		//InteractNode.Print();
 		InteractValue[iinter] = GetInteractResult(InteractNode);
-
+		//cout << setw(10) << "ID="<<setw(10)<<Id<<setw(10)<<"before"<<iinter;
+		//InteractValue[iinter].Print();
 		Value = InteractValue[iinter].GetValue();
-		MPI::COMM_WORLD.Send(InteractValue[iinter].GetValue(), size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
 		MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
 		for (int i = 0; i < size*nDof; i++)
 		{
 			InteractValue[iinter].at(i) = Value[i];
 		}
-		InteractValue[iinter].Print();
+		//cout << setw(10) << "ID=" << setw(10) << Id << setw(10) << iinter;
+		//InteractValue[iinter].Print();
 	}
 	return InteractValue;
 }
