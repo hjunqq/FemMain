@@ -144,7 +144,7 @@ class Quadr :
 {
 public:
 	Quadr();
-	virtual ~Quadr();
+	~Quadr();
 	void Print();
 	Quadr & operator=(const Quadr &Q);
 	FloatMatrix  ComputeStiff();
@@ -184,7 +184,7 @@ private:
 	int nElements;
 	int nDof;
 	double Alpha, Beta;
-	Quadr ** Quadrs; 
+	Quadr * Quadrs; 
 public:
 	// 初始化
 	void Init(int Index, int nElements, int type,int Mat,int Dof);
@@ -193,7 +193,7 @@ public:
 	void FillElement(Quadr * Quadrs);
 	void FillDampPara(double Alpha, double Beta);
 	// 获取第i个单元号
-	Quadr ** GetElement(Quadr &);
+	Quadr * GetElement(Quadr &);
 	// 获取单元个数
 	int GetnElements();
 	// 获取材料号

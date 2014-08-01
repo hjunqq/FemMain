@@ -24,8 +24,8 @@ private:
 	int Dir;
 	double StartC;
 	double EndC;
-	Line **Lines;
-	Quadr **Quadrs;
+	Line *Lines;
+	Quadr *Quadrs;
 public:
 	void Init(int Index,int nEle,int nNode, double StartC, double StartV, double EndC, double EndV, int Dir);
 	void Set(Line *Lines);

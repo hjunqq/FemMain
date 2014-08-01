@@ -3,6 +3,24 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+
+#define _CRTDBG_MAP_ALLOC
+
+#include <crtdbg.h>
+#include <stdlib.h>
+
+#include <iostream>
+#include <assert.h>
+
+#ifdef _DEBUG
+#define DEBUG_CLIENTBLOCK new(_CLIENT_BLOCK, __FILE__, __LINE__)
+#endif
+
+#ifdef _DEBUG
+#define new DEBUG_CLIENTBLOCK
+#endif
+
+
 using namespace std;
 class Time
 {
@@ -86,6 +104,7 @@ public:
 	FloatArray Minus(const FloatArray & F )const;
 	// Êý×é¸´ÖÆ
 	FloatArray Copy(const FloatArray & F)const;
+	FloatArray Cat(const FloatArray &F)const;
 	FloatArray(const FloatArray & F);
 	void Set(double n);
 	void SetSize(int Size);

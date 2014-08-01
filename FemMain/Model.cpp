@@ -354,7 +354,7 @@ void Group::Init(int Index, int nElements, int type , int Mat, int Dof)
 	this->Material = Mat;
 	this->nDof = Dof;
 	Elements = new IntArray(nElements);
-	Quadrs = new Quadr *[nElements];
+	Quadrs = new Quadr[nElements];
 }
 
 
@@ -368,7 +368,7 @@ void Group::FillElement(Quadr *Q)
 {
 	for (int ielem = 0; ielem < nElements;ielem++)
 	{
-		Quadrs[ielem] = &Q[ielem];
+		Quadrs[ielem] = Q[ielem];
 	}
 }
 
@@ -379,7 +379,7 @@ void Group::FillDampPara(double Alpha, double Beta)
 }
 
 // 获取第i个单元
-Quadr ** Group::GetElement(Quadr & )
+Quadr * Group::GetElement(Quadr & )
 {
 	return Quadrs;
 }
@@ -682,6 +682,7 @@ FloatMatrix Quadr::ComputeMassMatrix()
 
 Quadr::~Quadr()
 {
+	delete[]GaussStrain, GaussStress, NodeStrain, NodeStress;
 }
 
 
@@ -694,6 +695,7 @@ Quadr & Quadr::operator=(const Quadr &Q)
 	DegreeOfFreedom = Q.DegreeOfFreedom;
 	group = Q.group;
 	mat = Q.mat;
+	Dof = Q.Dof;
 	nGaussPoint = Q.nGaussPoint;
 	nNodes = Q.nNodes;
 	Nodes = Q.Nodes;

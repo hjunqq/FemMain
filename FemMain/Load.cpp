@@ -40,14 +40,14 @@ void Face::Init(int Index, int nEle, int nNode, double StartC, double StartV, do
 	this->Dir = Dir;
 	if (nNode == 2)
 	{
-		Lines = new Line*[nElem];
+		Lines = new Line[nElem];
 	}
 }
 void Face::Set(Line *TLines)
 {
 	for (int i = 0; i < nElem; i++)
 	{
-		Lines[i] =&TLines[i];
+		Lines[i] =TLines[i];
 	}
 }
 
@@ -88,7 +88,7 @@ double Face::GetEndV()
 
 Line *Face::GetLines()
 {
-	return *Lines;
+	return Lines;
 }
 
 Volumn::Volumn()

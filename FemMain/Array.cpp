@@ -52,11 +52,14 @@ void Time::Show() const
 IntArray::IntArray()
 {
 	size = 0;
+	Values = NULL;
 }
 
 
 IntArray::~IntArray()
 {
+	if (Values!=NULL)
+		delete[] Values;
 }
 
 
@@ -178,10 +181,11 @@ int *IntArray::GetValue()
 // 打印变量内容
 void IntArray::Print()
 {
-	cout << "The Values are:" <<size<< endl;
+	cout << "The Values are:" <<setw(10)<<size<< endl;
 	for (int i = 0; i < size; i++)
 	{
 		cout << setw(10) << Values[i];
+		if ((i+1) % 7 == 0)cout << endl;
 	}
 	cout << endl;
 }
@@ -222,11 +226,14 @@ IntArray IntArray::operator - (const IntArray & I)const
 FloatArray::FloatArray()
 {
 	size = 0;
+	Values = NULL;
 }
 
 
 FloatArray::~FloatArray()
 {
+	if (Values!=NULL)
+		delete[] Values;
 }
 
 bool FloatArray::IsNULL()
@@ -302,10 +309,11 @@ double FloatArray::MinValue()
 // 打印数组
 void FloatArray::Print()
 {
-	cout << "The Values are:    " << size << endl;
+	cout << "The Values are:    " <<setw(10)<< size << endl;
 	for (int i = 0; i < size; i++)
 	{
 		cout << setw(15) << Values[i] ;
+		if ((i+1) % 7 == 0)cout << endl;
 	}
 	cout << endl;
 }
@@ -431,6 +439,22 @@ FloatArray FloatArray::Copy(const FloatArray & F)const
 
 }
 
+FloatArray FloatArray::Cat(const FloatArray &F)const
+{
+	FloatArray Temp;
+	Temp.size = F.size + size;
+	Temp.Values = new double[Temp.size]();
+	for (int i = 0; i < size; i++)
+	{
+		Temp.Values[i] = Values[i];
+	}
+	for (int i = 0; i < F.size; i++)
+	{
+		Temp.Values[i+size] = F.Values[i];
+	}
+	return Temp;
+}
+
 FloatArray FloatArray::Cross(FloatArray &F)const
 {
 	FloatArray T(size);
@@ -514,6 +538,7 @@ FloatMatrix::FloatMatrix()
 {
 	m = 0;
 	n = 0;
+	Values = NULL;
 }
 
 FloatMatrix::FloatMatrix(const FloatMatrix &F)
@@ -529,6 +554,8 @@ FloatMatrix::FloatMatrix(const FloatMatrix &F)
 
 FloatMatrix::~FloatMatrix()
 {
+	if (Values!=NULL)
+		delete[]Values;
 }
 
 
@@ -536,7 +563,7 @@ IntMatrix::IntMatrix()
 {
 	m = 0;
 	n = 0;
-	Values = new int[m*n]();
+	Values = NULL;
 }
 
 IntMatrix::IntMatrix(const IntMatrix & I)
@@ -552,6 +579,8 @@ IntMatrix::IntMatrix(const IntMatrix & I)
 
 IntMatrix::~IntMatrix()
 {
+	if (Values!=NULL)
+		delete[] Values;
 }
 
 
@@ -784,6 +813,7 @@ void FloatMatrix::Print()
 		for (int j = 0; j < n; j++)
 		{
 			cout << setw(15) << this->at(i, j);
+			if ((j+1) % 7 == 0)cout << endl;
 		}
 		cout << endl;
 	}
@@ -936,6 +966,12 @@ CSRMatrix::CSRMatrix(CSRMatrix &C)
 
 CSRMatrix::~CSRMatrix()
 {
+	if (Values != NULL)
+		delete[] Values;
+	if (RowIdx != NULL)
+		delete[]RowIdx;
+	if(ColIdx!=NULL)
+		delete[] ColIdx;
 }
 
 
@@ -1001,6 +1037,7 @@ void CSRMatrix::Print()
 		for (int iCol = 0; iCol < nCol; iCol++)
 		{
 			cout << setw(7) << this->at(iRow, iCol);
+			if ((iCol+1) % 7 == 0)cout << endl;
 		}
 		cout << endl;
 	}

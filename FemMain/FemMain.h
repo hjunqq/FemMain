@@ -2,14 +2,12 @@
 #pragma comment(linker,"/NODEFAULTLIB:libcmt.lib")
 #ifdef WIN32
 #pragma comment(lib,"GidLib\\x32\\zlib.lib")
-#pragma comment(lib,"GidLib\\x32\\hdf5.lib")
 #pragma comment(lib,"GidLib\\x32\\gidpost.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\cxx.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
 #endif
 #ifdef x64
 #pragma comment(lib,"GidLib\\x64\\zlib.lib")
-#pragma comment(lib,"GidLib\\x64\\hdf5.lib")
 #pragma comment(lib,"GidLib\\x64\\gidpost.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\cxx.lib")
 #pragma comment(lib,"C:\\Program Files\\MPICH2\\lib\\mpi.lib")
@@ -86,7 +84,8 @@ private:
 	Displace *Disp;
 	Interact *Inters;
 
-	FloatMatrix Stiff,Mass,Damp,EffictiveStiff,EffictiveMass;
+	FloatMatrix Stiff,Mass,Damp,EffictiveStiff,EffictiveMass,IStiff;
+	IntArray InterDof;
 	FloatArray ResultZero,LResultZero;
 	FloatArray ResultFirst,LResultFirst;
 	FloatArray ResultSecond,LResultSecond;
@@ -122,6 +121,7 @@ public:
 	void InitSolve();
 	void ComputeElementStiff();
 	void AssembleStiff();
+	void AssembleIStiff();
 	void ApplyLoad();
 	void ApplyInitial();
 	void StaticSolve();
