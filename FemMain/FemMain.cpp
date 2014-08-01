@@ -1198,8 +1198,8 @@ void FemMain::DynamicStaticSolve()
 				{
 					ConvergeCheck();
 				}
-				//cout << "ResultZero    " << setw(10) << Id << setw(10) << iiter;
-				//ResultZero.Print();
+				cout << "ResultZero    " << setw(10) << Id << setw(10) << iiter;
+				ResultZero.Print();
 				
 				LResultFirst = ResultFirst;
 				LResultSecond = ResultSecond;
@@ -1208,12 +1208,12 @@ void FemMain::DynamicStaticSolve()
 				SendResultToNode();
 				GIDOutResult(iiter);
 				
-				if (Id == 0)
-				{
+				//if (Id == 0)
+				//{
 					cout << setw(7) << "Iter=" << setw(7) << iiter
 						<< setw(14) << "InterError=" <<setw(7)<< Error<<"  ";
 					ShowTime();
-				}
+				//}
 			} while (Converge[1] == false && iiter < MaxIter);
 		}
 		break;

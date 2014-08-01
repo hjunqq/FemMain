@@ -20,7 +20,7 @@
 #define new DEBUG_CLIENTBLOCK
 #endif
 
-#include "vld.h"
+//#include "vld.h"
 
 using namespace std;
 class Time
