@@ -701,7 +701,7 @@ Quadr & Quadr::operator=(const Quadr &Q)
 	Nodes = Q.Nodes;
 	Stiff = Q.Stiff;
 	type = Q.type;
-	return *this;
+	return (*this);
 }
 
 

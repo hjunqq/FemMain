@@ -22,9 +22,9 @@ int main(int argc,char**argv)
 {
 	//_CrtSetBreakAlloc(65741);
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	_CrtMemState s1;
-	_CrtMemState s2;
-	_CrtMemCheckpoint(&s1);
+	//_CrtMemState s1;
+	//_CrtMemState s2;
+	//_CrtMemCheckpoint(&s1);
 	FemMain Fem;
 	string text1,text2;
 	stringstream stream;
@@ -88,12 +88,12 @@ int main(int argc,char**argv)
 	GiD_PostDone();
 	MPI::COMM_WORLD.Barrier();
 	MPI::Finalize();
-	_CrtMemCheckpoint(&s2);
-	_CrtMemState s3;
-	if (_CrtMemDifference(&s3, &s1, &s2))
-	{
-		_CrtMemDumpStatistics(&s3);
-	}
+	//_CrtMemCheckpoint(&s2);
+	//_CrtMemState s3;
+	//if (_CrtMemDifference(&s3, &s1, &s2))
+	//{
+	//	_CrtMemDumpStatistics(&s3);
+	//}
 	//_CrtDumpMemoryLeaks();
 	return 0;
 }
@@ -144,12 +144,12 @@ void FemMain::ReadFiles()
 
 	stream.clear();
 	stream.str("");
-	glb.getline(str, MAXCHAR);
-	glb.getline(str, MAXCHAR);
+	glb.getline(str, MACLENGTH);
+	glb.getline(str, MACLENGTH);
 	stream << str;
 	stream >> nDim >> nNode >> nGroup >> nElem >> nMat >> nStep >> nDof >> MaxIter >> Tolerance;
-	glb.getline(str, MAXCHAR);
-	glb.getline(str, MAXCHAR);
+	glb.getline(str, MACLENGTH);
+	glb.getline(str, MACLENGTH);
 	stream.clear();
 	stream.str("");
 	stream << str;
@@ -161,18 +161,18 @@ void FemMain::ReadFiles()
 	{
 		int Idx, Type, nElem, Mat, Dof;
 		double alpha, beta;
-		grp.getline(str, MAXCHAR);
+		grp.getline(str, MACLENGTH);
 
 		stream.clear();
 		stream.str("");
-		grp.getline(str, MAXCHAR);
+		grp.getline(str, MACLENGTH);
 		stream << str;
 		stream >> Idx >> Type >> nElem >> Mat >> Dof;
 		Mat--;
 		stream.clear();
 		stream.str("");
-		grp.getline(str, MAXCHAR);
-		grp.getline(str, MAXCHAR);
+		grp.getline(str, MACLENGTH);
+		grp.getline(str, MACLENGTH);
 		stream << str;
 		stream >> alpha >> beta;
 		Groups[igroup].Init(Idx, nElem, Type, Mat, Dof);
@@ -185,7 +185,7 @@ void FemMain::ReadFiles()
 	for (int inode = 0; inode < nNode; inode++)
 	{
 		int Idx;
-		cor.getline(str, MAXCHAR);
+		cor.getline(str, MACLENGTH);
 		stream.clear();
 		stream.str("");
 		stream << str;
@@ -218,7 +218,7 @@ void FemMain::ReadFiles()
 			{
 				stream.clear();
 				stream.str("");
-				ele.getline(str, MAXCHAR);
+				ele.getline(str, MACLENGTH);
 				stream << str;
 				stream >> Idx;
 				for (int i = 0; i < 4; i++)
@@ -243,24 +243,24 @@ void FemMain::ReadFiles()
 	{
 		int Idx, Type;
 		Idx = imat;
-		mat.getline(str, MAXCHAR);
+		mat.getline(str, MACLENGTH);
 		if (strcmp(str, "Elastic") == 0)
 		{
 			Type = Elastic;
 			double Young, Possion, Density;
 			stream.clear();
 			stream.str("");
-			mat.getline(str, MAXCHAR);
+			mat.getline(str, MACLENGTH);
 			stream << str;
 			stream >> Young >> Possion >> Density;
 			Mats[imat].Init(Idx, Elastic, Young, Possion, Density);
 		}
 	}
 
-	loa.getline(str, MAXCHAR);
+	loa.getline(str, MACLENGTH);
 	stream.clear();
 	stream.str("");
-	loa.getline(str, MAXCHAR);
+	loa.getline(str, MACLENGTH);
 	stream << str;
 	stream >> nTotalLoad >> nFace >> nVolumn >> nConcentrate;
 	Faces = new Face[nFace]();
@@ -270,9 +270,9 @@ void FemMain::ReadFiles()
 	{
 		int nEle = 0, nNode = 0, Dir = 0,AdjElem=0;
 		double StartC, EndC, StartV, EndV;
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 
 		stream.str("");
 		stream.clear();
@@ -280,7 +280,7 @@ void FemMain::ReadFiles()
 		stream >> nEle >> nNode >> Dir >> StartC >> EndC >> StartV >> EndV;
 		Dir--;
 		Faces[iface].Init(iface, nEle, nNode, StartC, StartV, EndC, EndV, Dir);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
 		if (nNode == 2)
 		{
 			Line *Lines;
@@ -288,7 +288,7 @@ void FemMain::ReadFiles()
 			IntArray Nodes(2);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				loa.getline(str, MAXCHAR);
+				loa.getline(str, MACLENGTH);
 				stream.clear();
 				stream.str("");
 				stream << str;
@@ -308,17 +308,17 @@ void FemMain::ReadFiles()
 		int Dir,nGroup;
 		double Acc;
 		IntArray *group;
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
 		stream >> Dir >> Acc >> nGroup;
 		Dir--;
 		group=new IntArray(nGroup);
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -335,9 +335,9 @@ void FemMain::ReadFiles()
 		int nNode, Dir;
 		FloatArray *Value;
 		IntArray *Node;
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -345,8 +345,8 @@ void FemMain::ReadFiles()
 		Dir--;
 		Value = new FloatArray(nNode);
 		Node = new IntArray(nNode);
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -354,8 +354,8 @@ void FemMain::ReadFiles()
 		{
 			stream >> Value->at(inode);
 		}
-		loa.getline(str, MAXCHAR);
-		loa.getline(str, MAXCHAR);
+		loa.getline(str, MACLENGTH);
+		loa.getline(str, MACLENGTH);
 		stream.str ("");
 		stream.clear();
 		stream << str;
@@ -369,8 +369,8 @@ void FemMain::ReadFiles()
 	}
 
 	
-	pre.getline(str, MAXCHAR);
-	pre.getline(str, MAXCHAR);
+	pre.getline(str, MACLENGTH);
+	pre.getline(str, MACLENGTH);
 	stream.str("");
 	stream.clear();
 	stream << str;
@@ -382,15 +382,15 @@ void FemMain::ReadFiles()
 	{
 		int Dir, nNode;
 		IntArray *Nodes;
-		pre.getline(str, MAXCHAR);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
 		stream >> Dir >> nNode;
 		Dir--;
 		Nodes = new IntArray(nNode);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -407,8 +407,8 @@ void FemMain::ReadFiles()
 		int Dir, nNode;
 		IntArray *Node;
 		FloatArray *Value;
-		pre.getline(str, MAXCHAR);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -416,7 +416,7 @@ void FemMain::ReadFiles()
 		Dir--;
 		Node = new IntArray(nNode);
 		Value = new FloatArray(nNode);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -424,7 +424,7 @@ void FemMain::ReadFiles()
 		{
 			stream >> Value->at(inode);
 		}
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -440,8 +440,8 @@ void FemMain::ReadFiles()
 	{
 		int nNode, AdjDomain;
 		IntArray *Local, *Remote;
-		pre.getline(str, MAXCHAR);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -449,7 +449,7 @@ void FemMain::ReadFiles()
 		AdjDomain--;
 		Local = new IntArray(nNode);
 		Remote = new IntArray(nNode);
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -458,7 +458,7 @@ void FemMain::ReadFiles()
 			stream >> Local->at(inode);
 			Local->at(inode)--;
 		}
-		pre.getline(str, MAXCHAR);
+		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
@@ -519,9 +519,8 @@ void FemMain::GIDOutMesh()
 		GiD_fBeginElements(FMesh);
 		if (type == 4)
 		{
-			Quadr *Elems;
+			Quadr *Elems=NULL;
 			IntArray Nodes;
-			Elems = new Quadr[nEle];
 			nid = new int[type];
 			Elems =  Groups[igroup].GetElement(*Elems);
 			for (int iele = 0; iele < nEle; iele++)
@@ -533,7 +532,6 @@ void FemMain::GIDOutMesh()
 				}
 				GiD_fWriteElement(FMesh,Elems[iele].GetIndex(), nid);
 			}
-			//delete Elems;
 		}
 		
 		GiD_fEndElements(FMesh);
@@ -599,14 +597,12 @@ void FemMain::ComputeDOF()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr *Elems=NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].FillDof(DegreeOfFreedom);
 			}
-			//delete[]Elems;
 		}
 	}
 }
@@ -660,8 +656,7 @@ void FemMain::InitSolve()
 		int Dof = Groups[igroup].GetDof();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr *Elems=NULL;
 			EDof = new IntArray(Type*Dof);
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
@@ -681,7 +676,6 @@ void FemMain::InitSolve()
 					}
 				}
 			}
-			//delete[] Elems;
 		}
 	}
 	NonZero = 0;
@@ -725,11 +719,10 @@ void FemMain::ComputeElementStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
+			Quadr *Elems=NULL;
 			IntArray ENode(Type);
 			FloatMatrix *Coor;
 			Material *Mat;
-			Elems = new Quadr[nEle];
 			Coor = new FloatMatrix (Type,nDim);
 			Mat = new Material(Mats[Groups[igroup].GetMaterial()]);
 			Elems = Groups[igroup].GetElement(*Elems);
@@ -762,9 +755,8 @@ void FemMain::AssembleStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
+			Quadr *Elems=NULL;
 			FloatMatrix EStiff(Type*nDof, Type*nDof),EMass(Type*nDof,Type*nDof);
-			Elems = new Quadr[nEle];
 			Elems = Groups[igroup].GetElement(*Elems);
 			IntArray Dof(Type*nDof);
 			for (int ielem = 0; ielem < nEle; ielem++)
@@ -821,10 +813,9 @@ void FemMain::ApplyLoad()
 		EndV = Faces[iface].GetEndV();
 		if (nNode == 2)
 		{
-			Line *Lines;
+			Line *Lines=NULL;
 			int Type = 2;
 			FloatMatrix Coor;
-			Lines = new Line[nEle];
 			IntArray ENode;
 			ENode.SetSize(2);
 			double Length;
@@ -926,8 +917,7 @@ void FemMain::ApplyLoad()
 			Density = Mats[iMat].GetDensity();
 			if (Type == 4)
 			{
-				Quadr *Elems;
-				Elems = new Quadr[nEle];
+				Quadr *Elems=NULL;
 				Elems = Groups[GroupIdx].GetElement(*Elems);
 				FloatArray *Eload = new FloatArray(2);
 				FloatArray GaussT(2);
@@ -968,7 +958,6 @@ void FemMain::ApplyLoad()
 						}
 					}
 				}
-				//delete[]Elems;
 			}
 		}
 		
@@ -1007,14 +996,12 @@ void FemMain::ApplyLoad()
 			int nEle = Groups[igroup].GetnElements();
 			if (Type == 4)
 			{
-				Quadr *Elems;
-				Elems = new Quadr[nEle];
+				Quadr *Elems=NULL;
 				Elems = Groups[igroup].GetElement(*Elems);
 				for (int ielem = 0; ielem < nEle; ielem++)
 				{
 					Elems[ielem].FillDof(DispDof);
 				}
-				//delete[]Elems;
 			}
 		}
 		nDispDof -= TotalDOF;
@@ -1025,8 +1012,7 @@ void FemMain::ApplyLoad()
 			int nEle = Groups[igroup].GetnElements();
 			if (Type == 4)
 			{
-				Quadr *Elems;
-				Elems = new Quadr[nEle];
+				Quadr *Elems=NULL;
 				Elems = Groups[igroup].GetElement(*Elems);
 				for (int ielem = 0; ielem < nEle; ielem++)
 				{
@@ -1048,7 +1034,6 @@ void FemMain::ApplyLoad()
 						}
 					}
 				}
-				//delete[]Elems;
 			}
 		}
 		for (int igroup = 0; igroup < nGroup; igroup++)
@@ -1057,14 +1042,12 @@ void FemMain::ApplyLoad()
 			int nEle = Groups[igroup].GetnElements();
 			if (Type == 4)
 			{
-				Quadr *Elems;
-				Elems = new Quadr[nEle];
+				Quadr *Elems=NULL;
 				Elems = Groups[igroup].GetElement(*Elems);
 				for (int ielem = 0; ielem < nEle; ielem++)
 				{
 					Elems[ielem].FillDof(DegreeOfFreedom);
 				}
-				//delete[]Elems;
 			}
 		}
 		InitialDispLoad = InitialDispLoad - LStiff.Mult(NodeDisplacement);
@@ -1075,14 +1058,12 @@ void FemMain::ApplyLoad()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr [nEle];
+			Quadr *Elems=NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].SetInitialDisplacement(IniDisplacement);
 			}
-			//delete[]Elems;
 		}
 	}
 }
@@ -1133,7 +1114,7 @@ void FemMain::DynamicStaticSolve()
 				LUSolver.Decomposition(Mass);
 				break;
 			}
-			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
+			TotalLoad = ExternalForce+ InitialStain + InteractLoad + InitialDispLoad;
 			switch (SolveMethod)
 			{
 			case MSor:
@@ -1496,15 +1477,13 @@ void FemMain::ComputeElementStress()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr [nEle];
+			Quadr *Elems=NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].SetResult(ResultZero);
 				Elems[ielem].ComputeStress();
 			}
-			//delete[]Elems;
 		}
 	}
 }
@@ -1521,10 +1500,9 @@ void FemMain::CountElement()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
+			Quadr *Elems = NULL;
 			IntArray ENode(4);
 			int NodeIndex;
-			Elems = new Quadr [nEle];
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
@@ -1535,7 +1513,6 @@ void FemMain::CountElement()
 					Nodes[NodeIndex].AddCount();
 				}
 			}
-			//delete[]Elems;
 		}
 	}
 }
@@ -1548,13 +1525,12 @@ void FemMain::SendResultToNode()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
+			Quadr *Elems = NULL;
 			IntArray ENode(4);
 			FloatArray NodeStress(3);
 			FloatArray NodeStrain(3);
 			FloatArray Displacement(2);
 			int NodeIndex;
-			Elems = new Quadr [nEle];
 			Elems = Groups[igroup].GetElement(*Elems);
 			
 			for (int ielem = 0; ielem < nEle; ielem++)
@@ -1636,14 +1612,12 @@ void FemMain::AssembleIStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr *Elems = NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].FillDof(InterDof);
 			}
-			//delete[]Elems;
 		}
 	}
 	nInterDof -= TotalDOF;
@@ -1655,8 +1629,7 @@ void FemMain::AssembleIStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr *Elems = NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
@@ -1678,7 +1651,6 @@ void FemMain::AssembleIStiff()
 					}
 				}
 			}
-			//delete[]Elems;
 		}
 	}
 	for (int igroup = 0; igroup < nGroup; igroup++)
@@ -1687,14 +1659,12 @@ void FemMain::AssembleIStiff()
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr[nEle];
+			Quadr *Elems = NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].FillDof(DegreeOfFreedom);
 			}
-			//delete[]Elems;
 		}
 	}
 }
@@ -1731,14 +1701,12 @@ void FemMain::SetInteractResult(FloatArray * InteractResult)
 		int nEle = Groups[igroup].GetnElements();
 		if (Type == 4)
 		{
-			Quadr *Elems;
-			Elems = new Quadr [nEle];
+			Quadr *Elems = NULL;
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				Elems[ielem].SetInitialDisplacement(InterDisplace);
 			}
-			//delete[]Elems;
 		}
 	}
 	FloatArray iInteractResult(0);

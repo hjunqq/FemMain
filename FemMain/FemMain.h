@@ -21,7 +21,7 @@
 #include "Solver.h"
 #include "mpi.h"
 
-#define MAXCHAR 200
+#define MACLENGTH 200
 #define TagNode   1
 #define TagValue  2
 #define TagCheck  4
@@ -42,7 +42,7 @@ private:
 
 	string prob, text,workdir;
 	string GidResultFile;
-	char str[MAXCHAR];
+	char str[MACLENGTH];
 	int nNode;
 	int nElem;
 	int nDim;

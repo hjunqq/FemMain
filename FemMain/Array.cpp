@@ -58,8 +58,11 @@ IntArray::IntArray()
 
 IntArray::~IntArray()
 {
-	if (Values!=NULL)
+	if (Values != NULL)
+	{
 		delete[] Values;
+		Values = NULL;
+	}
 }
 
 
@@ -88,6 +91,11 @@ void IntArray::Set(int Value)
 void IntArray::SetSize(int Size)
 {
 	size = Size;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[size]();
 }
 
@@ -128,6 +136,8 @@ IntArray IntArray::Add(const IntArray & I)const
 IntArray::IntArray(const IntArray & I)
 {
 	size = I.size;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new int[size]();
 	for (int i = 0; i < size; i++)
 	{
@@ -204,6 +214,11 @@ IntArray  IntArray::operator + (const IntArray & I)const
 IntArray & IntArray::operator = (const IntArray & I)
 {
 	size =  I.size;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[size];
 	for (int i = 0; i < size; i++)
 	{
@@ -232,8 +247,11 @@ FloatArray::FloatArray()
 
 FloatArray::~FloatArray()
 {
-	if (Values!=NULL)
+	if (Values != NULL)
+	{
 		delete[] Values;
+		Values = NULL;
+	}
 }
 
 bool FloatArray::IsNULL()
@@ -342,10 +360,10 @@ void FloatArray::Set(double n)
 
 void FloatArray::SetSize(int Size)
 {
-	
-	if (size > 0)
+	if (Values != NULL)
 	{
 		delete[] Values;
+		Values = NULL;
 	}
 	size = Size;
 	Values = new double[size]();
@@ -505,12 +523,17 @@ FloatArray FloatArray::operator + (const FloatArray & I)const
 FloatArray & FloatArray::operator = (const FloatArray & I)
 {
 	size = I.size;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[size];
 	for (int i = 0; i < size; i++)
 	{
 		Values[i] = I.Values[i];
 	}
-	return *this;
+	return (*this);
 }
 FloatArray FloatArray::operator - (const FloatArray & I)const
 {
@@ -545,6 +568,8 @@ FloatMatrix::FloatMatrix(const FloatMatrix &F)
 {
 	m = F.m;
 	n = F.n;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new double[m*n]();
 	for (int i = 0; i < m*n; i++)
 	{
@@ -554,8 +579,11 @@ FloatMatrix::FloatMatrix(const FloatMatrix &F)
 
 FloatMatrix::~FloatMatrix()
 {
-	if (Values!=NULL)
-		delete[]Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 }
 
 
@@ -570,6 +598,8 @@ IntMatrix::IntMatrix(const IntMatrix & I)
 {
 	m = I.m;
 	n = I.n;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new int[m*n]();
 	for (int i = 0; i < m*n; i++)
 	{
@@ -579,8 +609,11 @@ IntMatrix::IntMatrix(const IntMatrix & I)
 
 IntMatrix::~IntMatrix()
 {
-	if (Values!=NULL)
+	if (Values != NULL)
+	{
 		delete[] Values;
+		Values = NULL;
+	}
 }
 
 
@@ -588,6 +621,8 @@ IntMatrix::~IntMatrix()
 IntMatrix::IntMatrix(int i, int j)
 {
 	m = i; n = j;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new int[m*n]();
 }
 
@@ -651,6 +686,11 @@ IntMatrix & IntMatrix::operator=(const IntMatrix & I)
 {
 	m = I.m;
 	n = I.n;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[m * n];
 	for (int i = 0; i < m; i++)
 	{
@@ -681,6 +721,8 @@ IntMatrix IntMatrix::operator-(const IntMatrix & I)const
 FloatMatrix::FloatMatrix(int i, int j)
 {
 	m = i; n = j;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new double[m*n]();
 }
 
@@ -715,6 +757,11 @@ void FloatMatrix::SetSize(int m, int n)
 {
 	this->m = m;
 	this->n = n;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[m*n]();
 }
 
@@ -909,6 +956,11 @@ FloatMatrix &FloatMatrix::operator = (const FloatMatrix & I)
 {
 	m = I.m;
 	n = I.n;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[m * n]();
 	for (int i = 0; i < m; i++)
 	{
@@ -950,8 +1002,14 @@ CSRMatrix::CSRMatrix(CSRMatrix &C)
 	nRow = C.nRow;
 	nCol = C.nCol;
 	NonZero = C.NonZero;
+	//if (Values != NULL)
+	//	delete[] Values;
 	Values = new double[NonZero]();
+	//if (RowIdx != NULL)
+	//	delete[] RowIdx;
 	RowIdx = new int [nRow + 1]();
+	//if (ColIdx != NULL)
+	//	delete[] ColIdx;
 	ColIdx = new int[NonZero]();
 	for (int i = 0; i < NonZero; i++)
 	{
@@ -967,11 +1025,20 @@ CSRMatrix::CSRMatrix(CSRMatrix &C)
 CSRMatrix::~CSRMatrix()
 {
 	if (Values != NULL)
+	{
 		delete[] Values;
+		Values = NULL;
+	}
 	if (RowIdx != NULL)
-		delete[]RowIdx;
-	if(ColIdx!=NULL)
+	{
+		delete[] RowIdx;
+		RowIdx = NULL;
+	}
+	if (ColIdx != NULL)
+	{
 		delete[] ColIdx;
+		ColIdx = NULL;
+	}
 }
 
 
@@ -980,6 +1047,11 @@ void CSRMatrix::Init(int NonZero, int nRow, int nCol, int* RowIdx, int*ColIdx)
 	this->nRow = nRow;
 	this->nCol = nCol;
 	this->NonZero = NonZero;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[NonZero]();
 	this->RowIdx = RowIdx;
 	this->ColIdx = ColIdx;
