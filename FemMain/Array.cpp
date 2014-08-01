@@ -69,6 +69,11 @@ IntArray::~IntArray()
 // 构造大小为n的数组
 IntArray::IntArray(int n)
 {
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	size = n;
 	Values = new int[n]();
 }
@@ -136,8 +141,11 @@ IntArray IntArray::Add(const IntArray & I)const
 IntArray::IntArray(const IntArray & I)
 {
 	size = I.size;
-	//if (Values != NULL)
-	//	delete[] Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[size]();
 	for (int i = 0; i < size; i++)
 	{
@@ -202,9 +210,7 @@ void IntArray::Print()
 
 IntArray  IntArray::operator + (const IntArray & I)const
 {
-	IntArray T;
-	T.size = I.size;
-	T.Values = new int[T.size];
+	IntArray T(size);
 	for (int i = 0; i < T.size; i++)
 	{
 		T.Values[i] =Values[i]+ I.Values[i];
@@ -228,9 +234,7 @@ IntArray & IntArray::operator = (const IntArray & I)
 }
 IntArray IntArray::operator - (const IntArray & I)const
 {
-	IntArray T;
-	T.size = I.size;
-	T.Values = new int[T.size];
+	IntArray T(size);
 	for (int i = 0; i < T.size; i++)
 	{
 		T.Values[i] =Values[i]- I.Values[i];
@@ -274,6 +278,11 @@ double & FloatArray::at(int i)
 FloatArray::FloatArray(int n)
 {
 	size = n;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[n]();
 }
 
@@ -340,9 +349,7 @@ void FloatArray::Print()
 // 乘以标量
 FloatArray FloatArray::Times(double Scalar)const
 {
-	FloatArray TArray;
-	TArray.size = size;
-	TArray.Values = new double[TArray.size];
+	FloatArray TArray(size);
 	for (int i = 0; i < size; i++)
 	{
 		TArray.at(i) = Values[i] * Scalar;
@@ -502,6 +509,11 @@ FloatArray FloatArray::Cross(FloatArray &F)const
 FloatArray::FloatArray(const FloatArray & F)
 {
 	size = F.size;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[size]();
 	for (int i = 0; i < size; i++)
 	{
@@ -511,9 +523,7 @@ FloatArray::FloatArray(const FloatArray & F)
 
 FloatArray FloatArray::operator + (const FloatArray & I)const
 {
-	FloatArray T;
-	T.size = I.size;
-	T.Values = new double[T.size];
+	FloatArray T(size);
 	for (int i = 0; i < T.size; i++)
 	{
 		T.Values[i] =this->Values[i]+ I.Values[i];
@@ -537,9 +547,7 @@ FloatArray & FloatArray::operator = (const FloatArray & I)
 }
 FloatArray FloatArray::operator - (const FloatArray & I)const
 {
-	FloatArray T;
-	T.size = size;
-	T.Values = new double[size];
+	FloatArray T(size);
 	if (I.size > 0)
 	{
 		for (int i = 0; i < T.size; i++)
@@ -568,8 +576,11 @@ FloatMatrix::FloatMatrix(const FloatMatrix &F)
 {
 	m = F.m;
 	n = F.n;
-	//if (Values != NULL)
-	//	delete[] Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[m*n]();
 	for (int i = 0; i < m*n; i++)
 	{
@@ -598,8 +609,11 @@ IntMatrix::IntMatrix(const IntMatrix & I)
 {
 	m = I.m;
 	n = I.n;
-	//if (Values != NULL)
-	//	delete[] Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[m*n]();
 	for (int i = 0; i < m*n; i++)
 	{
@@ -621,8 +635,11 @@ IntMatrix::~IntMatrix()
 IntMatrix::IntMatrix(int i, int j)
 {
 	m = i; n = j;
-	//if (Values != NULL)
-	//	delete[] Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new int[m*n]();
 }
 
@@ -669,10 +686,7 @@ double IntMatrix::Determinant()
 
 IntMatrix IntMatrix::operator + (const IntMatrix & I)const
 {
-	IntMatrix T;
-	T.m = m;
-	T.n = n;
-	T.Values = new int[m * n];
+	IntMatrix T(m,n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -703,10 +717,7 @@ IntMatrix & IntMatrix::operator=(const IntMatrix & I)
 }
 IntMatrix IntMatrix::operator-(const IntMatrix & I)const
 {
-	IntMatrix T;
-	T.m = m;
-	T.n = n;
-	T.Values = new int[m * n];
+	IntMatrix T(m,n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -721,8 +732,11 @@ IntMatrix IntMatrix::operator-(const IntMatrix & I)const
 FloatMatrix::FloatMatrix(int i, int j)
 {
 	m = i; n = j;
-	//if (Values != NULL)
-	//	delete[] Values;
+	if (Values != NULL)
+	{
+		delete[] Values;
+		Values = NULL;
+	}
 	Values = new double[m*n]();
 }
 
@@ -939,10 +953,7 @@ FloatMatrix FloatMatrix::Inverse()
 
 FloatMatrix FloatMatrix::operator + (const FloatMatrix & I)const
 {
-	FloatMatrix T;
-	T.m = m;
-	T.n = n;
-	T.Values = new double[m * n]();
+	FloatMatrix T(m,n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -973,10 +984,7 @@ FloatMatrix &FloatMatrix::operator = (const FloatMatrix & I)
 }
 FloatMatrix FloatMatrix::operator - (const FloatMatrix & I) const
 {
-	FloatMatrix T;
-	T.m = m;
-	T.n = n;
-	T.Values = new double[m * n]();
+	FloatMatrix T(m,n);
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)

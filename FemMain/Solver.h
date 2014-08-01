@@ -21,6 +21,8 @@ private:
 	double alpha = 1.0, beta = 1.0;
 	double Error;
 public:
+	LUSolve();
+	~LUSolve();
 	int Decomposition(FloatMatrix &A);
 	int Inverse();
 	void Mult(FloatArray &B);
@@ -38,6 +40,8 @@ private:
 	FloatArray V1,V2,U1,U2;
 	double Error,ErrorAverage;
 public:
+	Sor();
+	~Sor();
 	void Init(FloatMatrix &A);
 	void MaxSpectralRadius();
 	void Compute(FloatArray &B,FloatArray &X);
@@ -62,6 +66,8 @@ private:
 	int *ipiv;
 	double Error;
 public:
+	Newmark();
+	~Newmark();
 	void IntSolver(double dT);
 	FloatMatrix & EffictiveStiff(FloatMatrix &Stiff, FloatMatrix &Mass, FloatMatrix &Damp);
 	FloatArray & EffictiveLoad(FloatArray &Load, FloatArray &ResultZero, FloatArray &ResultFirst, FloatArray &ResultSecond,
@@ -89,6 +95,8 @@ private:
 	FloatArray LastDisplace,InitAcc;
 	FloatArray Acc, Velocity;
 public:
+	CentralDifference();
+	~CentralDifference();
 	void Init(double dT, int TotDOF);
 	FloatArray & Init(FloatArray &ResultSecond);
 	FloatMatrix & EffictiveMass(FloatMatrix & Mass, FloatMatrix & Damp);

@@ -342,6 +342,8 @@ Group::Group()
 
 Group::~Group()
 {
+	delete[] Elements;
+	delete[] Quadrs;
 }
 
 

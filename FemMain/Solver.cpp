@@ -10,12 +10,41 @@ Solver::~Solver()
 {
 }
 
-
+LUSolve::LUSolve()
+{
+	Value = NULL;
+	ipiv = NULL;
+	Right = NULL;
+	Left = NULL;
+}
+LUSolve::~LUSolve()
+{
+	if (Value != NULL)
+	{
+		delete[] Value;
+		Value = NULL;
+	}
+	if (ipiv != NULL)
+	{
+		delete[] ipiv;
+		ipiv = NULL;
+	}
+}
 int LUSolve::Decomposition(FloatMatrix &A)
 {
 	this->A = A;
 	m = A.GetSize();
+	if (Value != NULL)
+	{
+		delete[] Value;
+		Value = NULL;
+	}
 	Value = new double[m*m]();
+	if (ipiv != NULL)
+	{
+		delete[] ipiv;
+		ipiv = NULL;
+	}
 	ipiv = new int[m]();
 	for (int i = 0; i < m; i++)
 	{
@@ -112,7 +141,30 @@ bool LUSolve::Check(FloatArray &B, FloatArray &X)
 	}
 	return false;
 }
-
+Sor::Sor()
+{
+	Value = NULL;
+	X1 = NULL;
+	X2=NULL;
+}
+Sor::~Sor()
+{
+	if (Value != NULL)
+	{
+		delete[] Value;
+		Value = NULL;
+	}
+	if (X1 != NULL)
+	{
+		delete[] X1;
+		X1 = NULL;
+	}
+	if (X2 != NULL)
+	{
+		delete[]X2;
+		X2 = NULL;
+	}
+}
 void Sor::Init(FloatMatrix &A)
 {
 	this->A = A;
@@ -228,7 +280,18 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 		X.at(i) = X2[i];
 	}
 }
-
+Newmark::Newmark()
+{
+	ipiv = NULL;
+}
+Newmark::~Newmark()
+{
+	if (ipiv != NULL)
+	{
+		delete[] ipiv;
+		ipiv = NULL;
+	}
+}
 void Newmark::IntSolver(double dT)
 {
 	Alpha = 0.25; Beta = 0.5;
@@ -275,7 +338,14 @@ void Newmark::SolvePorcess(const FloatArray ResultZero, const FloatArray LResult
 	ResultSecond = Acc1 - Acc2 - Acc3;
 	ResultFirst = LResultFirst + LResultSecond.Times(a6) + ResultSecond.Times(a7);
 }
+CentralDifference::CentralDifference()
+{
 
+}
+CentralDifference::~CentralDifference()
+{
+
+}
 void CentralDifference::Init(double dT,  int TotDOF)
 {
 	this->dT = dT;

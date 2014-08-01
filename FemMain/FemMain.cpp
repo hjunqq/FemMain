@@ -180,8 +180,8 @@ void FemMain::ReadFiles()
 	}
 
 	Nodes = new Node[nNode];
-	FloatArray *Coors;
-	Coors = new FloatArray(nDim);
+	FloatArray Coors;
+	Coors.SetSize(nDim);
 	for (int inode = 0; inode < nNode; inode++)
 	{
 		int Idx;
@@ -193,11 +193,10 @@ void FemMain::ReadFiles()
 		Idx--;
 		for (int idim = 0; idim < nDim; idim++)
 		{
-			stream >> Coors->at(idim);
+			stream >> Coors.at(idim);
 		}
-		Nodes[inode].Init(Idx, *Coors);
+		Nodes[inode].Init(Idx, Coors);
 	}
-	delete Coors;
 	//for (int inode = 0; inode < nNode; inode++)
 	//{
 	//	Nodes[inode].Print();
@@ -234,6 +233,7 @@ void FemMain::ReadFiles()
 			//}
 			Groups[igroup].FillElement(Quadrs);
 			delete[] Quadrs;
+			Quadrs = NULL;
 		}
 	}
 
@@ -301,13 +301,14 @@ void FemMain::ReadFiles()
 			}
 			Faces[iface].Set(Lines);
 			delete[] Lines;
+			Lines = NULL;
 		}
 	}
 	for (int ivol = 0; ivol < nVolumn; ivol++)
 	{
 		int Dir,nGroup;
 		double Acc;
-		IntArray *group;
+		IntArray group;
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
@@ -316,7 +317,7 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> Dir >> Acc >> nGroup;
 		Dir--;
-		group=new IntArray(nGroup);
+		group.SetSize(nGroup);
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
 		stream.str("");
@@ -324,17 +325,16 @@ void FemMain::ReadFiles()
 		stream << str;
 		for (int igroup = 0; igroup < nGroup; igroup++)
 		{
-			stream >> group->at(igroup);
-			group->at(igroup)--;
+			stream >> group.at(igroup);
+			group.at(igroup)--;
 		}
-		Vols[ivol].Init(ivol, nGroup, *group, Acc, Dir);
-		delete[] group;
+		Vols[ivol].Init(ivol, nGroup, group, Acc, Dir);
 	}
 	for (int icon = 0; icon < nConcentrate; icon++)
 	{
 		int nNode, Dir;
-		FloatArray *Value;
-		IntArray *Node;
+		FloatArray Value;
+		IntArray Node;
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
@@ -343,8 +343,8 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> nNode >> Dir;
 		Dir--;
-		Value = new FloatArray(nNode);
-		Node = new IntArray(nNode);
+		Value.SetSize(nNode);
+		Node.SetSize(nNode);
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
 		stream.str("");
@@ -352,7 +352,7 @@ void FemMain::ReadFiles()
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Value->at(inode);
+			stream >> Value.at(inode);
 		}
 		loa.getline(str, MACLENGTH);
 		loa.getline(str, MACLENGTH);
@@ -361,11 +361,10 @@ void FemMain::ReadFiles()
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Node->at(inode);
-			Node->at(inode)--;
+			stream >> Node.at(inode);
+			Node.at(inode)--;
 		}
-		Cons[icon].Init(icon, nNode,* Node, *Value, Dir);
-		delete[]Node, Value;
+		Cons[icon].Init(icon, nNode,Node,Value, Dir);
 	}
 
 	
@@ -381,7 +380,7 @@ void FemMain::ReadFiles()
 	for (int ifix = 0; ifix < nFix; ifix++)
 	{
 		int Dir, nNode;
-		IntArray *Nodes;
+		IntArray Nodes;
 		pre.getline(str, MACLENGTH);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
@@ -389,24 +388,23 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> Dir >> nNode;
 		Dir--;
-		Nodes = new IntArray(nNode);
+		Nodes.SetSize(nNode);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Nodes->at(inode);
-			Nodes->at(inode)--;
+			stream >> Nodes.at(inode);
+			Nodes.at(inode)--;
 		}
-		Fix[ifix].Init(ifix, nNode,* Nodes, Dir);
-		delete[] Nodes;
+		Fix[ifix].Init(ifix, nNode,Nodes, Dir);
 	}
 	for (int idisp = 0; idisp < nDisp; idisp++)
 	{
 		int Dir, nNode;
-		IntArray *Node;
-		FloatArray *Value;
+		IntArray Node;
+		FloatArray Value;
 		pre.getline(str, MACLENGTH);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
@@ -414,15 +412,15 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> Dir >> nNode;
 		Dir--;
-		Node = new IntArray(nNode);
-		Value = new FloatArray(nNode);
+		Node.SetSize(nNode);
+		Value.SetSize(nNode);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Value->at(inode);
+			stream >> Value.at(inode);
 		}
 		pre.getline(str, MACLENGTH);
 		stream.str("");
@@ -430,16 +428,15 @@ void FemMain::ReadFiles()
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Node->at(inode);
-			Node->at(inode)--;
+			stream >> Node.at(inode);
+			Node.at(inode)--;
 		}
-		Disp[idisp].Init(nNode, Dir, *Node, *Value);
-		delete[] Node, Value;
+		Disp[idisp].Init(nNode, Dir, Node, Value);
 	}
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
 		int nNode, AdjDomain;
-		IntArray *Local, *Remote;
+		IntArray Local, Remote;
 		pre.getline(str, MACLENGTH);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
@@ -447,16 +444,16 @@ void FemMain::ReadFiles()
 		stream << str;
 		stream >> nNode >> AdjDomain;
 		AdjDomain--;
-		Local = new IntArray(nNode);
-		Remote = new IntArray(nNode);
+		Local.SetSize(nNode);
+		Remote.SetSize(nNode);
 		pre.getline(str, MACLENGTH);
 		stream.str("");
 		stream.clear();
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Local->at(inode);
-			Local->at(inode)--;
+			stream >> Local.at(inode);
+			Local.at(inode)--;
 		}
 		pre.getline(str, MACLENGTH);
 		stream.str("");
@@ -464,11 +461,10 @@ void FemMain::ReadFiles()
 		stream << str;
 		for (int inode = 0; inode < nNode; inode++)
 		{
-			stream >> Remote->at(inode);
-			Remote->at(inode)--;
+			stream >> Remote.at(inode);
+			Remote.at(inode)--;
 		}
-		Inters[iinter].Init(nNode, AdjDomain,* Local,* Remote);
-		delete Local, Remote;
+		Inters[iinter].Init(nNode, AdjDomain, Local, Remote);
 	}
 
 	glb.close();
@@ -721,27 +717,26 @@ void FemMain::ComputeElementStiff()
 		{
 			Quadr *Elems=NULL;
 			IntArray ENode(Type);
-			FloatMatrix *Coor;
-			Material *Mat;
-			Coor = new FloatMatrix (Type,nDim);
-			Mat = new Material(Mats[Groups[igroup].GetMaterial()]);
+			FloatMatrix Coor;
+			Material Mat;
+			Coor.SetSize(Type,nDim);
+			Mat =Mats[Groups[igroup].GetMaterial()];
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
 				ENode = Elems[ielem].GetNodeArray();
-				Elems[ielem].SetMaterial(*Mat);
+				Elems[ielem].SetMaterial(Mat);
 				for (int inode = 0; inode < Type; inode++)
 				{
 					for (int idim = 0; idim < nDim; idim++)
 					{
-						Coor->at(inode, idim) = Nodes[ENode.at(inode)].GetCoordinate().at(idim);
+						Coor.at(inode, idim) = Nodes[ENode.at(inode)].GetCoordinate().at(idim);
 					}
 				}
-				Elems[ielem].SetCoor(*Coor);
+				Elems[ielem].SetCoor(Coor);
 				Elems[ielem].ComputeStiff();
 				Elems[ielem].ComputeMassMatrix();
 			}
-			delete[]Coor, Mat;
 		}
 	}
 }
@@ -791,7 +786,15 @@ void FemMain::AssembleStiff()
 		double Alpha, Beta;
 		Alpha = Groups[0].GetDampAlpha();
 		Beta = Groups[0].GetDampBeta();
-		Damp = Mass.Mult(Alpha) + Stiff.Mult(Beta);
+		Damp.SetSize(TotalDOF, TotalDOF);
+		for (int i = 0; i < TotalDOF; i++)
+		{
+			for (int j = 0; j < TotalDOF; j++)
+			{
+				Damp.at(i, j) = Mass.at(i, j)*Alpha + Stiff.at(i, j)*Beta;
+			}
+		}
+		//Damp = Mass.Mult(Alpha) + Stiff.Mult(Beta);
 		//cout << "DampMatrix=:";
 		//Damp.Print();
 	}
@@ -1104,7 +1107,6 @@ void FemMain::DynamicStaticSolve()
 			}
 			ApplyLoad();
 			CountElement();
-
 			switch (SolveMethod)
 			{
 			case MSor:
@@ -1198,8 +1200,8 @@ void FemMain::DynamicStaticSolve()
 				{
 					ConvergeCheck();
 				}
-				cout << "ResultZero    " << setw(10) << Id << setw(10) << iiter;
-				ResultZero.Print();
+				//cout << "ResultZero    " << setw(10) << Id << setw(10) << iiter;
+				//ResultZero.Print();
 				
 				LResultFirst = ResultFirst;
 				LResultSecond = ResultSecond;

@@ -14,6 +14,7 @@ Boundary::~Boundary()
 
 Fixed::Fixed()
 {
+	Index = 0;
 	nNode = 0;
 	Dir = 0;
 }

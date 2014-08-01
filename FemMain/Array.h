@@ -45,7 +45,7 @@ public:
 	virtual ~IntArray();
 private:
 	int size;
-	int *Values;
+	int *Values=NULL;
 public:
 	// 构造大小为n的数组
 	IntArray(int n);
@@ -80,7 +80,7 @@ public:
 	bool IsNULL();
 private:
 	int size;
-	double *Values;
+	double *Values=NULL;
 public:
 	// 返回第i个元素
 	double & at(int i);
@@ -125,7 +125,7 @@ public:
 private:
 	int m;
 	int n;
-	double *Values;
+	double *Values=NULL;
 public:
 	// 构造m行n列的矩阵
 	FloatMatrix(int i, int j);
@@ -166,7 +166,7 @@ public:
 private:
 	int m;
 	int n;
-	int * Values;
+	int * Values=NULL;
 public:
 	// 构造矩阵
 	IntMatrix(int i, int j);
@@ -191,9 +191,9 @@ private:
 	int nRow;
 	int nCol;
 	int NonZero;
-	double *Values;
-	int *RowIdx;
-	int *ColIdx;
+	double *Values=NULL;
+	int *RowIdx=NULL;
+	int *ColIdx=NULL;
 	double Zero;
 public:
 	void Init(int NonZero, int nRow, int nCol, int* RowIdx,int*ColIdx);
