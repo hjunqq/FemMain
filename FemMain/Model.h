@@ -180,11 +180,11 @@ private:
 	int Material;
 	bool Appear;
 	int type;
-	IntArray *Elements;
+	IntArray *Elements=NULL;
 	int nElements;
 	int nDof;
 	double Alpha, Beta;
-	Quadr * Quadrs; 
+	Quadr * Quadrs = NULL;
 public:
 	// ≥ı ºªØ
 	void Init(int Index, int nElements, int type,int Mat,int Dof);

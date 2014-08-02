@@ -138,5 +138,5 @@ public:
 
 	void GetSize(int & NProces);
 	void GetID(int &MyID);
-	FloatArray * ExchangeData();
+	void ExchangeData();
 };

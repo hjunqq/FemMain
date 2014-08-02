@@ -95,13 +95,17 @@ void IntArray::Set(int Value)
 
 void IntArray::SetSize(int Size)
 {
-	size = Size;
-	if (Values != NULL)
+	if (size != Size)
 	{
-		delete[] Values;
-		Values = NULL;
+		size = Size;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new int[size]();
 	}
-	Values = new int[size]();
+	
 }
 
 // 两个向量直接叠加
@@ -219,13 +223,17 @@ IntArray  IntArray::operator + (const IntArray & I)const
 }
 IntArray & IntArray::operator = (const IntArray & I)
 {
-	size =  I.size;
-	if (Values != NULL)
+	if (size != I.size)
 	{
-		delete[] Values;
-		Values = NULL;
+		size =  I.size;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new int[size];
 	}
-	Values = new int[size];
+	
 	for (int i = 0; i < size; i++)
 	{
 		Values[i] = I.Values[i];
@@ -308,7 +316,7 @@ double FloatArray::MaxValue()
 	}
 	for (int i = 1; i < size; i++)
 	{
-		if (Max < Values[i])
+		if (abs(Max) < abs(Values[i]))
 		{
 			Max = Values[i];
 		}
@@ -367,13 +375,16 @@ void FloatArray::Set(double n)
 
 void FloatArray::SetSize(int Size)
 {
-	if (Values != NULL)
+	if (this->size != Size)
 	{
-		delete[] Values;
-		Values = NULL;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		size = Size;
+		Values = new double[size]();
 	}
-	size = Size;
-	Values = new double[size]();
 }
 
 // 点乘
@@ -532,13 +543,16 @@ FloatArray FloatArray::operator + (const FloatArray & I)const
 }
 FloatArray & FloatArray::operator = (const FloatArray & I)
 {
-	size = I.size;
-	if (Values != NULL)
+	if (size != I.size)
 	{
-		delete[] Values;
-		Values = NULL;
+		size = I.size;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new double[size];
 	}
-	Values = new double[size];
 	for (int i = 0; i < size; i++)
 	{
 		Values[i] = I.Values[i];
@@ -683,7 +697,20 @@ double IntMatrix::Determinant()
 	}
 
 }
-
+void IntMatrix::SetSize(int m,int n)
+{
+	if (this->m != m && this->n != n)
+	{
+		this->m = m;
+		this->n = n;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new int[m * n]();
+	}
+}
 IntMatrix IntMatrix::operator + (const IntMatrix & I)const
 {
 	IntMatrix T(m,n);
@@ -698,14 +725,17 @@ IntMatrix IntMatrix::operator + (const IntMatrix & I)const
 }
 IntMatrix & IntMatrix::operator=(const IntMatrix & I)
 {
-	m = I.m;
-	n = I.n;
-	if (Values != NULL)
+	if (m != I.m && n != I.n)
 	{
-		delete[] Values;
-		Values = NULL;
+		m = I.m;
+		n = I.n;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new int[m * n];
 	}
-	Values = new int[m * n];
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -769,14 +799,17 @@ FloatMatrix FloatMatrix::Trans()const
 
 void FloatMatrix::SetSize(int m, int n)
 {
-	this->m = m;
-	this->n = n;
-	if (Values != NULL)
+	if (this->m != m && this->n != n)
 	{
-		delete[] Values;
-		Values = NULL;
+		this->m = m;
+		this->n = n;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new double[m*n]();
 	}
-	Values = new double[m*n]();
 }
 
 FloatMatrix FloatMatrix::Mult(double &D)const
@@ -965,14 +998,17 @@ FloatMatrix FloatMatrix::operator + (const FloatMatrix & I)const
 }
 FloatMatrix &FloatMatrix::operator = (const FloatMatrix & I)
 {
-	m = I.m;
-	n = I.n;
-	if (Values != NULL)
+	if (m != I.m && n != I.n)
 	{
-		delete[] Values;
-		Values = NULL;
+		m = I.m;
+		n = I.n;
+		if (Values != NULL)
+		{
+			delete[] Values;
+			Values = NULL;
+		}
+		Values = new double[m * n]();
 	}
-	Values = new double[m * n]();
 	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)

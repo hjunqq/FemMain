@@ -51,6 +51,7 @@ int main(int argc,char**argv)
 		if (MyID == iProb)
 		{
 			Fem.WorkDir() = text1;
+			cout << "text1="<<text1<<endl;
 		}
 	}
 	//getline(inp, text1);
@@ -77,8 +78,7 @@ int main(int argc,char**argv)
 
 	Fem.GIDOutMesh();
 
-	Fem.ShowTime();
-	MPI::COMM_WORLD.Barrier();
+	//Fem.ShowTime();
 
 	Fem.GloableSolve();
 
@@ -154,7 +154,10 @@ void FemMain::ReadFiles()
 	stream.str("");
 	stream << str;
 	stream >> SolveMethod >> SolveType>>ProblemType>>dT;
-	cout << Tolerance << endl;
+	cout <<setw(14)<< "SolveMethod" << setw(4) << SolveMethod;
+	cout << setw(14) << "SolveType" << setw(4) << SolveType;
+	cout << setw(14) << "ProblemType" << setw(4) << ProblemType;
+	cout << setw(14) << "Tolerance" << setw(8) << Tolerance<<endl;
 
 	Groups = new Group[nGroup];
 	for (int igroup = 0; igroup < nGroup; igroup++)
@@ -637,14 +640,14 @@ void FemMain::InitSolve()
 	Converge[0] = false;
 	Converge[1] = false;
 	int NonZero;
-	IntArray *RowIdx, *ColIdx,*CNonZero;
-	RowIdx = new IntArray(TotalDOF+1);
-	CNonZero = new IntArray(TotalDOF);
+	IntArray RowIdx, ColIdx,CNonZero;
+	RowIdx.SetSize(TotalDOF+1);
+	CNonZero.SetSize(TotalDOF);
 
-	IntMatrix *DofRel;
-	DofRel = new IntMatrix(TotalDOF,TotalDOF);
+	IntMatrix DofRel;
+	DofRel.SetSize(TotalDOF,TotalDOF);
 	
-	IntArray *EDof;
+	IntArray EDof;
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();
@@ -653,20 +656,20 @@ void FemMain::InitSolve()
 		if (Type == 4)
 		{
 			Quadr *Elems=NULL;
-			EDof = new IntArray(Type*Dof);
+			EDof.SetSize(Type*Dof);
 			Elems = Groups[igroup].GetElement(*Elems);
 			for (int ielem = 0; ielem < nEle; ielem++)
 			{
-				*EDof=Elems[ielem].GetDof();
+				EDof=Elems[ielem].GetDof();
 				for (int iDof = 0; iDof < Type*Dof; iDof++)
 				{
-					if (EDof->at(iDof) !=0 )
+					if (EDof.at(iDof) !=0 )
 					{
 						for (int jDof = 0; jDof < Type*Dof; jDof++)
 						{
-							if (EDof->at(jDof) != 0)
+							if (EDof.at(jDof) != 0)
 							{
-								DofRel->at(EDof->at(iDof) - 1, EDof->at(jDof) - 1) = 1;
+								DofRel.at(EDof.at(iDof) - 1, EDof.at(jDof) - 1) = 1;
 							}
 						}
 					}
@@ -679,27 +682,27 @@ void FemMain::InitSolve()
 	{
 		for (int jDof = 0; jDof < TotalDOF; jDof++)
 		{
-			CNonZero->at(iDof) += DofRel->at(iDof, jDof);
+			CNonZero.at(iDof) += DofRel.at(iDof, jDof);
 		}
 	}
-	RowIdx->at(0) = 0;
+	RowIdx.at(0) = 0;
 	for (int iDof = 0; iDof < TotalDOF; iDof++)
 	{
-		RowIdx->at(iDof + 1) = RowIdx->at(iDof) + CNonZero->at(iDof);
+		RowIdx.at(iDof + 1) = RowIdx.at(iDof) + CNonZero.at(iDof);
 	}
-	NonZero = RowIdx->at(TotalDOF);
-	ColIdx = new IntArray(NonZero);
+	NonZero = RowIdx.at(TotalDOF);
+	ColIdx.SetSize(NonZero);
 	int iRow,iCol;
 	for (int iDof = 0; iDof < TotalDOF; iDof++)
 	{
 		iCol = 0;
-		iRow = RowIdx->at(iDof);
+		iRow = RowIdx.at(iDof);
 		for (int jDof = 0; jDof < TotalDOF; jDof++)
 		{
-			if (DofRel->at(iDof, jDof) !=0)
+			if (DofRel.at(iDof, jDof) !=0)
 			{
 				iCol++;
-				ColIdx->at(iRow+iCol-1)=jDof;
+				ColIdx.at(iRow+iCol-1)=jDof;
 			}
 		}
 	}
@@ -1165,7 +1168,7 @@ void FemMain::DynamicStaticSolve()
 				if (nProces > 1)
 				{
 					
-					InteractValue = ExchangeData();
+					ExchangeData();
 					//for (int i = 0; i < nInter; i++)
 					//{
 					//	cout << "MyID=   " <<setw(10)<< Id <<"  Inter="<<setw(10)<<i<<"  "<< endl;
@@ -1185,7 +1188,13 @@ void FemMain::DynamicStaticSolve()
 				//cout << "InitialDispLoad    " << setw(10) << Id << setw(10) << iiter;
 				//InitialDispLoad.Print();
 
+				//cout << "ExternalForce    "<<setw(10)<<Id<<setw(10)<<iiter;
+				//ExternalForce.Print();
+				//cout << "ResultZero    " << setw(10) << Id << setw(10) << iiter;
+				//ResultZero.Print();
+
 				LResultZero = ResultZero;
+				
 				switch (SolveMethod)
 				{
 				case MSor:
@@ -1195,6 +1204,7 @@ void FemMain::DynamicStaticSolve()
 					LUSolver.Solver(EffictiveLoad, ResultZero);
 					break;
 				}
+				cout << "Solve Iteration " << iiter << "     ID=   " << Id << endl;
 				CDiff.SolvePorcess(ResultZero, LResultZero, ResultFirst, ResultSecond);
 				if (nProces > 1)
 				{
@@ -1250,7 +1260,7 @@ void FemMain::DynamicStaticSolve()
 					cout << "MyID=  " << Id;
 				
 					//InteractValue.Print();
-					InteractValue = ExchangeData();
+					ExchangeData();
 					//InteractValue.Print();
 					SetInteractResult(InteractValue);
 				}
@@ -1333,18 +1343,23 @@ void FemMain::StaticSolve()
 		InitSolve();
 		ComputeElementStiff();
 		AssembleStiff();
+		if (nInter > 0)
+		{
+			AssembleIStiff();
+		}
+		CountElement();
 		ApplyLoad();
 
 		TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
-		ShowTime();
+		//ShowTime();
 		switch (SolveMethod)
 		{
-		case MSor:
+		case MLU:
 			LUSolver.Decomposition(Stiff);
 			LUSolver.Solver(TotalLoad, ResultZero);
 			LUSolver.Check(TotalLoad, ResultZero);
 			break;
-		case MLU:
+		case MSor:
 			Soror.Init(Stiff);
 			Soror.Solve(TotalLoad, ResultZero);
 			break;
@@ -1358,31 +1373,42 @@ void FemMain::StaticSolve()
 			do
 			{
 				iiter++;
-				cout << "Myid= " << Id;
+				cout << "Myid= " <<setw(10) <<Id<<"SolveMethod"<<setw(10)<<SolveMethod<<endl;
 				//InteractValue.Print();
-				InteractValue = ExchangeData();
-				//InteractValue.Print();
-				SetInteractResult(InteractValue);
-
+				//InteractValue = 
+				ExchangeData();
+				if (Id == 0)
+				{
+					cout << "InteractValue    " << setw(10) << Id << setw(10) << iiter;
+					for (int iinter = 0; iinter < nInter; iinter++)
+					{
+						InteractValue[iinter].Print();
+					}
+					SetInteractResult(InteractValue);
+					cout << "InteractLoad    " << setw(10) << Id << setw(10) << iiter;
+					InteractLoad.Print();
+				}
 				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
-
-				ShowTime();
+				//TotalLoad.Print();
+				//ShowTime();
 				switch (SolveMethod)
 				{
-				case MSor:
+				case MLU:
 					LUSolver.Decomposition(Stiff);
 					LUSolver.Solver(TotalLoad, ResultZero);
 					LUSolver.Check(TotalLoad, ResultZero);
 					break;
-				case MLU:
+				case MSor:
 					Soror.Init(Stiff);
 					Soror.Solve(TotalLoad, ResultZero);
 					break;
 				}
 				ConvergeCheck();
-				cout << "Iter=    " << iiter << endl;
+				
+				//ShowTime();
 				ComputeElementStress();
-				CountElement();
+				cout << setw(7) << "Iter=" << setw(7) << iiter
+					<< setw(14) << "InterError=" << setw(7) << Error << "  " << Converge[1] ;
 				SendResultToNode();
 				GIDOutResult(iiter);
 
@@ -1461,7 +1487,7 @@ void FemMain::GIDOutResult(int istep)
 		GiD_fWrite2DVector(FRes,inode + 1, Stress.at(0), Stress.at(1));
 	}
 	GiD_fEndResult(FRes);
-
+	//cout << "I am already alive GIDOutResult" << endl;
 }
 
 void FemMain::CloseGidFile()
@@ -1472,7 +1498,7 @@ void FemMain::CloseGidFile()
 
 void FemMain::ComputeElementStress()
 {
-
+	
 	for (int igroup = 0; igroup < nGroup; igroup++)
 	{
 		int Type = Groups[igroup].GetType();
@@ -1488,6 +1514,7 @@ void FemMain::ComputeElementStress()
 			}
 		}
 	}
+
 }
 
 void FemMain::CountElement()
@@ -1555,6 +1582,7 @@ void FemMain::SendResultToNode()
 			}
 		}
 	}
+	//cout << "I am already alive SendResultToNode" << endl;
 }
 
 IntArray FemMain::GetInteractNode(int iinter)
@@ -1723,16 +1751,16 @@ void FemMain::SetInteractResult(FloatArray * InteractResult)
 	}
 	//if (Id == 1)
 	//{
-	//	cout << "iInteractResult" << setw(10) << Id;
-	//	iInteractResult.Print();
+		cout << "iInteractResult" << setw(10) << Id;
+		iInteractResult.Print();
 	//}
 	InteractLoad = IStiff.Mult(iInteractResult);
 	//if (Id == 1)
 	//{
-	//	//cout << "IStiff" << setw(10) << Id;
-	//	//IStiff.Print();
-	//	cout << "InteractLoad" << setw(10) << Id;
-	//	InteractLoad.Print();
+		//cout << "IStiff" << setw(10) << Id;
+		////IStiff.Print();
+		//cout << "InteractLoad" << setw(10) << Id;
+		//InteractLoad.Print();
 	//}
 }
 
@@ -1746,7 +1774,7 @@ void FemMain::GetID(int &MyID)
 	Id = MyID;
 }
 
-FloatArray * FemMain::ExchangeData()
+void FemMain::ExchangeData()
 {
 	int *RemoteNode;
 	double *Value;
@@ -1760,7 +1788,7 @@ FloatArray * FemMain::ExchangeData()
 		RemoteNode = new int[size]();
 		Value = new double[size*nDof]();
 		RemoteNode = InteractNode.GetValue();
-		//cout << AdjDomain << endl;
+		
 		MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		for (int i = 0; i < size; i++)
@@ -1782,5 +1810,6 @@ FloatArray * FemMain::ExchangeData()
 		//InteractValue[iinter].Print();
 		delete[]RemoteNode, Value;
 	}
-	return InteractValue;
+	//cout << "I am already alive" << endl;
+	//return InteractValue;
 }

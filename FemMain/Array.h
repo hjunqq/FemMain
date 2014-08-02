@@ -4,21 +4,21 @@
 #include <iomanip>
 #include <iostream>
 
-#define _CRTDBG_MAP_ALLOC
-
-#include <crtdbg.h>
-#include <stdlib.h>
-
-#include <iostream>
-#include <assert.h>
-
-#ifdef _DEBUG
-#define DEBUG_CLIENTBLOCK new(_CLIENT_BLOCK, __FILE__, __LINE__)
-#endif
-
-#ifdef _DEBUG
-#define new DEBUG_CLIENTBLOCK
-#endif
+//#define _CRTDBG_MAP_ALLOC
+//
+//#include <crtdbg.h>
+//#include <stdlib.h>
+//
+//#include <iostream>
+//#include <assert.h>
+//
+//#ifdef _DEBUG
+//#define DEBUG_CLIENTBLOCK new(_CLIENT_BLOCK, __FILE__, __LINE__)
+//#endif
+//
+//#ifdef _DEBUG
+//#define new DEBUG_CLIENTBLOCK
+//#endif
 
 //#include "vld.h"
 
@@ -174,6 +174,7 @@ public:
 	// 返回第m行n列元素
 	int & at(int i, int j);
 	double Determinant();
+	void SetSize(int m, int n);
 	IntMatrix  operator+(const IntMatrix & I)const;
 	IntMatrix & operator=(const IntMatrix & I);
 	IntMatrix  operator-(const IntMatrix & I)const;

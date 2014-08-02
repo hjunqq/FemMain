@@ -355,8 +355,18 @@ void Group::Init(int Index, int nElements, int type , int Mat, int Dof)
 	this->type = type;
 	this->Material = Mat;
 	this->nDof = Dof;
+	if (Elements != NULL)
+	{
+		delete[] Elements;
+		Elements = NULL;
+	}
 	Elements = new IntArray(nElements);
-	Quadrs = new Quadr[nElements];
+	if (Quadrs != NULL)
+	{
+		delete[] Quadrs;
+		Quadrs = NULL;
+	}
+	Quadrs = new Quadr[nElements]();
 }
 
 
@@ -444,10 +454,10 @@ Quadr::Quadr()
 	Stiff.SetSize(8, 8);
 	Mass.SetSize(8, 8);
 	Displacement.SetSize(8);
-	GaussStrain = new FloatArray[nGaussPoint];
-	GaussStress = new FloatArray[nGaussPoint];
-	NodeStrain = new FloatArray[nNodes];
-	NodeStress = new FloatArray[nNodes];
+	GaussStrain = new FloatArray[nGaussPoint]();
+	GaussStress = new FloatArray[nGaussPoint]();
+	NodeStrain = new FloatArray[nNodes]();
+	NodeStress = new FloatArray[nNodes]();
 	for (int i = 0; i < 4; i++)
 	{
 		GaussStrain[i].SetSize(3);

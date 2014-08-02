@@ -186,6 +186,7 @@ void Sor::Init(FloatMatrix &A)
 	}
 	MaxSpectralRadius();
 	w = 2 / (1 + sqrt(1 - SpectralRadius*SpectralRadius));
+	w = 1.2;
 }
 void Sor::MaxSpectralRadius()
 {
@@ -237,6 +238,7 @@ void Sor::Compute(FloatArray &B, FloatArray &X)
 			axn += Value[i*m + j] * X1[j];
 		}
 		X2[i] = (1-w)*X1[i] + w*(B.at(i)-axnn-axn) / Value[i*m + i];
+		_ASSERT(Value[i*m + i] != 0);
 	}
 	for (int i = 0; i < m; i++)
 	{
