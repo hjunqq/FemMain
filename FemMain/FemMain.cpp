@@ -1237,7 +1237,12 @@ void FemMain::DynamicStaticSolve()
 			InitSolve();
 			ComputeElementStiff();
 			AssembleStiff();
+			if (nInter > 0)
+			{
+				AssembleIStiff();
+			}
 			ApplyLoad();
+			CountElement();
 			TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 
 			EffictiveStiff = Newmarker.EffictiveStiff(Stiff, Mass, Damp);
@@ -1282,13 +1287,18 @@ void FemMain::DynamicStaticSolve()
 
 				Newmarker.SolvePorcess(ResultZero, LResultZero, ResultFirst, LResultFirst, ResultSecond, LResultSecond);
 
-				ConvergeCheck();
-				cout << "Iter=    " << iiter << endl;
+				if (nProces > 1)
+				{
+					ConvergeCheck();
+				}
+				cout << setw(7) << "Iter=" << setw(7) << iiter
+					<< setw(14) << "InterError=" << setw(7) << Error << "  ";
+				ShowTime();
 				LResultZero = ResultZero;
 				LResultFirst = ResultFirst;
 				LResultSecond = ResultSecond;
 				ComputeElementStress();
-				CountElement();
+				
 				SendResultToNode();
 				GIDOutResult(iiter);
 			} while (Converge[1] == false && iiter < MaxIter);
