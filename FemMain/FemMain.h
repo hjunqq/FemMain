@@ -138,5 +138,7 @@ public:
 
 	void GetSize(int & NProces);
 	void GetID(int &MyID);
+	void InitialRepeatMPI();
+	void RepeatMPIExchangeData();
 	void ExchangeData();
 };

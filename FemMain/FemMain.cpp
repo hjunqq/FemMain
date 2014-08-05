@@ -66,7 +66,7 @@ int main(int argc,char**argv)
 	//}
 	//
 	inp.close();
-	MPI::COMM_WORLD.Barrier();
+	//MPI::COMM_WORLD.Barrier();
 	GiD_PostInit();
 
 	Fem.ShowTime();
@@ -86,7 +86,7 @@ int main(int argc,char**argv)
 	Fem.CloseGidFile();
 
 	GiD_PostDone();
-	MPI::COMM_WORLD.Barrier();
+	//MPI::COMM_WORLD.Barrier();
 	MPI::Finalize();
 	//_CrtMemCheckpoint(&s2);
 	//_CrtMemState s3;
@@ -1164,7 +1164,7 @@ void FemMain::DynamicStaticSolve()
 				//ComputeElementStress();
 				//CountElement();
 				//SendResultToNode();
-
+				cout << "Exchange  Iteration " << iiter << "     ID=   " << Id << endl;
 				if (nProces > 1)
 				{
 					
@@ -1176,6 +1176,7 @@ void FemMain::DynamicStaticSolve()
 					//}
 					SetInteractResult(InteractValue);
 				}
+				
 				TotalLoad = ExternalForce + InitialStain + InteractLoad + InitialDispLoad;
 				EffictiveLoad = CDiff.EffictiveLoad(TotalLoad, Stiff, Mass, Damp,
 					ResultZero, LResultZero);
@@ -1462,8 +1463,8 @@ bool *FemMain::ConvergeCheck()
 	{
 		int AdjDomain = Inters[iinter].GetAdj();
 		bool AdjConverge = false;
-		MPI::COMM_WORLD.Send(&Converge[0], 1, MPI_C_BOOL, AdjDomain, TagCheck);
-		MPI::COMM_WORLD.Recv(&AdjConverge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
+		MPI::COMM_WORLD.Isend(&Converge[0], 1, MPI_C_BOOL, AdjDomain, TagCheck);
+		MPI::COMM_WORLD.Irecv(&AdjConverge, 1, MPI_C_BOOL, AdjDomain, TagCheck);
 		Converge[1] = Converge[1] && AdjConverge;
 	}
 
@@ -1783,22 +1784,24 @@ void FemMain::GetID(int &MyID)
 {
 	Id = MyID;
 }
-
+void FemMain::InitialRepeatMPI()
+{
+	
+}
+void FemMain::RepeatMPIExchangeData()
+{}
 void FemMain::ExchangeData()
 {
-	int *RemoteNode;
-	double *Value;
-	MPI::COMM_WORLD.Barrier();
+	
 	for (int iinter = 0; iinter < nInter; iinter++)
 	{
 		InteractNode = GetInteractNode(iinter);
 		int AdjDomain = Inters[iinter].GetAdj();
 		int size = InteractNode.GetSize();
 
-		RemoteNode = new int[size]();
-		Value = new double[size*nDof]();
+		int *RemoteNode = new int[size]();
+		double *Value = new double[size*nDof]();
 		RemoteNode = InteractNode.GetValue();
-		
 		MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		for (int i = 0; i < size; i++)
@@ -1820,6 +1823,7 @@ void FemMain::ExchangeData()
 		//InteractValue[iinter].Print();
 		delete[]RemoteNode, Value;
 	}
+	MPI::COMM_WORLD.Barrier();
 	//cout << "I am already alive" << endl;
 	//return InteractValue;
 }
