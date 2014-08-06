@@ -20,6 +20,9 @@ Face::Face()
 	Dir = 0;
 	StartC = 0.0;
 	EndC = 0.0;
+	Lines = NULL;
+	Quadrs = NULL;
+	nNode = 0;
 }
 
 
@@ -97,6 +100,7 @@ Volumn::Volumn()
 	group = 0;
 	Dir = 0;
 	Value = 0.0;
+	nGroup = 0;
 }
 
 

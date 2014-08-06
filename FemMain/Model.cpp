@@ -1,6 +1,5 @@
 #include "Model.h"
 #include "FemMain.h"
-extern FemMain Fem1;
 
 Element::Element()
 {
@@ -8,6 +7,10 @@ Element::Element()
 	mat = 0;
 	Index = 0;
 	nGaussPoint = 0;
+	Det = 0;
+	Dof = 0;
+	group = 0;
+	type = 0;
 }
 
 
@@ -337,6 +340,9 @@ Group::Group()
 	Appear = 0;
 	type = 0;
 	nElements = 0;
+	Alpha = 0;
+	Beta = 0;
+	nDof = 0;
 }
 
 
@@ -732,6 +738,7 @@ Line::Line()
 	this->type = Linear;
 	this->nNodes = 2;
 	this->Nodes.SetSize(2);
+	this->AdjElem = 0;
 }
 Line::~Line()
 {
@@ -746,6 +753,7 @@ Line::Line(const Line & L)
 	Nodes.SetSize(nNodes);
 	Nodes = L.Nodes;
 	Shape.SetSize(2);
+	AdjElem=L.AdjElem;
 }
 
 

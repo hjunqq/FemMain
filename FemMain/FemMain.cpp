@@ -925,7 +925,6 @@ void FemMain::ApplyLoad()
 			{
 				Quadr *Elems=NULL;
 				Elems = Groups[GroupIdx].GetElement(*Elems);
-				FloatArray *Eload = new FloatArray(2);
 				FloatArray GaussT(2);
 				FloatArray Shape(Type);
 				FloatArray TLoad(Type);
@@ -1803,7 +1802,9 @@ void FemMain::ExchangeData()
 		double *Value = new double[size*nDof]();
 		RemoteNode = InteractNode.GetValue();
 		MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+		MPI::COMM_WORLD.Barrier();
 		MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+		MPI::COMM_WORLD.Barrier();
 		for (int i = 0; i < size; i++)
 		{
 			InteractNode.at(i) = RemoteNode[i];
@@ -1813,8 +1814,10 @@ void FemMain::ExchangeData()
 		//cout << setw(10) << "ID="<<setw(10)<<Id<<setw(10)<<"before"<<iinter;
 		//InteractValue[iinter].Print();
 		Value = InteractValue[iinter].GetValue();
-		MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
-		MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		//MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		//MPI::COMM_WORLD.Barrier();
+		//MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		//MPI::COMM_WORLD.Barrier();
 		for (int i = 0; i < size*nDof; i++)
 		{
 			InteractValue[iinter].at(i) = Value[i];
@@ -1823,7 +1826,7 @@ void FemMain::ExchangeData()
 		//InteractValue[iinter].Print();
 		delete[]RemoteNode, Value;
 	}
-	MPI::COMM_WORLD.Barrier();
+	//MPI::COMM_WORLD.Barrier();
 	//cout << "I am already alive" << endl;
 	//return InteractValue;
 }

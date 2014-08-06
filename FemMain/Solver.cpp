@@ -16,6 +16,11 @@ LUSolve::LUSolve()
 	ipiv = NULL;
 	Right = NULL;
 	Left = NULL;
+	Error = 0;
+	info = 0;
+	m = n = k = 0;
+	lda = ldb = ldc = 0;
+	trana =tranb ='N';
 }
 LUSolve::~LUSolve()
 {
@@ -146,6 +151,13 @@ Sor::Sor()
 	Value = NULL;
 	X1 = NULL;
 	X2=NULL;
+	axnn = 0;
+	axn = 0;
+	Error = 0;
+	m = 0;
+	w = 0;
+	SpectralRadius = 0;
+	ErrorAverage = 0;
 }
 Sor::~Sor()
 {
@@ -285,6 +297,11 @@ void Sor::Solve(FloatArray &B,FloatArray &X)
 Newmark::Newmark()
 {
 	ipiv = NULL;
+	a0 = a1 = a2 = a3 = a4 = a5 = a6 = a7 =0;
+	Alpha = 0;
+	Beta = 0;
+	Error = 0;
+	dT = 0;
 }
 Newmark::~Newmark()
 {
@@ -342,7 +359,8 @@ void Newmark::SolvePorcess(const FloatArray ResultZero, const FloatArray LResult
 }
 CentralDifference::CentralDifference()
 {
-
+	c0 = c1 = c2 = c3 = 0;
+	dT = 0;
 }
 CentralDifference::~CentralDifference()
 {

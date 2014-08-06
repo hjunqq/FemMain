@@ -664,9 +664,9 @@ int & IntMatrix::at(int i, int j)
 	return Values[i*n + j];
 }
 
-double IntMatrix::Determinant()
+int IntMatrix::Determinant()
 {
-	double Det = 0;
+	int Det = 0;
 	if (this->m == 1)
 	{
 		return this->at(0, 0);
@@ -691,7 +691,7 @@ double IntMatrix::Determinant()
 				}
 			}
 
-			Det += this->at(i, 0)* pow(-1, i)*T.Determinant();
+			Det += this->at(i, 0)* (int)pow(-1, i)*T.Determinant();
 		}
 		return Det;
 	}
@@ -1039,12 +1039,14 @@ CSRMatrix::CSRMatrix()
 	Values = NULL;
 	RowIdx = NULL;
 	ColIdx = NULL;
+	Zero = 0;
 }
 
 CSRMatrix::CSRMatrix(CSRMatrix &C)
 {
 	nRow = C.nRow;
 	nCol = C.nCol;
+	Zero = 0;
 	NonZero = C.NonZero;
 	//if (Values != NULL)
 	//	delete[] Values;
@@ -1122,7 +1124,7 @@ double & CSRMatrix::at(int i, int j)
 // ¾ØÕó×ªÖÃ
 CSRMatrix CSRMatrix::Trans(CSRMatrix &C)const
 {
-	return CSRMatrix();
+	return C;
 }
 
 

@@ -173,7 +173,7 @@ public:
 	IntMatrix(const IntMatrix &I);
 	// 返回第m行n列元素
 	int & at(int i, int j);
-	double Determinant();
+	int Determinant();
 	void SetSize(int m, int n);
 	IntMatrix  operator+(const IntMatrix & I)const;
 	IntMatrix & operator=(const IntMatrix & I);
