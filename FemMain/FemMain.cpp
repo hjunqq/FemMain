@@ -1800,20 +1800,73 @@ void FemMain::ExchangeData()
 
 		int *RemoteNode = new int[size]();
 		double *Value = new double[size*nDof]();
-		RemoteNode = InteractNode.GetValue();
-		MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
-		MPI::COMM_WORLD.Barrier();
-		MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
-		MPI::COMM_WORLD.Barrier();
-		for (int i = 0; i < size; i++)
+		
+		if (Id < AdjDomain)
 		{
-			InteractNode.at(i) = RemoteNode[i];
+			RemoteNode = InteractNode.GetValue();
+			MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
 		}
-		//InteractNode.Print();
-		InteractValue[iinter] = GetInteractResult(InteractNode);
-		//cout << setw(10) << "ID="<<setw(10)<<Id<<setw(10)<<"before"<<iinter;
-		//InteractValue[iinter].Print();
-		Value = InteractValue[iinter].GetValue();
+		else if (Id > AdjDomain)
+		{
+			MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+		}
+		if (Id < AdjDomain)
+		{
+			MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		}
+		else 
+		{
+			for (int i = 0; i < size; i++)
+			{
+				InteractNode.at(i) = RemoteNode[i];
+			}
+			InteractValue[iinter] = GetInteractResult(InteractNode);
+			Value = InteractValue[iinter].GetValue();
+			MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		}
+
+
+
+		if (Id < AdjDomain)
+		{
+			MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+			
+			
+		}
+		else if (Id > AdjDomain)
+		{
+			RemoteNode = InteractNode.GetValue();
+			MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+			
+		}
+		if (Id < AdjDomain)
+		{
+			for (int i = 0; i < size; i++)
+			{
+				InteractNode.at(i) = RemoteNode[i];
+			}
+			InteractValue[iinter] = GetInteractResult(InteractNode);
+			Value = InteractValue[iinter].GetValue();
+			MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+			
+		}
+		else
+		{
+			MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
+		}
+		//MPI::COMM_WORLD.Send(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+		//MPI::COMM_WORLD.Barrier();
+		//MPI::COMM_WORLD.Recv(RemoteNode, size, MPI_INTEGER, AdjDomain, TagNode);
+		//MPI::COMM_WORLD.Barrier();
+		//for (int i = 0; i < size; i++)
+		//{
+		//	InteractNode.at(i) = RemoteNode[i];
+		//}
+		////InteractNode.Print();
+		//InteractValue[iinter] = GetInteractResult(InteractNode);
+		////cout << setw(10) << "ID="<<setw(10)<<Id<<setw(10)<<"before"<<iinter;
+		////InteractValue[iinter].Print();
+		//Value = InteractValue[iinter].GetValue();
 		//MPI::COMM_WORLD.Send(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
 		//MPI::COMM_WORLD.Barrier();
 		//MPI::COMM_WORLD.Recv(Value, size*nDof, MPI_DOUBLE, AdjDomain, TagValue);
